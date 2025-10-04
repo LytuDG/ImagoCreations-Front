@@ -63,6 +63,7 @@ interface ExportColumn {
 
             <ng-template #end>
                 <p-button label="Export" icon="pi pi-upload" severity="secondary" (onClick)="exportCSV()" />
+                <p-button label="Loading" icon="pi pi-spinner" severity="secondary" class="ml-1" (onClick)="loadingTable()" />
             </ng-template>
         </p-toolbar>
 
@@ -237,6 +238,10 @@ export class Crud implements OnInit {
 
     exportCSV() {
         this.dt.exportCSV();
+    }
+
+    loadingTable(){
+        this.dt.loading = !this.dt.loading  ;
     }
 
     ngOnInit() {

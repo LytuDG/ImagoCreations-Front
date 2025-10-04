@@ -1,0 +1,33 @@
+@use 'mixins' as *;
+
+topbar-widget{
+    .topbar-widget-cart{
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
+        color: var(--text-color-secondary);
+        border-radius: 50%;
+        width: 2.5rem;
+        height: 2.5rem;
+        color: var(--color-primary);
+        transition: background-color var(--element-transition-duration);
+        cursor: pointer;
+
+        &:hover {
+            background-color: var(--surface-hover);
+        }
+
+        &:focus-visible {
+            @include focused();
+        }
+
+        i {
+            font-size: 1.45rem;
+        }
+
+        span {
+            font-size: 1rem;
+            display: none;
+        }
+    }
+}
