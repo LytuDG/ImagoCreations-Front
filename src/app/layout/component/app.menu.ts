@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { MenuItem } from 'primeng/api';
 import { AppMenuitem } from './app.menuitem';
+import { ADMIN_ROUTES, PRIVATE_ROUTES } from '@/core/constants/routes/routes';
 
 @Component({
     selector: 'app-menu',
@@ -92,7 +93,7 @@ export class AppMenu {
                     {
                         label: 'Users',
                         icon: 'pi pi-fw pi-users',
-                        routerLink: ['/pages/pay']
+                        routerLink: [`pages/${PRIVATE_ROUTES.ADMIN}/${ADMIN_ROUTES.ADMIN_USERS}`]
                     }
                 ]
             },
