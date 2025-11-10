@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { MenuItem } from 'primeng/api';
 import { RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
@@ -6,6 +6,7 @@ import { StyleClassModule } from 'primeng/styleclass';
 import { AppConfigurator } from './app.configurator';
 import { LayoutService } from '../service/layout.service';
 import { OverlayBadgeModule } from 'primeng/overlaybadge';
+import { AuthService } from '@/pages/service/auth.service';
 
 @Component({
     selector: 'app-topbar',
@@ -83,10 +84,10 @@ import { OverlayBadgeModule } from 'primeng/overlaybadge';
         </div>
     </div>`
 })
-export class AppTopbar {
-    items!: MenuItem[];
+export class AppTopbar{
+    layoutService = inject(LayoutService)
 
-    constructor(public layoutService: LayoutService) {}
+    items!: MenuItem[];
 
     toggleDarkMode() {
         this.layoutService.layoutConfig.update((state) => ({ ...state, darkTheme: !state.darkTheme }));

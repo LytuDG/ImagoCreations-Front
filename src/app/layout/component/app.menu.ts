@@ -1,9 +1,10 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { MenuItem } from 'primeng/api';
 import { AppMenuitem } from './app.menuitem';
 import { ADMIN_ROUTES, PRIVATE_ROUTES } from '@/core/constants/routes/routes';
+import { AuthService } from '@/pages/service/auth.service';
 
 @Component({
     selector: 'app-menu',
@@ -21,9 +22,27 @@ import { ADMIN_ROUTES, PRIVATE_ROUTES } from '@/core/constants/routes/routes';
     </ul> `
 })
 export class AppMenu {
+    authService = inject(AuthService);
+
+    isSuperAdmin = false;
+
     model: MenuItem[] = [];
 
     ngOnInit() {
+        this.authService.isSuperAdmin().subscribe({
+            next: (response) => {
+                this.isSuperAdmin = response;
+                this.buildMenu();
+            },
+            error: (error) => {
+                console.error('Error verificando SUPERADMIN:', error);
+                this.isSuperAdmin = false;
+                this.buildMenu();
+            }
+        });
+    }
+
+    private buildMenu(){
         this.model = [
             {
                 label: 'Home',
@@ -94,7 +113,12 @@ export class AppMenu {
                         label: 'Users',
                         icon: 'pi pi-fw pi-users',
                         routerLink: [`pages/${PRIVATE_ROUTES.ADMIN}/${ADMIN_ROUTES.ADMIN_USERS}`]
-                    }
+                    },
+                    ...(this.isSuperAdmin ? [{
+                        label: 'Agencies',
+                        icon: 'pi pi-fw pi-building',
+                        routerLink: [`pages/${PRIVATE_ROUTES.ADMIN}/${ADMIN_ROUTES.ADMIN_AGENCIES}`]
+                    }] : [])
                 ]
             },
             {

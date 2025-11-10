@@ -4,4 +4,5 @@ export enum PRIVATE_ROUTES {
 
 export enum ADMIN_ROUTES {
   ADMIN_USERS = 'users',
+  ADMIN_AGENCIES = 'agencies',
 }
