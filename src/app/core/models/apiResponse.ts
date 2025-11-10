@@ -1,4 +1,4 @@
-export interface Response<T> {
+export interface ApiResponse<T> {
   data: T[];
   total: number;
   currentPage: number;

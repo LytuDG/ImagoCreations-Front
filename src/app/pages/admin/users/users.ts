@@ -16,7 +16,7 @@ import { MessageService, ConfirmationService } from 'primeng/api';
 import { UserService } from './user.service';
 import { User } from './models/user';
 import { FilterParams } from '@/core/models/params';
-import { Response } from '@/core/models/response';
+import { ApiResponse } from '@/core/models/apiResponse';
 
 @Component({
     selector: 'app-users',
@@ -185,7 +185,7 @@ export class Users implements OnInit {
     requestBody: any = {
         page: 1,
         limit: 10,
-/*         sort:['name', 'desc'] */
+        sort:['user.name', 'desc']
     };
 
     @ViewChild('dt') dt!: Table;
@@ -197,7 +197,7 @@ export class Users implements OnInit {
     loadUsers(): void {
         this.loading.set(true);
         this.userService.getUsers(this.requestBody).subscribe({
-            next: (response: Response<User>) => {
+            next: (response: ApiResponse<User>) => {
                 this.users.set(response.data || []);
                 this.loading.set(false);
             },

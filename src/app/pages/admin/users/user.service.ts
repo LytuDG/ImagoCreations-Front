@@ -1,4 +1,4 @@
-import { Response } from '@/core/models/response';
+import { ApiResponse } from '@/core/models/apiResponse';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { User } from './models/user';
@@ -12,7 +12,7 @@ import { USER_ENDPOINT } from '@/core/constants/endpoints/user/users';
 export class UserService {
   http = inject(HttpClient);
 
-  getUsers( filterParams: any = {} ): Observable<Response<User>>{
-    return this.http.post<Response<User>>(`${USER_ENDPOINT}/filter`, filterParams);
+  getUsers( filterParams: any = {} ): Observable<ApiResponse<User>>{
+    return this.http.post<ApiResponse<User>>(`${USER_ENDPOINT}/filter`, filterParams);
   }
 }
