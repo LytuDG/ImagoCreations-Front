@@ -1,12 +1,20 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
+import { Observable } from 'rxjs';
+import { Product } from '@/core/models/product/product';
+import { CreateProductDto } from '@/core/models/product/create-product.dto';
+import { CREATE_PRODUCT_ENDPOINT, UPDATE_PRODUCT_ENDPOINT } from '@/core/constants/endpoints/product/product';
+
+// Re-export Product for convenience
+export type { Product } from '@/core/models/product/product';
 
 interface InventoryStatus {
     label: string;
     value: string;
 }
 
-export interface Product {
+// Legacy Product interface for demo data - will be migrated
+export interface LegacyProduct {
     id?: string;
     code?: string;
     name?: string;
@@ -21,6 +29,28 @@ export interface Product {
 
 @Injectable()
 export class ProductService {
+    private http = inject(HttpClient);
+
+    /**
+     * Create a new product
+     * @param productDto - Product creation data
+     * @returns Observable of created product
+     */
+    createProduct(productDto: CreateProductDto): Observable<Product> {
+        return this.http.post<Product>(CREATE_PRODUCT_ENDPOINT, productDto);
+    }
+
+    /**
+     * Update an existing product
+     * @param id - Product ID
+     * @param productDto - Product update data
+     * @returns Observable of updated product
+     */
+    updateProduct(id: string, productDto: Partial<CreateProductDto>): Observable<Product> {
+        return this.http.put<Product>(UPDATE_PRODUCT_ENDPOINT(id), productDto);
+    }
+
+    // Demo data methods below - kept for backward compatibility
     getProductsData() {
         return [
             {
@@ -1255,8 +1285,6 @@ export class ProductService {
         'Yoga Set'
     ];
 
-    constructor(private http: HttpClient) {}
-
     getProductsMini() {
         return Promise.resolve(this.getProductsData().slice(0, 5));
     }
@@ -1273,8 +1301,8 @@ export class ProductService {
         return Promise.resolve(this.getProductsWithOrdersData().slice(0, 10));
     }
 
-    generatePrduct(): Product {
-        const product: Product = {
+    generatePrduct(): LegacyProduct {
+        const product: LegacyProduct = {
             id: this.generateId(),
             name: this.generateName(),
             description: 'Product Description',

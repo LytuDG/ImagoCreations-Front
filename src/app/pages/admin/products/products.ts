@@ -18,9 +18,15 @@ import { TagModule } from 'primeng/tag';
 import { InputIconModule } from 'primeng/inputicon';
 import { IconFieldModule } from 'primeng/iconfield';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
-import { Product, ProductService } from '../../../core/services/product.service';
+import { LegacyProduct, ProductService } from '../../../core/services/product.service';
 import { FileUploadModule } from 'primeng/fileupload';
 import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
+import { Product, PRODUCT_TYPE } from '@/core/models/product/product';
+import { ImageUploadService } from '@/core/services/image-upload.service';
+import { ToggleSwitchModule } from 'primeng/toggleswitch';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
+import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
+import { firstValueFrom } from 'rxjs';
 
 interface Column {
     field: string;
@@ -56,7 +62,9 @@ interface ExportColumn {
         InputIconModule,
         InputGroupAddonModule,
         IconFieldModule,
-        ConfirmDialogModule
+        ConfirmDialogModule,
+        ToggleSwitchModule,
+        ProgressSpinnerModule
     ],
     template: `
         <p-toolbar styleClass="mb-6">
@@ -151,47 +159,98 @@ interface ExportColumn {
             </ng-template>
         </p-table>
 
-        <p-dialog [(visible)]="productDialog" [style]="{ width: '450px' }" header="Product Details" [modal]="true">
+        <p-dialog [(visible)]="productDialog" [style]="{ width: '600px' }" [modal]="true" [closable]="!isUploading && !isSaving" [closeOnEscape]="!isUploading && !isSaving">
+            <ng-template #header>
+                <div class="flex items-center gap-3">
+                    <i class="pi pi-box text-2xl"></i>
+                    <span class="font-semibold text-xl">{{ newProduct.name || 'New Product' }}</span>
+                </div>
+            </ng-template>
+
             <ng-template #content>
-                <div class="flex flex-col gap-6">
-                    <img [src]="'https://primefaces.org/cdn/primeng/images/demo/product/' + product.image" [alt]="product.image" class="block m-auto pb-4" *ngIf="product.image" />
-                    <div>
-                        <label for="name" class="block font-bold mb-3">Name</label>
-                        <input type="text" pInputText id="name" [(ngModel)]="product.name" required autofocus fluid />
-                        <small class="text-red-500" *ngIf="submitted && !product.name">Name is required.</small>
+                <div class="flex flex-col gap-5">
+                    <!-- Image Upload Section -->
+                    <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-primary transition-colors">
+                        <div *ngIf="!selectedFile && !imagePreview" class="flex flex-col items-center gap-3">
+                            <i class="pi pi-cloud-upload text-5xl text-gray-400"></i>
+                            <div>
+                                <p class="font-semibold text-gray-700 mb-1">Click to upload product image</p>
+                                <p class="text-sm text-gray-500">PNG, JPG, GIF or WebP (max. 10MB)</p>
+                            </div>
+                            <input type="file" #fileInput (change)="onFileSelect($event)" accept="image/*" class="hidden" id="imageUpload" />
+                            <p-button label="Choose Image" icon="pi pi-upload" (onClick)="fileInput.click()" [disabled]="isUploading || isSaving" />
+                        </div>
+
+                        <div *ngIf="selectedFile || imagePreview" class="flex flex-col items-center gap-3">
+                            <img *ngIf="imagePreview" [src]="imagePreview" alt="Product preview" class="max-h-48 rounded-lg shadow-md" />
+                            <div class="flex items-center gap-2 text-sm text-gray-600">
+                                <i class="pi pi-file"></i>
+                                <span>{{ selectedFile?.name }}</span>
+                                <span class="text-gray-400">{{ formatFileSize(selectedFile?.size) }}</span>
+                            </div>
+                            <p-button label="Change Image" icon="pi pi-refresh" severity="secondary" [outlined]="true" (onClick)="fileInput.click()" [disabled]="isUploading || isSaving" />
+                            <input type="file" #fileInput (change)="onFileSelect($event)" accept="image/*" class="hidden" />
+                        </div>
+
+                        <small class="text-red-500 block mt-2" *ngIf="submitted && !selectedFile">Product image is required.</small>
                     </div>
 
-                    <div class="col-span-full">
-                        <div class="">
-                            <label for="name" class="block font-bold mb-3">Image</label>
-                            <p-fileupload name="demo[]" (onUpload)="onUpload($event)" [multiple]="true" accept="image/*" maxFileSize="1000000" mode="advanced" url="https://www.primefaces.org/cdn/api/upload.php">
-                                <ng-template #empty>
-                                    <div>Drag and drop files to here to upload.</div>
-                                </ng-template>
-                            </p-fileupload>
-                        </div>
-                    </div>
+                    <!-- Product Name -->
                     <div>
-                        <label for="description" class="block font-bold mb-3">Description</label>
-                        <textarea id="description" pTextarea [(ngModel)]="product.description" required rows="3" cols="20" fluid></textarea>
+                        <label for="productName" class="block font-semibold mb-2 text-gray-700"> Product Name <span class="text-red-500">*</span> </label>
+                        <input type="text" pInputText id="productName" [(ngModel)]="newProduct.name" placeholder="Enter product name" [disabled]="isUploading || isSaving" class="w-full" fluid />
+                        <small class="text-red-500" *ngIf="submitted && !newProduct.name">Product name is required.</small>
                     </div>
 
-                    <div class="grid grid-cols-12 gap-4">
-                        <div class="col-span-6">
-                            <label for="price" class="block font-bold mb-3">Price</label>
-                            <p-inputnumber id="price" [(ngModel)]="product.price" mode="currency" currency="USD" locale="en-US" fluid />
+                    <!-- Description -->
+                    <div>
+                        <label for="productDescription" class="block font-semibold mb-2 text-gray-700"> Description <span class="text-red-500">*</span> </label>
+                        <textarea id="productDescription" pTextarea [(ngModel)]="newProduct.description" placeholder="Describe the product features and characteristics" [disabled]="isUploading || isSaving" rows="4" class="w-full" fluid></textarea>
+                        <small class="text-red-500" *ngIf="submitted && !newProduct.description">Description is required.</small>
+                    </div>
+
+                    <!-- Base Price and Product Type -->
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label for="basePrice" class="block font-semibold mb-2 text-gray-700"> Base Price <span class="text-red-500">*</span> </label>
+                            <p-inputnumber id="basePrice" [(ngModel)]="newProduct.basePrice" mode="currency" currency="USD" locale="en-US" [disabled]="isUploading || isSaving" placeholder="0.00" [min]="0" class="w-full" fluid />
+                            <small class="text-red-500" *ngIf="submitted && !newProduct.basePrice">Base price is required.</small>
                         </div>
-                        <div class="col-span-6">
-                            <label for="quantity" class="block font-bold mb-3">Quantity</label>
-                            <p-inputnumber id="quantity" [(ngModel)]="product.quantity" fluid />
+
+                        <div>
+                            <label for="productType" class="block font-semibold mb-2 text-gray-700"> Product Type <span class="text-red-500">*</span> </label>
+                            <p-select id="productType" [(ngModel)]="newProduct.type" [options]="productTypes" optionLabel="label" optionValue="value" placeholder="Select type" [disabled]="isUploading || isSaving" class="w-full" fluid />
                         </div>
+                    </div>
+
+                    <!-- Active Status -->
+                    <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                        <div>
+                            <label class="font-semibold text-gray-700 block mb-1">Active Status</label>
+                            <p class="text-sm text-gray-500">Make this product available for purchase</p>
+                        </div>
+                        <p-toggleswitch [(ngModel)]="newProduct.isActive" [disabled]="isUploading || isSaving" />
+                    </div>
+
+                    <!-- Upload Progress -->
+                    <div *ngIf="isUploading" class="flex items-center gap-3 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                        <p-progressSpinner [style]="{ width: '30px', height: '30px' }" strokeWidth="4" />
+                        <span class="text-blue-700 font-medium">Uploading image to Cloudinary...</span>
+                    </div>
+
+                    <!-- Save Progress -->
+                    <div *ngIf="isSaving" class="flex items-center gap-3 p-4 bg-green-50 rounded-lg border border-green-200">
+                        <p-progressSpinner [style]="{ width: '30px', height: '30px' }" strokeWidth="4" />
+                        <span class="text-green-700 font-medium">Creating product...</span>
                     </div>
                 </div>
             </ng-template>
 
             <ng-template #footer>
-                <p-button label="Cancel" icon="pi pi-times" text (click)="hideDialog()" />
-                <p-button label="Save" icon="pi pi-check" (click)="saveProduct()" />
+                <div class="flex justify-end gap-2">
+                    <p-button label="Cancel" icon="pi pi-times" severity="secondary" [outlined]="true" (onClick)="hideDialog()" [disabled]="isUploading || isSaving" />
+                    <p-button label="Create Product" icon="pi pi-check" (onClick)="saveProduct()" [loading]="isUploading || isSaving" [disabled]="isUploading || isSaving" />
+                </div>
             </ng-template>
         </p-dialog>
 
@@ -203,11 +262,11 @@ export class Products implements OnInit {
     productDialog: boolean = false;
 
     uploadedFiles: any[] = [];
-    products = signal<Product[]>([]);
+    products = signal<LegacyProduct[]>([]);
 
-    product!: Product;
+    product!: LegacyProduct;
 
-    selectedProducts!: Product[] | null;
+    selectedProducts!: LegacyProduct[] | null;
 
     submitted: boolean = false;
 
@@ -219,10 +278,25 @@ export class Products implements OnInit {
 
     cols!: Column[];
 
+    // New Product properties
+    newProduct: Partial<Product> = {};
+    productTypes = [
+        { label: 'Simple Product', value: PRODUCT_TYPE.SIMPLE },
+        { label: 'Product with Variants', value: PRODUCT_TYPE.VARIANT }
+    ];
+
+    // Image upload state
+    isUploading = false;
+    isSaving = false;
+    selectedFile: File | null = null;
+    imagePreview: SafeUrl | null = null;
+
     constructor(
         private productService: ProductService,
         private messageService: MessageService,
-        private confirmationService: ConfirmationService
+        private confirmationService: ConfirmationService,
+        private imageUploadService: ImageUploadService,
+        private sanitizer: DomSanitizer
     ) {}
 
     onUpload(event: any) {
@@ -273,11 +347,17 @@ export class Products implements OnInit {
 
     openNew() {
         this.product = {};
+        this.newProduct = {
+            isActive: true,
+            type: PRODUCT_TYPE.SIMPLE
+        };
         this.submitted = false;
+        this.selectedFile = null;
+        this.imagePreview = null;
         this.productDialog = true;
     }
 
-    editProduct(product: Product) {
+    editProduct(product: LegacyProduct) {
         this.product = { ...product };
         this.productDialog = true;
     }
@@ -303,9 +383,12 @@ export class Products implements OnInit {
     hideDialog() {
         this.productDialog = false;
         this.submitted = false;
+        this.newProduct = {};
+        this.selectedFile = null;
+        this.imagePreview = null;
     }
 
-    deleteProduct(product: Product) {
+    deleteProduct(product: LegacyProduct) {
         this.confirmationService.confirm({
             message: 'Are you sure you want to delete ' + product.name + '?',
             header: 'Confirm',
@@ -357,33 +440,152 @@ export class Products implements OnInit {
         }
     }
 
-    saveProduct() {
-        this.submitted = true;
-        let _products = this.products();
-        if (this.product.name?.trim()) {
-            if (this.product.id) {
-                _products[this.findIndexById(this.product.id)] = this.product;
-                this.products.set([..._products]);
+    /**
+     * Handle file selection for product image
+     */
+    onFileSelect(event: Event): void {
+        const input = event.target as HTMLInputElement;
+        if (input.files && input.files.length > 0) {
+            const file = input.files[0];
+
+            // Validate the file
+            const validation = this.imageUploadService.validateImageFile(file);
+            if (!validation.isValid) {
                 this.messageService.add({
-                    severity: 'success',
-                    summary: 'Successful',
-                    detail: 'Product Updated',
-                    life: 3000
+                    severity: 'error',
+                    summary: 'Invalid File',
+                    detail: validation.error,
+                    life: 5000
                 });
-            } else {
-                this.product.id = this.createId();
-                this.product.image = 'product-placeholder.svg';
-                this.messageService.add({
-                    severity: 'success',
-                    summary: 'Successful',
-                    detail: 'Product Created',
-                    life: 3000
-                });
-                this.products.set([..._products, this.product]);
+                return;
             }
 
-            this.productDialog = false;
-            this.product = {};
+            this.selectedFile = file;
+
+            // Create preview
+            const reader = new FileReader();
+            reader.onload = (e: ProgressEvent<FileReader>) => {
+                if (e.target?.result) {
+                    this.imagePreview = this.sanitizer.sanitize(1, e.target.result as string) || null;
+                }
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+
+    /**
+     * Format file size for display
+     */
+    formatFileSize(bytes: number | undefined): string {
+        if (!bytes) return '0 Bytes';
+
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+
+        return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i];
+    }
+
+    /**
+     * Save product with image upload
+     */
+    async saveProduct(): Promise<void> {
+        this.submitted = true;
+
+        // Validate required fields
+        if (!this.newProduct.name || !this.newProduct.description || !this.newProduct.basePrice || !this.selectedFile) {
+            this.messageService.add({
+                severity: 'warn',
+                summary: 'Validation Error',
+                detail: 'Please fill in all required fields and select an image',
+                life: 5000
+            });
+            return;
+        }
+
+        try {
+            // Step 1: Upload image to Cloudinary
+            console.log('🚀 Starting image upload...', {
+                fileName: this.selectedFile.name,
+                fileSize: this.selectedFile.size,
+                fileType: this.selectedFile.type
+            });
+
+            this.isUploading = true;
+            const uploadResponse = await firstValueFrom(this.imageUploadService.uploadImage(this.selectedFile, 'product'));
+
+            console.log('✅ Image upload successful:', uploadResponse);
+
+            if (!uploadResponse || !uploadResponse.public_id || !uploadResponse.secure_url) {
+                throw new Error('Image upload response is incomplete');
+            }
+
+            this.isUploading = false;
+            this.isSaving = true;
+
+            // Step 2: Create product with image URLs
+            const productDto = {
+                name: this.newProduct.name,
+                description: this.newProduct.description,
+                basePrice: this.newProduct.basePrice,
+                type: this.newProduct.type || PRODUCT_TYPE.SIMPLE,
+                isActive: this.newProduct.isActive ?? true,
+                publicId: uploadResponse.public_id,
+                secureUrl: uploadResponse.secure_url
+            };
+
+            console.log('🚀 Creating product with data:', productDto);
+
+            const createdProduct = await firstValueFrom(this.productService.createProduct(productDto));
+
+            console.log('✅ Product created successfully:', createdProduct);
+
+            this.isSaving = false;
+
+            this.messageService.add({
+                severity: 'success',
+                summary: 'Success',
+                detail: 'Product created successfully',
+                life: 3000
+            });
+
+            // Reset form and close dialog
+            this.hideDialog();
+
+            // Optionally refresh the products list here
+            // this.loadProducts();
+        } catch (error: any) {
+            console.error('❌ Error during product creation:', error);
+            console.error('Error details:', {
+                message: error.message,
+                status: error.status,
+                statusText: error.statusText,
+                error: error.error
+            });
+
+            this.isUploading = false;
+            this.isSaving = false;
+
+            let errorMessage = 'Failed to create product';
+
+            if (error.status === 0) {
+                errorMessage = 'Network error - please check your connection';
+            } else if (error.status === 413) {
+                errorMessage = 'Image file is too large';
+            } else if (error.status === 415) {
+                errorMessage = 'Unsupported file type';
+            } else if (error.error?.message) {
+                errorMessage = error.error.message;
+            } else if (error.message) {
+                errorMessage = error.message;
+            }
+
+            this.messageService.add({
+                severity: 'error',
+                summary: 'Error',
+                detail: errorMessage,
+                life: 5000
+            });
         }
     }
 }

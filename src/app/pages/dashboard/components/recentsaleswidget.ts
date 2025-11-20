@@ -37,7 +37,7 @@ import { Product, ProductService } from '../../../core/services/product.service'
     providers: [ProductService]
 })
 export class RecentSalesWidget {
-    products!: Product[];
+    products!: any[];
 
     constructor(private productService: ProductService) {}
 

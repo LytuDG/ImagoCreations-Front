@@ -139,7 +139,7 @@ export class ShopWindget {
 
     options = ['list', 'grid'];
 
-    products: Product[] = [];
+    products: any[] = [];
 
     sourceCities: any[] = [];
 
@@ -187,7 +187,7 @@ export class ShopWindget {
         });
     }
 
-    getSeverity(product: Product) {
+    getSeverity(product: any) {
         switch (product.inventoryStatus) {
             case 'INSTOCK':
                 return 'success';

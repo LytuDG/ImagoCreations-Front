@@ -163,7 +163,7 @@ export class ListDemo {
 
     options = ['list', 'grid'];
 
-    products: Product[] = [];
+    products: any[] = [];
 
     sourceCities: any[] = [];
 
@@ -199,7 +199,7 @@ export class ListDemo {
         ];
     }
 
-    getSeverity(product: Product) {
+    getSeverity(product: any) {
         switch (product.inventoryStatus) {
             case 'INSTOCK':
                 return 'success';

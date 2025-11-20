@@ -140,7 +140,7 @@ export class OverlayDemo implements OnInit {
 
     display: boolean = false;
 
-    products: Product[] = [];
+    products: any[] = [];
 
     visibleLeft: boolean = false;
 

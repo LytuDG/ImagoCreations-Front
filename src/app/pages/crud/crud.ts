@@ -214,9 +214,9 @@ interface ExportColumn {
 export class Crud implements OnInit {
     productDialog: boolean = false;
 
-    products = signal<Product[]>([]);
+    products = signal<any[]>([]);
 
-    product!: Product;
+    product!: any;
 
     selectedProducts!: Product[] | null;
 
@@ -240,8 +240,8 @@ export class Crud implements OnInit {
         this.dt.exportCSV();
     }
 
-    loadingTable(){
-        this.dt.loading = !this.dt.loading  ;
+    loadingTable() {
+        this.dt.loading = !this.dt.loading;
     }
 
     ngOnInit() {

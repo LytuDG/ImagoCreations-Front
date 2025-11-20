@@ -57,7 +57,7 @@ import { Product, ProductService } from '../../core/services/product.service';
     providers: [ProductService, PhotoService]
 })
 export class MediaDemo implements OnInit {
-    products!: Product[];
+    products!: any[];
 
     images!: any[];
 
