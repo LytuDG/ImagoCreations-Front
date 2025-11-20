@@ -2,6 +2,7 @@ import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { MenuItem } from 'primeng/api';
+import { SkeletonModule } from 'primeng/skeleton';
 import { AppMenuitem } from './app.menuitem';
 import { ADMIN_ROUTES, PRIVATE_ROUTES, PUBLIC_BASE_ROUTES } from '@/core/constants/routes/routes';
 import { AuthService } from '@/core/services/auth.service';
@@ -9,17 +10,87 @@ import { AuthService } from '@/core/services/auth.service';
 @Component({
     selector: 'app-menu',
     standalone: true,
-    imports: [CommonModule, AppMenuitem, RouterModule],
+    imports: [CommonModule, AppMenuitem, RouterModule, SkeletonModule],
     template: `<ul class="layout-menu">
-        @for (item of model; track $index; let i = $index) {
-            <ng-container>
-                @if (!item.separator) {
-                    <li app-menuitem [item]="item" [index]="i" [root]="true"></li>
-                }
-                @if (item.separator) {
-                    <li class="menu-separator"></li>
-                }
-            </ng-container>
+        @if (isLoading) {
+            <!-- Skeleton Loader -->
+            <li class="layout-root-menuitem">
+                <div class="layout-menuitem-root-text">
+                    <p-skeleton width="4rem" height="1rem" styleClass="mb-2"></p-skeleton>
+                </div>
+                <ul>
+                    @for (item of [1]; track $index) {
+                        <li class="px-4 py-2">
+                            <div class="flex items-center gap-3">
+                                <p-skeleton shape="circle" size="1.5rem"></p-skeleton>
+                                <p-skeleton width="8rem" height="1rem"></p-skeleton>
+                            </div>
+                        </li>
+                    }
+                </ul>
+            </li>
+
+            <li class="layout-root-menuitem">
+                <div class="layout-menuitem-root-text">
+                    <p-skeleton width="3rem" height="1rem" styleClass="mb-2"></p-skeleton>
+                </div>
+                <ul>
+                    @for (item of [1, 2, 3, 4, 5]; track $index) {
+                        <li class="px-4 py-2">
+                            <div class="flex items-center gap-3">
+                                <p-skeleton shape="circle" size="1.5rem"></p-skeleton>
+                                <p-skeleton width="7rem" height="1rem"></p-skeleton>
+                            </div>
+                        </li>
+                    }
+                </ul>
+            </li>
+
+            <li class="layout-root-menuitem">
+                <div class="layout-menuitem-root-text">
+                    <p-skeleton width="3.5rem" height="1rem" styleClass="mb-2"></p-skeleton>
+                </div>
+                <ul>
+                    @for (item of [1]; track $index) {
+                        <li class="px-4 py-2">
+                            <div class="flex items-center gap-3">
+                                <p-skeleton shape="circle" size="1.5rem"></p-skeleton>
+                                <p-skeleton width="6rem" height="1rem"></p-skeleton>
+                            </div>
+                        </li>
+                    }
+                </ul>
+            </li>
+
+            <li class="menu-separator"></li>
+
+            <li class="layout-root-menuitem">
+                <div class="layout-menuitem-root-text">
+                    <p-skeleton width="4.5rem" height="1rem" styleClass="mb-2"></p-skeleton>
+                </div>
+                <ul>
+                    @for (item of [1]; track $index) {
+                        <li class="px-4 py-2">
+                            <div class="flex items-center gap-3">
+                                <p-skeleton shape="circle" size="1.5rem"></p-skeleton>
+                                <p-skeleton width="5rem" height="1rem"></p-skeleton>
+                            </div>
+                        </li>
+                    }
+                </ul>
+            </li>
+        } @else {
+            <!-- Actual Menu -->
+            @for (item of model; track $index; let i = $index) {
+                <ng-container>
+                    @if (!item.separator) {
+                        <li app-menuitem [item]="item" [index]="i" [root]="true"></li>
+                    }
+                    @if (item.separator) {
+                        <li class="menu-separator"></li>
+                    }
+                </ng-container>
+            }
         }
     </ul> `
 })
@@ -27,6 +98,7 @@ export class AppMenu {
     authService = inject(AuthService);
 
     isSuperAdmin = false;
+    isLoading = true;
 
     model: MenuItem[] = [];
 
@@ -35,11 +107,13 @@ export class AppMenu {
             next: (response) => {
                 this.isSuperAdmin = response;
                 this.buildMenu();
+                this.isLoading = false;
             },
             error: (error) => {
                 console.error('Error verificando SUPERADMIN:', error);
                 this.isSuperAdmin = false;
                 this.buildMenu();
+                this.isLoading = false;
             }
         });
     }
