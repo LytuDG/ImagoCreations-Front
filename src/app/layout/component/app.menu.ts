@@ -31,18 +31,17 @@ export class AppMenu {
     model: MenuItem[] = [];
 
     ngOnInit() {
-        // this.authService.isSuperAdmin().subscribe({
-        //     next: (response) => {
-        //         this.isSuperAdmin = response;
-        //         this.buildMenu();
-        //     },
-        //     error: (error) => {
-        //         console.error('Error verificando SUPERADMIN:', error);
-        //         this.isSuperAdmin = false;
-        //         this.buildMenu();
-        //     }
-        // });
-        this.buildMenu();
+        this.authService.isSuperAdmin().subscribe({
+            next: (response) => {
+                this.isSuperAdmin = response;
+                this.buildMenu();
+            },
+            error: (error) => {
+                console.error('Error verificando SUPERADMIN:', error);
+                this.isSuperAdmin = false;
+                this.buildMenu();
+            }
+        });
     }
 
     logout() {

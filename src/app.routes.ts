@@ -16,7 +16,7 @@ export const appRoutes: Routes = [
     {
         path: PRIVATE_ROUTES.ADMIN,
         component: AppLayout,
-        loadChildren: () => import('./app/pages/admin/admin.routes'),
+        loadChildren: () => import('./app/pages/admin/admin.routes')
         // canActivate: [authGuard]
     },
     // { path: 'documentation', component: Documentation },
