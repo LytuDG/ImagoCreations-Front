@@ -15,7 +15,7 @@ import { SkeletonModule } from 'primeng/skeleton';
     standalone: true,
     imports: [CommonModule, FormsModule, PickListModule, OrderListModule, TagModule, ButtonModule, SkeletonModule],
     template: `
-        <div class="card px-4 py-8 md:px-6 lg:px-8">
+        <div id="shop" class="card px-4 py-8 md:px-6 lg:px-8">
             <div class="flex justify-between items-center mb-6">
                 <div class="font-bold text-2xl text-surface-900 dark:text-surface-0">Featured Products</div>
             </div>

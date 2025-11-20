@@ -20,7 +20,7 @@ import { ShopWindget } from './components/shop-widgets';
         <div class="bg-surface-0 dark:bg-surface-900">
             <p-toast />
             <div id="home" class="landing-wrapper overflow-hidden">
-                <topbar-widget class="py-6 px-6 mx-0 md:mx-12 lg:mx-20 lg:px-20 flex items-center justify-between relative lg:static" />
+                <topbar-widget class="fixed w-full top-0 left-0 z-50 bg-white dark:bg-surface-900 shadow-sm py-4 px-6 lg:px-20 flex items-center justify-between" />
                 <hero-widget />
                 <shop-widget />
                 <footer-widget />
