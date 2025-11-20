@@ -8,6 +8,7 @@ import { BadgeModule } from 'primeng/badge';
 import { CartService } from '@/core/services/cart.service';
 import { MessageService } from 'primeng/api';
 import { OverlayBadgeModule } from 'primeng/overlaybadge';
+import { AuthService } from '@/core/services/auth.service';
 
 @Component({
     selector: 'topbar-widget',
@@ -45,12 +46,18 @@ import { OverlayBadgeModule } from 'primeng/overlaybadge';
                 </li> -->
             </ul>
             <div class="flex border-t lg:border-t-0 border-surface py-4 lg:py-0 mt-4 lg:mt-0 gap-2">
-                <p-overlaybadge [value]="cart.products().length" >
+                <p-overlaybadge [value]="cart.products().length">
                     <button type="button" class="topbar-widget-cart">
                         <i class="pi pi-shopping-cart"></i>
                     </button>
                 </p-overlaybadge>
-                <button pButton pRipple label="Login" routerLink="/auth/login" [rounded]="true" [text]="true"></button>
+                @if (authService.isLogin()) {
+                    <button pRipple routerLink="/admin" class="topbar-widget-cart mx-2">
+                        <i class="pi pi-home"></i>
+                    </button>
+                } @else {
+                    <button pButton pRipple label="Login" routerLink="/auth/login" [rounded]="true" [text]="true"></button>
+                }
                 <!-- <button pButton pRipple label="Register" routerLink="/auth/login" [rounded]="true"></button> -->
                 <app-floating-configurator [float]="false" />
             </div>
@@ -59,4 +66,5 @@ import { OverlayBadgeModule } from 'primeng/overlaybadge';
 export class TopbarWidget {
     router = inject(Router);
     cart = inject(CartService);
+    authService = inject(AuthService);
 }
