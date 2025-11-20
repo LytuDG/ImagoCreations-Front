@@ -6,36 +6,34 @@ import { CURRENT_USER_ENDPOINT, LOGIN_ENDPOINT } from '@/core/constants/endpoint
 import { User } from '../../pages/admin/users/models/user';
 import { map, Observable } from 'rxjs';
 import { RolesEnum } from '@/core/constants/general/roles';
+import { PUBLIC_BASE_ROUTES } from '@/core/constants/routes/routes';
 
 @Injectable({
-  providedIn: 'root'
+    providedIn: 'root'
 })
 export class AuthService {
-  http = inject(HttpClient);
-  jwt = inject(JwtService);
-  router = inject(Router);
+    http = inject(HttpClient);
+    jwt = inject(JwtService);
+    router = inject(Router);
 
-  isSuperAdmin(): Observable<boolean> {
-    return this.getCurrentUser().pipe(
-      map(user => user.roleName === RolesEnum.SUPERADMIN)
-    )
-  }
+    isSuperAdmin(): Observable<boolean> {
+        return this.getCurrentUser().pipe(map((user) => user.roleName === RolesEnum.SUPERADMIN));
+    }
 
-  getCurrentUser(): Observable<User>{
-    return this.http.get<User>(CURRENT_USER_ENDPOINT);
-  }
+    getCurrentUser(): Observable<User> {
+        return this.http.get<User>(CURRENT_USER_ENDPOINT);
+    }
 
-  isLogin(){
-    return this.jwt.getToken() ? true : false;
-  }
+    isLogin() {
+        return this.jwt.getToken() ? true : false;
+    }
 
-  login(email: string, password: string) {
-    return this.http
-    .post<AuthToken>(LOGIN_ENDPOINT, { email, password });
-  }
+    login(email: string, password: string) {
+        return this.http.post<AuthToken>(LOGIN_ENDPOINT, { email, password });
+    }
 
-  logout() {
-    this.jwt.removeToken();
-    this.router.navigate(['/login']);
-  }
+    logout() {
+        this.jwt.removeToken();
+        this.router.navigate(['/login']);
+    }
 }

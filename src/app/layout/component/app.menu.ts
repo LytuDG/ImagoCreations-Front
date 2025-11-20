@@ -45,6 +45,10 @@ export class AppMenu {
         this.buildMenu();
     }
 
+    logout() {
+        this.authService.logout();
+    }
+
     private buildMenu() {
         this.model = [
             {
@@ -115,6 +119,19 @@ export class AppMenu {
                         label: 'Landing',
                         icon: 'pi pi-fw pi-globe',
                         routerLink: [PUBLIC_BASE_ROUTES.HOME]
+                    }
+                ]
+            },
+            {
+                separator: true
+            },
+            {
+                label: 'Account',
+                items: [
+                    {
+                        label: 'Logout',
+                        icon: 'pi pi-fw pi-sign-out',
+                        command: () => this.logout()
                     }
                 ]
             }
