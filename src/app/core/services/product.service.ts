@@ -1,9 +1,10 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Product } from '@/core/models/product/product';
 import { CreateProductDto } from '@/core/models/product/create-product.dto';
-import { CREATE_PRODUCT_ENDPOINT, UPDATE_PRODUCT_ENDPOINT } from '@/core/constants/endpoints/product/product';
+import { FilterProductsDto, FilterProductsResponse } from '@/core/models/product/filter-products.dto';
+import { CREATE_PRODUCT_ENDPOINT, UPDATE_PRODUCT_ENDPOINT, FILTER_PRODUCTS_ENDPOINT } from '@/core/constants/endpoints/product/product';
 
 // Re-export Product for convenience
 export type { Product } from '@/core/models/product/product';
@@ -48,6 +49,57 @@ export class ProductService {
      */
     updateProduct(id: string, productDto: Partial<CreateProductDto>): Observable<Product> {
         return this.http.put<Product>(UPDATE_PRODUCT_ENDPOINT(id), productDto);
+    }
+
+    /**
+     * Filter products with pagination
+     * @param filters - Filter criteria (can be sent as query params or body)
+     * @returns Observable of filtered products with pagination metadata
+     */
+    filterProducts(filters: FilterProductsDto = {}): Observable<FilterProductsResponse> {
+        // Build query params (these take priority over body params according to API docs)
+        let params = new HttpParams();
+        if (filters.page !== undefined) {
+            params = params.set('page', filters.page.toString());
+        }
+        if (filters.limit !== undefined) {
+            params = params.set('limit', filters.limit.toString());
+        }
+        if (filters.deleted !== undefined) {
+            params = params.set('deleted', filters.deleted.toString());
+        }
+        if (filters.onlyDeleted !== undefined) {
+            params = params.set('onlyDeleted', filters.onlyDeleted.toString());
+        }
+        if (filters.id) {
+            params = params.set('id', filters.id);
+        }
+        if (filters.agencyId) {
+            params = params.set('agencyId', filters.agencyId);
+        }
+        if (filters.isActive !== undefined) {
+            params = params.set('isActive', filters.isActive.toString());
+        }
+        if (filters.name) {
+            params = params.set('name', filters.name);
+        }
+        if (filters.nameLike) {
+            params = params.set('nameLike', filters.nameLike);
+        }
+        if (filters.type) {
+            params = params.set('type', filters.type);
+        }
+        if (filters.sku) {
+            params = params.set('sku', filters.sku);
+        }
+        if (filters.sort && filters.sort.length > 0) {
+            // Sort is an array, add each value
+            filters.sort.forEach((sortValue) => {
+                params = params.append('sort', sortValue);
+            });
+        }
+        // Send POST request with query params and body
+        return this.http.post<FilterProductsResponse>(FILTER_PRODUCTS_ENDPOINT, filters, { params });
     }
 
     // Demo data methods below - kept for backward compatibility

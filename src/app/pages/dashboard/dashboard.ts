@@ -20,6 +20,7 @@ import { RevenueStreamWidget } from './components/revenuestreamwidget';
                 <app-notifications-widget />
             </div>
         </div>
-    `
+    `,
+    standalone: true
 })
 export class Dashboard {}

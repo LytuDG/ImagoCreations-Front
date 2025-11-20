@@ -11,6 +11,11 @@ export interface Product {
     agency_id?: string;
     publicId: string;
     secureUrl: string;
+    picture?: string;
+    pictureProperties: {
+        publicId: string;
+        secureId: string;
+    };
 }
 
 export type ProductType = 'simple' | 'variant';

@@ -19,6 +19,7 @@ import { InputIconModule } from 'primeng/inputicon';
 import { IconFieldModule } from 'primeng/iconfield';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { LegacyProduct, ProductService } from '../../../core/services/product.service';
+import { FilterProductsDto } from '@/core/models/product/filter-products.dto';
 import { FileUploadModule } from 'primeng/fileupload';
 import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
 import { Product, PRODUCT_TYPE } from '@/core/models/product/product';
@@ -67,6 +68,8 @@ interface ExportColumn {
         ProgressSpinnerModule
     ],
     template: `
+        <p-toast />
+
         <p-toolbar styleClass="mb-6">
             <ng-template #start>
                 <p-button label="New" icon="pi pi-plus" severity="secondary" class="mr-2" (onClick)="openNew()" />
@@ -75,17 +78,20 @@ interface ExportColumn {
 
             <ng-template #end>
                 <p-button label="Export" icon="pi pi-upload" severity="secondary" (onClick)="exportCSV()" />
-                <!-- <p-button label="Loading" icon="pi pi-spinner" severity="secondary" class="ml-1" (onClick)="loadingTable()" /> -->
             </ng-template>
         </p-toolbar>
 
         <p-table
             #dt
             [value]="products()"
-            [rows]="10"
+            [rows]="pageSize"
             [columns]="cols"
             [paginator]="true"
-            [globalFilterFields]="['name', 'country.name', 'representative.name', 'status']"
+            [lazy]="true"
+            [totalRecords]="totalRecords"
+            [loading]="loading()"
+            (onLazyLoad)="onPageChange($event)"
+            [globalFilterFields]="['name', 'sku', 'type']"
             [tableStyle]="{ 'min-width': '75rem' }"
             [(selection)]="selectedProducts"
             [rowHover]="true"
@@ -108,27 +114,23 @@ interface ExportColumn {
                     <th style="width: 3rem">
                         <p-tableHeaderCheckbox />
                     </th>
-                    <th style="min-width: 16rem">Code</th>
+                    <th style="min-width: 12rem">SKU</th>
                     <th pSortableColumn="name" style="min-width:16rem">
                         Name
                         <p-sortIcon field="name" />
                     </th>
                     <th>Image</th>
-                    <th pSortableColumn="price" style="min-width: 8rem">
+                    <th pSortableColumn="basePrice" style="min-width: 8rem">
                         Price
-                        <p-sortIcon field="price" />
+                        <p-sortIcon field="basePrice" />
                     </th>
-                    <th pSortableColumn="category" style="min-width:10rem">
-                        Category
-                        <p-sortIcon field="category" />
+                    <th pSortableColumn="type" style="min-width:10rem">
+                        Type
+                        <p-sortIcon field="type" />
                     </th>
-                    <th pSortableColumn="rating" style="min-width: 12rem">
-                        Reviews
-                        <p-sortIcon field="rating" />
-                    </th>
-                    <th pSortableColumn="inventoryStatus" style="min-width: 12rem">
+                    <th pSortableColumn="isActive" style="min-width: 10rem">
                         Status
-                        <p-sortIcon field="inventoryStatus" />
+                        <p-sortIcon field="isActive" />
                     </th>
                     <th style="min-width: 12rem"></th>
                 </tr>
@@ -138,18 +140,17 @@ interface ExportColumn {
                     <td style="width: 3rem">
                         <p-tableCheckbox [value]="product" />
                     </td>
-                    <td style="min-width: 12rem">{{ product.code }}</td>
+                    <td style="min-width: 12rem">{{ product.sku || 'N/A' }}</td>
                     <td style="min-width: 16rem">{{ product.name }}</td>
                     <td>
-                        <img [src]="'https://primefaces.org/cdn/primeng/images/demo/product/' + product.image" [alt]="product.name" style="width: 64px" class="rounded" />
+                        <img [src]="product.picture" [alt]="product.name" style="width: 64px; height: 64px; object-fit: cover;" class="rounded" />
                     </td>
-                    <td>{{ product.price | currency: 'USD' }}</td>
-                    <td>{{ product.category }}</td>
+                    <td>{{ product.basePrice | currency: 'USD' }}</td>
                     <td>
-                        <p-rating [(ngModel)]="product.rating" [readonly]="true" />
+                        <p-tag [value]="product.type" [severity]="product.type === 'simple' ? 'info' : 'secondary'" />
                     </td>
                     <td>
-                        <p-tag [value]="product.inventoryStatus" [severity]="getSeverity(product.inventoryStatus)" />
+                        <p-tag [value]="product.isActive ? 'Active' : 'Inactive'" [severity]="product.isActive ? 'success' : 'danger'" />
                     </td>
                     <td>
                         <p-button icon="pi pi-pencil" class="mr-2" [rounded]="true" [outlined]="true" (click)="editProduct(product)" />
@@ -235,7 +236,7 @@ interface ExportColumn {
                     <!-- Upload Progress -->
                     <div *ngIf="isUploading" class="flex items-center gap-3 p-4 bg-blue-50 rounded-lg border border-blue-200">
                         <p-progressSpinner [style]="{ width: '30px', height: '30px' }" strokeWidth="4" />
-                        <span class="text-blue-700 font-medium">Uploading image to Cloudinary...</span>
+                        <span class="text-blue-700 font-medium">Uploading image...</span>
                     </div>
 
                     <!-- Save Progress -->
@@ -262,11 +263,17 @@ export class Products implements OnInit {
     productDialog: boolean = false;
 
     uploadedFiles: any[] = [];
-    products = signal<LegacyProduct[]>([]);
+    products = signal<Product[]>([]);
 
-    product!: LegacyProduct;
+    product!: Product;
 
-    selectedProducts!: LegacyProduct[] | null;
+    selectedProducts!: Product[] | null;
+
+    // Pagination and loading state
+    loading = signal<boolean>(false);
+    totalRecords = 0;
+    pageSize = 10;
+    currentPage = 1;
 
     submitted: boolean = false;
 
@@ -316,29 +323,63 @@ export class Products implements OnInit {
     }
 
     ngOnInit() {
-        this.loadDemoData();
+        this.initializeColumns();
+        // Don't call loadProducts() here - lazy loading will trigger onPageChange automatically
     }
 
-    loadDemoData() {
-        this.productService.getProducts().then((data) => {
-            this.products.set(data);
-        });
-
-        this.statuses = [
-            { label: 'INSTOCK', value: 'instock' },
-            { label: 'LOWSTOCK', value: 'lowstock' },
-            { label: 'OUTOFSTOCK', value: 'outofstock' }
-        ];
-
+    initializeColumns() {
         this.cols = [
-            { field: 'code', header: 'Code', customExportHeader: 'Product Code' },
+            { field: 'sku', header: 'SKU', customExportHeader: 'Product SKU' },
             { field: 'name', header: 'Name' },
-            { field: 'image', header: 'Image' },
-            { field: 'price', header: 'Price' },
-            { field: 'category', header: 'Category' }
+            { field: 'secureUrl', header: 'Image' },
+            { field: 'basePrice', header: 'Price' },
+            { field: 'type', header: 'Type' },
+            { field: 'isActive', header: 'Status' }
         ];
 
         this.exportColumns = this.cols.map((col) => ({ title: col.header, dataKey: col.field }));
+    }
+
+    /**
+     * Load products from API with pagination
+     */
+    loadProducts(page: number = 1, limit: number = 10) {
+        this.loading.set(true);
+        this.currentPage = page;
+        this.pageSize = limit;
+
+        const filters: FilterProductsDto = {
+            page,
+            limit
+            // Only show active products by default (remove this line to show all)
+            // isActive: true
+        };
+
+        this.productService.filterProducts(filters).subscribe({
+            next: (response: any) => {
+                this.products.set(response.data);
+                this.totalRecords = response.total;
+                this.loading.set(false);
+            },
+            error: (error: any) => {
+                console.error('Error loading products:', error);
+                this.messageService.add({
+                    severity: 'error',
+                    summary: 'Error',
+                    detail: 'Failed to load products',
+                    life: 5000
+                });
+                this.loading.set(false);
+            }
+        });
+    }
+
+    /**
+     * Handle pagination events from the table
+     */
+    onPageChange(event: any) {
+        const page = event.first / event.rows + 1;
+        this.loadProducts(page, event.rows);
     }
 
     onGlobalFilter(table: Table, event: Event) {
@@ -346,7 +387,7 @@ export class Products implements OnInit {
     }
 
     openNew() {
-        this.product = {};
+        this.product = {} as Product;
         this.newProduct = {
             isActive: true,
             type: PRODUCT_TYPE.SIMPLE
@@ -357,7 +398,7 @@ export class Products implements OnInit {
         this.productDialog = true;
     }
 
-    editProduct(product: LegacyProduct) {
+    editProduct(product: Product) {
         this.product = { ...product };
         this.productDialog = true;
     }
@@ -388,14 +429,14 @@ export class Products implements OnInit {
         this.imagePreview = null;
     }
 
-    deleteProduct(product: LegacyProduct) {
+    deleteProduct(product: Product) {
         this.confirmationService.confirm({
             message: 'Are you sure you want to delete ' + product.name + '?',
             header: 'Confirm',
             icon: 'pi pi-exclamation-triangle',
             accept: () => {
                 this.products.set(this.products().filter((val) => val.id !== product.id));
-                this.product = {};
+                this.product = {} as Product;
                 this.messageService.add({
                     severity: 'success',
                     summary: 'Successful',
@@ -427,7 +468,10 @@ export class Products implements OnInit {
         return id;
     }
 
-    getSeverity(status: string) {
+    getSeverity(status: string | boolean) {
+        if (typeof status === 'boolean') {
+            return status ? 'success' : 'danger';
+        }
         switch (status) {
             case 'INSTOCK':
                 return 'success';
@@ -552,8 +596,8 @@ export class Products implements OnInit {
             // Reset form and close dialog
             this.hideDialog();
 
-            // Optionally refresh the products list here
-            // this.loadProducts();
+            // Refresh the products list
+            this.loadProducts(this.currentPage, this.pageSize);
         } catch (error: any) {
             console.error('❌ Error during product creation:', error);
             console.error('Error details:', {
