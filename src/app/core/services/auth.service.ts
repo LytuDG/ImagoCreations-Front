@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { AuthToken, JwtService } from '@/core/services/jwt.service';
 import { Router } from '@angular/router';
 import { CURRENT_USER_ENDPOINT, LOGIN_ENDPOINT } from '@/core/constants/endpoints/auth/auth';
-import { User } from '../admin/users/models/user';
+import { User } from '../../pages/admin/users/models/user';
 import { map, Observable } from 'rxjs';
 import { RolesEnum } from '@/core/constants/general/roles';
 

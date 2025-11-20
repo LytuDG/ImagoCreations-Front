@@ -2,7 +2,7 @@ import { HttpErrorResponse, HttpInterceptorFn, HttpStatusCode } from '@angular/c
 import { inject } from '@angular/core';
 import { JwtService } from '../services/jwt.service';
 import { catchError, throwError } from 'rxjs';
-import { AuthService } from '@/pages/service/auth.service';
+import { AuthService } from '@/core/services/auth.service';
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const jwtService = inject(JwtService);

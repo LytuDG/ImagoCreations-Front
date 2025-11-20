@@ -18,7 +18,9 @@ import { TagModule } from 'primeng/tag';
 import { InputIconModule } from 'primeng/inputicon';
 import { IconFieldModule } from 'primeng/iconfield';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
-import { Product, ProductService } from '../../core/services/product.service';
+import { Product, ProductService } from '../../../core/services/product.service';
+import { FileUploadModule } from 'primeng/fileupload';
+import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
 
 interface Column {
     field: string;
@@ -32,10 +34,11 @@ interface ExportColumn {
 }
 
 @Component({
-    selector: 'app-crud',
+    selector: 'app-products',
     standalone: true,
     imports: [
         CommonModule,
+        FileUploadModule,
         TableModule,
         FormsModule,
         ButtonModule,
@@ -51,6 +54,7 @@ interface ExportColumn {
         DialogModule,
         TagModule,
         InputIconModule,
+        InputGroupAddonModule,
         IconFieldModule,
         ConfirmDialogModule
     ],
@@ -63,7 +67,7 @@ interface ExportColumn {
 
             <ng-template #end>
                 <p-button label="Export" icon="pi pi-upload" severity="secondary" (onClick)="exportCSV()" />
-                <p-button label="Loading" icon="pi pi-spinner" severity="secondary" class="ml-1" (onClick)="loadingTable()" />
+                <!-- <p-button label="Loading" icon="pi pi-spinner" severity="secondary" class="ml-1" (onClick)="loadingTable()" /> -->
             </ng-template>
         </p-toolbar>
 
@@ -80,7 +84,7 @@ interface ExportColumn {
             dataKey="id"
             currentPageReportTemplate="Showing {first} to {last} of {totalRecords} products"
             [showCurrentPageReport]="true"
-            [rowsPerPageOptions]="[10, 20, 30]"
+            [rowsPerPageOptions]="[10, 20, 50]"
         >
             <ng-template #caption>
                 <div class="flex items-center justify-between">
@@ -156,36 +160,20 @@ interface ExportColumn {
                         <input type="text" pInputText id="name" [(ngModel)]="product.name" required autofocus fluid />
                         <small class="text-red-500" *ngIf="submitted && !product.name">Name is required.</small>
                     </div>
+
+                    <div class="col-span-full">
+                        <div class="">
+                            <label for="name" class="block font-bold mb-3">Image</label>
+                            <p-fileupload name="demo[]" (onUpload)="onUpload($event)" [multiple]="true" accept="image/*" maxFileSize="1000000" mode="advanced" url="https://www.primefaces.org/cdn/api/upload.php">
+                                <ng-template #empty>
+                                    <div>Drag and drop files to here to upload.</div>
+                                </ng-template>
+                            </p-fileupload>
+                        </div>
+                    </div>
                     <div>
                         <label for="description" class="block font-bold mb-3">Description</label>
                         <textarea id="description" pTextarea [(ngModel)]="product.description" required rows="3" cols="20" fluid></textarea>
-                    </div>
-
-                    <div>
-                        <label for="inventoryStatus" class="block font-bold mb-3">Inventory Status</label>
-                        <p-select [(ngModel)]="product.inventoryStatus" inputId="inventoryStatus" [options]="statuses" optionLabel="label" optionValue="label" placeholder="Select a Status" fluid />
-                    </div>
-
-                    <div>
-                        <span class="block font-bold mb-4">Category</span>
-                        <div class="grid grid-cols-12 gap-4">
-                            <div class="flex items-center gap-2 col-span-6">
-                                <p-radiobutton id="category1" name="category" value="Accessories" [(ngModel)]="product.category" />
-                                <label for="category1">Accessories</label>
-                            </div>
-                            <div class="flex items-center gap-2 col-span-6">
-                                <p-radiobutton id="category2" name="category" value="Clothing" [(ngModel)]="product.category" />
-                                <label for="category2">Clothing</label>
-                            </div>
-                            <div class="flex items-center gap-2 col-span-6">
-                                <p-radiobutton id="category3" name="category" value="Electronics" [(ngModel)]="product.category" />
-                                <label for="category3">Electronics</label>
-                            </div>
-                            <div class="flex items-center gap-2 col-span-6">
-                                <p-radiobutton id="category4" name="category" value="Fitness" [(ngModel)]="product.category" />
-                                <label for="category4">Fitness</label>
-                            </div>
-                        </div>
                     </div>
 
                     <div class="grid grid-cols-12 gap-4">
@@ -211,9 +199,10 @@ interface ExportColumn {
     `,
     providers: [MessageService, ProductService, ConfirmationService]
 })
-export class Crud implements OnInit {
+export class Products implements OnInit {
     productDialog: boolean = false;
 
+    uploadedFiles: any[] = [];
     products = signal<Product[]>([]);
 
     product!: Product;
@@ -236,12 +225,20 @@ export class Crud implements OnInit {
         private confirmationService: ConfirmationService
     ) {}
 
+    onUpload(event: any) {
+        for (const file of event.files) {
+            this.uploadedFiles.push(file);
+        }
+
+        this.messageService.add({ severity: 'info', summary: 'Success', detail: 'File Uploaded' });
+    }
+
     exportCSV() {
         this.dt.exportCSV();
     }
 
-    loadingTable(){
-        this.dt.loading = !this.dt.loading  ;
+    loadingTable() {
+        this.dt.loading = !this.dt.loading;
     }
 
     ngOnInit() {

@@ -6,6 +6,7 @@ import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
 import { PasswordModule } from 'primeng/password';
 import { Agency } from './models/agency';
+import { DEFAULT_CREATE_USER } from '../users/models/user';
 
 @Component({
   selector: 'app-agency-form',
@@ -208,14 +209,7 @@ export class AgencyFormComponent {
       address: '',
       phone: '',
       phoneCountryCode: '',
-      user: {
-        email: '',
-        name: '',
-        lastName: '',
-        password: '',
-        phone: '',
-        phoneCountryCode: ''
-      }
+      user: DEFAULT_CREATE_USER
     };
     this.submitted = false;
   }

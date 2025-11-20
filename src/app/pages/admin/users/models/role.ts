@@ -1,10 +1,21 @@
 export interface Role {
-  name: string;
-  description?: string; //eliminar ?
-  agencyId?: string;
-  agency?: string;
+  name?: string;
+//   agencyId?: string;
+//   agency?: string;
   id: string;
-  createdAt?: string; //eliminar ?
-  updatedAt?: string; //eliminar ?
-  deletedAt?: string; //eliminar ?
+
 }
+
+export const DEFAULT_ROLE: Role = {
+  name: '',
+//   agencyId: '',
+//   agency: '',
+  id: ''
+};
+export const DEFAULT_ROLES_EMPTY: Role [] = []
+export const DEFAULT_ROLES: Role [] = [
+    {
+        name: 'SUPERADMIN',
+        id: '1'
+    },
+]

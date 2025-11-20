@@ -6,7 +6,7 @@ import { StyleClassModule } from 'primeng/styleclass';
 import { AppConfigurator } from './app.configurator';
 import { LayoutService } from '../service/layout.service';
 import { OverlayBadgeModule } from 'primeng/overlaybadge';
-import { AuthService } from '@/pages/service/auth.service';
+import { AuthService } from '@/core/services/auth.service';
 
 @Component({
     selector: 'app-topbar',

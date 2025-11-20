@@ -1,13 +1,17 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { StyleClassModule } from 'primeng/styleclass';
 import { Router, RouterModule } from '@angular/router';
 import { RippleModule } from 'primeng/ripple';
 import { ButtonModule } from 'primeng/button';
 import { AppFloatingConfigurator } from '@/layout/component/app.floatingconfigurator';
+import { BadgeModule } from 'primeng/badge';
+import { CartService } from '@/core/services/cart.service';
+import { MessageService } from 'primeng/api';
+import { OverlayBadgeModule } from 'primeng/overlaybadge';
 
 @Component({
     selector: 'topbar-widget',
-    imports: [RouterModule, StyleClassModule, ButtonModule, RippleModule, AppFloatingConfigurator],
+    imports: [RouterModule, StyleClassModule, ButtonModule, RippleModule, BadgeModule, OverlayBadgeModule, AppFloatingConfigurator],
     template: `<a class="flex items-center mr-10" href="#">
             <img src="img/imago.svg" alt="imago logo" class="h-24 inline-block" />
             <span class="flex ml-2 text-xl font-bold w-60 ">IMAGO CREATIONS</span>
@@ -41,15 +45,18 @@ import { AppFloatingConfigurator } from '@/layout/component/app.floatingconfigur
                 </li> -->
             </ul>
             <div class="flex border-t lg:border-t-0 border-surface py-4 lg:py-0 mt-4 lg:mt-0 gap-2">
-                <button type="button" class="topbar-widget-cart">
-                    <i class="pi pi-shopping-cart"></i>
-                </button>
+                <p-overlaybadge [value]="cart.products().length" >
+                    <button type="button" class="topbar-widget-cart">
+                        <i class="pi pi-shopping-cart"></i>
+                    </button>
+                </p-overlaybadge>
                 <button pButton pRipple label="Login" routerLink="/auth/login" [rounded]="true" [text]="true"></button>
                 <!-- <button pButton pRipple label="Register" routerLink="/auth/login" [rounded]="true"></button> -->
                 <app-floating-configurator [float]="false" />
             </div>
-        </div> `,
+        </div> `
 })
 export class TopbarWidget {
-    constructor(public router: Router) {}
+    router = inject(Router);
+    cart = inject(CartService);
 }

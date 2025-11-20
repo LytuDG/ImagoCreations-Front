@@ -13,29 +13,36 @@ import { IconFieldModule } from 'primeng/iconfield';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { DialogModule } from 'primeng/dialog';
 import { MessageService, ConfirmationService } from 'primeng/api';
-import { UserService } from './user.service';
-import { User } from './models/user';
+import { UserService } from './services/user.service';
+import { CreateUserDTO, DEFAULT_CREATE_USER, DEFAULT_USER, User } from './models/user';
 import { FilterParams } from '@/core/models/params';
 import { ApiResponse } from '@/core/models/apiResponse';
+import { LOAD_STATE } from '@/core/models/load-state';
+import { RoleService } from './services/role.service';
+import { DEFAULT_ROLES, Role } from './models/role';
+import { Select } from "primeng/select";
+import { SelectModule } from 'primeng/select';
 
 @Component({
     selector: 'app-users',
     standalone: true,
     imports: [
-        CommonModule,
-        TableModule,
-        FormsModule,
-        ButtonModule,
-        RippleModule,
-        ToastModule,
-        ToolbarModule,
-        InputTextModule,
-        TagModule,
-        InputIconModule,
-        IconFieldModule,
-        ConfirmDialogModule,
-        DialogModule
-    ],
+    CommonModule,
+    TableModule,
+    FormsModule,
+    SelectModule,
+    ButtonModule,
+    RippleModule,
+    ToastModule,
+    ToolbarModule,
+    InputTextModule,
+    TagModule,
+    InputIconModule,
+    IconFieldModule,
+    ConfirmDialogModule,
+    DialogModule,
+    Select
+],
     template: `
         <p-toast />
 
@@ -96,10 +103,10 @@ import { ApiResponse } from '@/core/models/apiResponse';
                         <p-sortIcon field="roleName" />
                     </th>
                     <th style="min-width:12rem">Teléfono</th>
-                    <th pSortableColumn="agencyId" style="min-width:12rem">
+                    <!-- <th pSortableColumn="agencyId" style="min-width:12rem">
                         Agencia
                         <p-sortIcon field="agencyId" />
-                    </th>
+                    </th> -->
                 </tr>
             </ng-template>
 
@@ -111,7 +118,7 @@ import { ApiResponse } from '@/core/models/apiResponse';
                     <td style="min-width: 16rem">{{ user.name }} {{ user.lastName }}</td>
                     <td style="min-width: 20rem">{{ user.email }}</td>
                     <td style="min-width: 12rem">
-                        <p-tag [value]="user.roleName" [severity]="getRoleSeverity(user.roleName)" />
+                        <p-tag [value]="user.role.name" [severity]="getRoleSeverity(user.roleName)" />
                     </td>
                     <td style="min-width: 12rem">
                         @if (user.phone) {
@@ -120,19 +127,19 @@ import { ApiResponse } from '@/core/models/apiResponse';
                             <span class="text-color-secondary">No especificado</span>
                         }
                     </td>
-                    <td style="min-width: 12rem">{{ user.agencyId || 'N/A' }}</td>
+                    <!-- <td style="min-width: 12rem">{{ user.agencyId || 'N/A' }}</td> -->
                 </tr>
             </ng-template>
 
             <ng-template #emptymessage>
                 <tr>
                     <td colspan="7" class="text-center py-6">
-                        <div class="flex flex-column align-items-center gap-3">
-                            <i class="pi pi-users text-6xl text-color-secondary"></i>
-                            <span class="text-xl text-color-secondary font-medium">
+                        <div class="flex flex-column justify-center align-items-center gap-3">
+                            <!-- <i class="pi pi-users text-color-secondary"></i> -->
+                            <span class="text-xl my-4 text-color-secondary font-medium">
                                 No se encontraron usuarios
                             </span>
-                            <p-button label="Recargar" icon="pi pi-refresh" (onClick)="loadUsers()" />
+                            <!-- <p-button label="Recargar" icon="pi pi-refresh" (onClick)="loadUsers()" /> -->
                         </div>
                     </td>
                 </tr>
@@ -156,7 +163,15 @@ import { ApiResponse } from '@/core/models/apiResponse';
                     </div>
                     <div>
                         <label for="roleName" class="block font-bold mb-3">Rol</label>
-                        <input type="text" pInputText id="roleName" [(ngModel)]="user.roleName" class="w-full" />
+                        <p-select [options]="roles()" optionLabel="name" id="roleName" [(ngModel)]="user.roleName" class="w-full" />
+                    </div>
+                     <div>
+                        <label for="password" class="block font-bold mb-3">Contraseña</label>
+                        <input type="password" pInputText id="password" [(ngModel)]="user.password" required class="w-full" />
+                    </div>
+                     <div>
+                        <label for="passwordConfirmation" class="block font-bold mb-3">Confirmar Contraseña</label>
+                        <input type="password" pInputText id="passwordConfirm" [(ngModel)]="user.passwordConfirm" required class="w-full" />
                     </div>
                 </div>
             </ng-template>
@@ -172,27 +187,51 @@ import { ApiResponse } from '@/core/models/apiResponse';
     providers: [MessageService, ConfirmationService]
 })
 export class Users implements OnInit {
+    private roleService = inject(RoleService);
     private userService = inject(UserService);
     private messageService = inject(MessageService);
     private confirmationService = inject(ConfirmationService);
 
     userDialog: boolean = false;
     users = signal<User[]>([]);
-    user: User = {};
+    roles = signal<Role[]>([]);
+    user: CreateUserDTO & {passwordConfirm? : string}  = DEFAULT_CREATE_USER ;
     selectedUsers: User[] | null = [];
     submitted: boolean = false;
     loading = signal(false);
+    loadRoleState = signal<LOAD_STATE>(LOAD_STATE.NOT_LOAD)
     requestBody: any = {
         page: 1,
         limit: 10,
         sort:['user.name', 'desc']
     };
 
+    LOAD_STATE = LOAD_STATE
+
     @ViewChild('dt') dt!: Table;
 
     ngOnInit() {
         this.loadUsers();
+        this.loadRoles();
     }
+
+    loadRoles(){
+        this.loadRoleState.set(LOAD_STATE.LOADING);
+        this.roleService.getRoles()
+        .subscribe({
+            next: (response: Role[]) => {
+                this.roles.set(response);
+                this.loadRoleState.set(LOAD_STATE.SUCCESS);
+            },
+            error: (error: any) => {
+                this.roles.set(DEFAULT_ROLES);
+                this.loadRoleState.set(LOAD_STATE.ERROR);
+                console.error('Error loading roles:', error);
+            }
+        })
+
+    }
+
 
     loadUsers(): void {
         this.loading.set(true);
@@ -204,6 +243,12 @@ export class Users implements OnInit {
             error: (error) => {
                 console.error('Error loading users:', error);
                 this.loading.set(false);
+                this.messageService.add({
+                    severity: 'error',
+                    summary: 'Error',
+                    detail: 'Error loading users',
+                    life: 5000
+                });
                 this.users.set([]);
             }
         });
@@ -224,13 +269,13 @@ export class Users implements OnInit {
     }
 
     openNew() {
-        this.user = {};
+        this.user = DEFAULT_CREATE_USER;
         this.submitted = false;
         this.userDialog = true;
     }
 
     editUser(user: User) {
-        this.user = { ...user };
+        // this.user = { ...user };
         this.userDialog = true;
     }
 
@@ -264,7 +309,7 @@ export class Users implements OnInit {
             icon: 'pi pi-exclamation-triangle',
             accept: () => {
                 this.users.set(this.users().filter((val) => val.id !== user.id));
-                this.user = {};
+                this.user = DEFAULT_CREATE_USER;
                 this.messageService.add({
                     severity: 'success',
                     summary: 'Éxito',
@@ -281,7 +326,7 @@ export class Users implements OnInit {
         if (this.user.name?.trim() && this.user.email?.trim()) {
             // Aquí iría la lógica para guardar el usuario
             this.userDialog = false;
-            this.user = {};
+            this.user = DEFAULT_CREATE_USER;
             this.messageService.add({
                 severity: 'success',
                 summary: 'Éxito',
@@ -303,8 +348,8 @@ export class Users implements OnInit {
                 return 'danger';
             case 'USER':
                 return 'info';
-            case 'AGENT':
-                return 'warning';
+            case 'SUPERADMIN':
+                return 'success';
             case 'MANAGER':
                 return 'success';
             default:

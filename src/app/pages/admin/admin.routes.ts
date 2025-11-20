@@ -1,10 +1,23 @@
-import { Routes } from "@angular/router";
+import { Route, Routes } from "@angular/router";
 import { Users } from "./users/users";
 import { ADMIN_ROUTES } from "@/core/constants/routes/routes";
 import { Agencies } from "./agencies/agencies";
 import { superAdminGuard } from "@/core/guards/super-admin.guard";
+import { Crud } from "../crud/crud";
+import { Dashboard } from "../dashboard/dashboard";
+import { Empty } from "../empty/empty";
+import { Products } from "./products/products";
 
-export const routes: Routes = [
+export default [
+    {
+        path: '',
+        redirectTo: ADMIN_ROUTES.ADMIN_DASHBOARD,
+        pathMatch: 'full'
+    },
+    {
+        path: ADMIN_ROUTES.ADMIN_DASHBOARD,
+        component: Dashboard
+    },
     {
         path: ADMIN_ROUTES.ADMIN_USERS,
         component: Users
@@ -15,7 +28,13 @@ export const routes: Routes = [
         canActivate: [superAdminGuard]
     },
     {
-        path: '**',
-        redirectTo: '/notfound'
+        path: ADMIN_ROUTES.ADMIN_ORDERS,
+        component: Empty
+    },
+    {
+        path: ADMIN_ROUTES.ADMIN_PRODUCTS,
+        component: Products
+
     }
-]
+
+] as Routes

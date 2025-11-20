@@ -1,1 +1,3 @@
-export const BASE_ENDPOINT = `https://imagocreations-api.onrender.com`
+import { environment } from "src/environments/environment";
+
+export const BASE_ENDPOINT = environment.API_URL

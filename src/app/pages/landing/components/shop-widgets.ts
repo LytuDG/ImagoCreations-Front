@@ -1,7 +1,9 @@
-import { Product, ProductService } from '@/pages/service/product.service';
+import { CartService } from '@/core/services/cart.service';
+import { Product, ProductService } from '@/core/services/product.service';
 import { NgClass } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { MessageService } from 'primeng/api';
 import { ButtonModule } from 'primeng/button';
 import { DataViewModule } from 'primeng/dataview';
 import { OrderListModule } from 'primeng/orderlist';
@@ -62,7 +64,7 @@ import { TagModule } from 'primeng/tag';
                                         <span class="text-xl font-semibold">$ {{ item.price }}</span>
                                         <div class="flex flex-row-reverse md:flex-row gap-2">
                                             <p-button icon="pi pi-dollar" styleClass="h-full" [outlined]="true"></p-button>
-                                            <p-button icon="pi pi-cart-plus" label="Add to Cart" [disabled]="item.inventoryStatus === 'OUTOFSTOCK'" styleClass="flex-auto md:flex-initial whitespace-nowrap"></p-button>
+                                            <p-button icon="pi pi-cart-plus" label="Add to Cart" [disabled]="item.inventoryStatus === 'OUTOFSTOCK'" (click)="addToCart(item)" styleClass="flex-auto md:flex-initial whitespace-nowrap"></p-button>
                                         </div>
                                     </div>
                                 </div>
@@ -114,7 +116,7 @@ import { TagModule } from 'primeng/tag';
                                         <div class="flex flex-col gap-6 mt-6">
                                             <span class="text-2xl font-semibold">$ {{ item.price }}</span>
                                             <div class="flex gap-2">
-                                                <p-button icon="pi pi-cart-plus" label="Add to Cart" [disabled]="item.inventoryStatus === 'OUTOFSTOCK'" class="flex-auto whitespace-nowrap" styleClass="w-full"></p-button>
+                                                <p-button icon="pi pi-cart-plus" label="Add to Cart" [disabled]="item.inventoryStatus === 'OUTOFSTOCK'" (click)="addToCart(item)" class="flex-auto whitespace-nowrap" styleClass="w-full"></p-button>
                                                 <p-button icon="pi pi-dollar" styleClass="h-full" [outlined]="true"></p-button>
                                             </div>
                                         </div>
@@ -130,6 +132,9 @@ import { TagModule } from 'primeng/tag';
     providers: [ProductService]
 })
 export class ShopWindget {
+    cart = inject(CartService);
+    message = inject(MessageService);
+
     layout: 'list' | 'grid' = 'grid';
 
     options = ['list', 'grid'];
@@ -145,7 +150,7 @@ export class ShopWindget {
     constructor(private productService: ProductService) {}
 
     ngOnInit() {
-        this.productService.getProducts ().then((data) => (this.products = data.slice(0, 6)));
+        this.productService.getProducts().then((data) => (this.products = data.slice(0, 6)));
 
         this.sourceCities = [
             { name: 'San Francisco', code: 'SF' },
@@ -168,6 +173,18 @@ export class ShopWindget {
             { name: 'Barcelona', code: 'BRC' },
             { name: 'Rome', code: 'RM' }
         ];
+    }
+
+    addToCart(product: any) {
+        console.log('adding');
+        this.cart.addToCart(product);
+        this.message.add({
+            severity: 'success',
+            summary: 'Success',
+            detail: 'Product added',
+            text: 'Product added',
+            life: 3000
+        });
     }
 
     getSeverity(product: Product) {
