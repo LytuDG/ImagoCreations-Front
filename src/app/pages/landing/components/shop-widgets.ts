@@ -1,205 +1,101 @@
 import { CartService } from '@/core/services/cart.service';
 import { Product, ProductService } from '@/core/services/product.service';
-import { NgClass } from '@angular/common';
-import { Component, inject } from '@angular/core';
+import { CommonModule, NgClass } from '@angular/common';
+import { Component, inject, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MessageService } from 'primeng/api';
 import { ButtonModule } from 'primeng/button';
-import { DataViewModule } from 'primeng/dataview';
 import { OrderListModule } from 'primeng/orderlist';
 import { PickListModule } from 'primeng/picklist';
-import { SelectButtonModule } from 'primeng/selectbutton';
 import { TagModule } from 'primeng/tag';
+import { SkeletonModule } from 'primeng/skeleton';
 
 @Component({
     selector: 'shop-widget',
     standalone: true,
-    imports: [NgClass, DataViewModule, FormsModule, SelectButtonModule, PickListModule, OrderListModule, TagModule, ButtonModule],
+    imports: [CommonModule, FormsModule, PickListModule, OrderListModule, TagModule, ButtonModule, SkeletonModule],
     template: `
-        <div class="card">
-            <!-- <h2 class="font-semibold text-5xl text-center">Shop</h2> -->
-            <p-dataview [value]="products" [layout]="layout">
-                <ng-template #header>
-                    <div class="flex justify-end">
-                        <p-select-button [(ngModel)]="layout" [options]="options" [allowEmpty]="false">
-                            <ng-template #item let-option>
-                                <i class="pi " [ngClass]="{ 'pi-bars': option === 'list', 'pi-table': option === 'grid' }"></i>
-                            </ng-template>
-                        </p-select-button>
-                    </div>
-                </ng-template>
+        <div class="card px-4 py-8 md:px-6 lg:px-8">
+            <div class="flex justify-between items-center mb-6">
+                <div class="font-bold text-2xl text-surface-900 dark:text-surface-0">Featured Products</div>
+            </div>
 
-                <ng-template #list let-items>
-                    <div class="flex flex-col">
-                        @for (item of items; track $index; let i = $index) {
-                            <div class="flex flex-col sm:flex-row sm:items-center p-6 gap-4" [ngClass]="{ 'border-t border-surface': i !== 0 }">
-                                <div class="md:w-40 relative">
-                                    <img class="block xl:block mx-auto rounded w-full" src="https://primefaces.org/cdn/primevue/images/product/{{ item.image }}" [alt]="item.name" />
-                                    <div class="absolute bg-black/70 rounded-border" [style]="{ left: '4px', top: '4px' }">
-                                        <p-tag [value]="item.inventoryStatus" [severity]="getSeverity(item)"></p-tag>
-                                    </div>
-                                </div>
-                                <div class="flex flex-col md:flex-row justify-between md:items-center flex-1 gap-6">
-                                    <div class="flex flex-row md:flex-col justify-between items-start gap-2">
-                                        <div>
-                                            <span class="font-medium text-surface-500 dark:text-surface-400 text-sm">{{ item.category }}</span>
-                                            <div class="text-lg font-medium mt-2">{{ item.name }}</div>
-                                        </div>
-                                        <div class="bg-surface-100 p-1" style="border-radius: 30px">
-                                            <div
-                                                class="bg-surface-0 flex items-center gap-2 justify-center py-1 px-2"
-                                                style="
-                                                        border-radius: 30px;
-                                                        box-shadow:
-                                                            0px 1px 2px 0px rgba(0, 0, 0, 0.04),
-                                                            0px 1px 2px 0px rgba(0, 0, 0, 0.06);
-                                                    "
-                                            >
-                                                <span class="text-surface-900 font-medium text-sm">{{ item.rating }}</span>
-                                                <i class="pi pi-star-fill text-yellow-500"></i>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="flex flex-col md:items-end gap-8">
-                                        <span class="text-xl font-semibold">$ {{ item.price }}</span>
-                                        <div class="flex flex-row-reverse md:flex-row gap-2">
-                                            <p-button icon="pi pi-dollar" styleClass="h-full" [outlined]="true"></p-button>
-                                            <p-button icon="pi pi-cart-plus" label="Add to Cart" [disabled]="item.inventoryStatus === 'OUTOFSTOCK'" (click)="addToCart(item)" styleClass="flex-auto md:flex-initial whitespace-nowrap"></p-button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        }
+            <div *ngIf="loading" class="grid grid-cols-12 gap-4">
+                <div *ngFor="let i of [1, 2, 3, 4, 5, 6]" class="col-span-12 sm:col-span-6 lg:col-span-4 p-2">
+                    <div class="p-4 border border-surface-200 dark:border-surface-700 bg-surface-0 dark:bg-surface-900 rounded flex flex-col gap-4">
+                        <p-skeleton width="100%" height="200px"></p-skeleton>
+                        <div class="flex justify-between items-center">
+                            <p-skeleton width="40%" height="2rem"></p-skeleton>
+                            <p-skeleton width="20%" height="2rem"></p-skeleton>
+                        </div>
+                        <p-skeleton width="100%" height="1rem"></p-skeleton>
+                        <p-skeleton width="100%" height="1rem"></p-skeleton>
+                        <div class="flex justify-between mt-4">
+                            <p-skeleton width="40%" height="3rem"></p-skeleton>
+                            <p-skeleton width="40%" height="3rem"></p-skeleton>
+                        </div>
                     </div>
-                </ng-template>
+                </div>
+            </div>
 
-                <ng-template #grid let-items>
-                    <div class="grid grid-cols-12 gap-4">
-                        @for (item of items; track $index; let i = $index) {
-                            <div class="col-span-12 sm:col-span-6 lg:col-span-4 p-2">
-                                <div class="p-6 border border-surface-200 dark:border-surface-700 bg-surface-0 dark:bg-surface-900 rounded flex flex-col">
-                                    <div class="relative w-full shadow-sm">
-                                        <img class="rounded w-full" src="https://primefaces.org/cdn/primevue/images/product/{{ item.image }}" [alt]="item.name" />
-                                        <div
-                                            class="absolute bg-black/70 rounded-border"
-                                            [style]="{
-                                                left: '4px',
-                                                top: '4px'
-                                            }"
-                                        >
-                                            <p-tag [value]="item.inventoryStatus" [severity]="getSeverity(item)"></p-tag>
-                                        </div>
-                                    </div>
-                                    <div class="pt-12">
-                                        <div class="flex flex-row justify-between items-start gap-2">
-                                            <div>
-                                                <span class="font-medium text-surface-500 dark:text-surface-400 text-sm">{{ item.category }}</span>
-                                                <div class="text-lg font-medium mt-1">
-                                                    {{ item.name }}
-                                                </div>
-                                            </div>
-                                            <div class="bg-surface-100 p-1" style="border-radius: 30px">
-                                                <div
-                                                    class="bg-surface-0 flex items-center gap-2 justify-center py-1 px-2"
-                                                    style="
-                                                    border-radius: 30px;
-                                                    box-shadow:
-                                                        0px 1px 2px 0px rgba(0, 0, 0, 0.04),
-                                                        0px 1px 2px 0px rgba(0, 0, 0, 0.06);
-                                                "
-                                                >
-                                                    <span class="text-surface-900 font-medium text-xs">{{ item.rating }}</span>
-                                                    <i class="pi pi-star-fill text-yellow-500"></i>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="flex flex-col gap-6 mt-6">
-                                            <span class="text-2xl font-semibold">$ {{ item.price }}</span>
-                                            <div class="flex gap-2">
-                                                <p-button icon="pi pi-cart-plus" label="Add to Cart" [disabled]="item.inventoryStatus === 'OUTOFSTOCK'" (click)="addToCart(item)" class="flex-auto whitespace-nowrap" styleClass="w-full"></p-button>
-                                                <p-button icon="pi pi-dollar" styleClass="h-full" [outlined]="true"></p-button>
-                                            </div>
-                                        </div>
-                                    </div>
+            <div *ngIf="!loading" class="grid grid-cols-12 gap-4">
+                <div *ngFor="let item of products" class="col-span-12 sm:col-span-6 lg:col-span-4 p-2">
+                    <div class="group p-4 border border-surface-200 dark:border-surface-700 bg-surface-0 dark:bg-surface-900 rounded-xl flex flex-col h-full hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+                        <div class="relative w-full overflow-hidden rounded-lg bg-surface-100 dark:bg-surface-800 mb-4">
+                            <img class="w-full h-64 object-cover hover:scale-105 transition-transform duration-500" [src]="item.picture" [alt]="item.name" />
+                        </div>
+                        <div class="flex flex-col flex-1">
+                            <div class="flex justify-between items-start mb-2">
+                                <div>
+                                    <div class="text-lg font-bold text-surface-900 dark:text-surface-0 mt-1">{{ item.name }}</div>
                                 </div>
+                                <span class="text-xl font-bold text-primary">\${{ item.basePrice }}</span>
                             </div>
-                        }
+                            <p class="text-surface-600 dark:text-surface-300 text-sm line-clamp-2 mb-4 flex-1">{{ item.description }}</p>
+                            <div class="flex gap-2 mt-auto">
+                                <p-button icon="pi pi-shopping-cart" label="Add to Cart" (click)="addToCart(item)" class="flex-1" styleClass="w-full"></p-button>
+                            </div>
+                        </div>
                     </div>
-                </ng-template>
-            </p-dataview>
+                </div>
+            </div>
         </div>
     `,
     providers: [ProductService]
 })
-export class ShopWindget {
+export class ShopWindget implements OnInit {
     cart = inject(CartService);
     message = inject(MessageService);
+    productService = inject(ProductService);
 
-    layout: 'list' | 'grid' = 'grid';
-
-    options = ['list', 'grid'];
-
-    products: any[] = [];
-
-    sourceCities: any[] = [];
-
-    targetCities: any[] = [];
-
-    orderCities: any[] = [];
-
-    constructor(private productService: ProductService) {}
+    products: Product[] = [];
+    loading: boolean = true;
 
     ngOnInit() {
-        this.productService.getProducts().then((data) => (this.products = data.slice(0, 6)));
-
-        this.sourceCities = [
-            { name: 'San Francisco', code: 'SF' },
-            { name: 'London', code: 'LDN' },
-            { name: 'Paris', code: 'PRS' },
-            { name: 'Istanbul', code: 'IST' },
-            { name: 'Berlin', code: 'BRL' },
-            { name: 'Barcelona', code: 'BRC' },
-            { name: 'Rome', code: 'RM' }
-        ];
-
-        this.targetCities = [];
-
-        this.orderCities = [
-            { name: 'San Francisco', code: 'SF' },
-            { name: 'London', code: 'LDN' },
-            { name: 'Paris', code: 'PRS' },
-            { name: 'Istanbul', code: 'IST' },
-            { name: 'Berlin', code: 'BRL' },
-            { name: 'Barcelona', code: 'BRC' },
-            { name: 'Rome', code: 'RM' }
-        ];
+        this.loadProducts();
     }
 
-    addToCart(product: any) {
-        console.log('adding');
+    loadProducts() {
+        this.loading = true;
+        this.productService.filterProducts({ limit: 6, page: 1 }).subscribe({
+            next: (response) => {
+                this.products = response.data;
+                this.loading = false;
+            },
+            error: (error) => {
+                console.error('Error loading products', error);
+                this.loading = false;
+            }
+        });
+    }
+
+    addToCart(product: Product) {
         this.cart.addToCart(product);
         this.message.add({
             severity: 'success',
             summary: 'Success',
-            detail: 'Product added',
-            text: 'Product added',
+            detail: 'Product added to cart',
             life: 3000
         });
-    }
-
-    getSeverity(product: any) {
-        switch (product.inventoryStatus) {
-            case 'INSTOCK':
-                return 'success';
-
-            case 'LOWSTOCK':
-                return 'warn';
-
-            case 'OUTOFSTOCK':
-                return 'danger';
-
-            default:
-                return 'info';
-        }
     }
 }
