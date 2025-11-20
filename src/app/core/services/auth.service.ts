@@ -34,6 +34,6 @@ export class AuthService {
 
     logout() {
         this.jwt.removeToken();
-        this.router.navigate(['/login']);
+        this.router.navigate([PUBLIC_BASE_ROUTES.LOGIN]);
     }
 }
