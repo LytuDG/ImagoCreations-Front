@@ -250,7 +250,7 @@ interface ExportColumn {
             <ng-template #footer>
                 <div class="flex justify-end gap-2">
                     <p-button label="Cancel" icon="pi pi-times" severity="secondary" [outlined]="true" (onClick)="hideDialog()" [disabled]="isUploading || isSaving" />
-                    <p-button label="Create Product" icon="pi pi-check" (onClick)="saveProduct()" [loading]="isUploading || isSaving" [disabled]="isUploading || isSaving" />
+                    <p-button [label]="product.id ? 'Update Product' : 'Create Product'" icon="pi pi-check" (onClick)="saveProduct()" [loading]="isUploading || isSaving" [disabled]="isUploading || isSaving" />
                 </div>
             </ng-template>
         </p-dialog>
@@ -400,6 +400,8 @@ export class Products implements OnInit {
 
     editProduct(product: Product) {
         this.product = { ...product };
+        this.newProduct = { ...product };
+        this.imagePreview = product.picture as SafeUrl;
         this.productDialog = true;
     }
 
@@ -409,6 +411,7 @@ export class Products implements OnInit {
             header: 'Confirm',
             icon: 'pi pi-exclamation-triangle',
             accept: () => {
+                // TODO: Implement bulk delete API if available
                 this.products.set(this.products().filter((val) => !this.selectedProducts?.includes(val)));
                 this.selectedProducts = null;
                 this.messageService.add({
@@ -435,14 +438,29 @@ export class Products implements OnInit {
             header: 'Confirm',
             icon: 'pi pi-exclamation-triangle',
             accept: () => {
-                this.products.set(this.products().filter((val) => val.id !== product.id));
-                this.product = {} as Product;
-                this.messageService.add({
-                    severity: 'success',
-                    summary: 'Successful',
-                    detail: 'Product Deleted',
-                    life: 3000
-                });
+                if (product.id) {
+                    this.productService.deleteProduct(product.id).subscribe({
+                        next: () => {
+                            this.products.set(this.products().filter((val) => val.id !== product.id));
+                            this.product = {} as Product;
+                            this.messageService.add({
+                                severity: 'success',
+                                summary: 'Successful',
+                                detail: 'Product Deleted',
+                                life: 3000
+                            });
+                        },
+                        error: (error) => {
+                            console.error('Error deleting product:', error);
+                            this.messageService.add({
+                                severity: 'error',
+                                summary: 'Error',
+                                detail: 'Failed to delete product',
+                                life: 3000
+                            });
+                        }
+                    });
+                }
             }
         });
     }
@@ -531,67 +549,90 @@ export class Products implements OnInit {
     }
 
     /**
-     * Save product with image upload
+     * Save product with image upload (Create or Update)
      */
     async saveProduct(): Promise<void> {
         this.submitted = true;
+        const isUpdate = !!this.product.id;
 
         // Validate required fields
-        if (!this.newProduct.name || !this.newProduct.description || !this.newProduct.basePrice || !this.selectedFile) {
+        if (!this.newProduct.name || !this.newProduct.description || !this.newProduct.basePrice) {
             this.messageService.add({
                 severity: 'warn',
                 summary: 'Validation Error',
-                detail: 'Please fill in all required fields and select an image',
+                detail: 'Please fill in all required fields',
+                life: 5000
+            });
+            return;
+        }
+
+        // Image is required for new products, but optional for updates (if not changing)
+        if (!isUpdate && !this.selectedFile) {
+            this.messageService.add({
+                severity: 'warn',
+                summary: 'Validation Error',
+                detail: 'Product image is required for new products',
                 life: 5000
             });
             return;
         }
 
         try {
-            // Step 1: Upload image to Cloudinary
-            console.log('🚀 Starting image upload...', {
-                fileName: this.selectedFile.name,
-                fileSize: this.selectedFile.size,
-                fileType: this.selectedFile.type
-            });
+            let publicId = this.product.pictureProperties?.publicId;
+            let secureUrl = this.product.pictureProperties?.secureId || this.product.picture;
 
-            this.isUploading = true;
-            const uploadResponse = await firstValueFrom(this.imageUploadService.uploadImage(this.selectedFile, 'product'));
+            // Step 1: Upload image to Cloudinary if a new file is selected
+            if (this.selectedFile) {
+                console.log('🚀 Starting image upload...', {
+                    fileName: this.selectedFile.name,
+                    fileSize: this.selectedFile.size,
+                    fileType: this.selectedFile.type
+                });
 
-            console.log('✅ Image upload successful:', uploadResponse);
+                this.isUploading = true;
+                const uploadResponse = await firstValueFrom(this.imageUploadService.uploadImage(this.selectedFile, 'product'));
 
-            if (!uploadResponse || !uploadResponse.public_id || !uploadResponse.secure_url) {
-                throw new Error('Image upload response is incomplete');
+                console.log('✅ Image upload successful:', uploadResponse);
+
+                if (!uploadResponse || !uploadResponse.public_id || !uploadResponse.secure_url) {
+                    throw new Error('Image upload response is incomplete');
+                }
+
+                publicId = uploadResponse.public_id;
+                secureUrl = uploadResponse.secure_url;
+                this.isUploading = false;
             }
 
-            this.isUploading = false;
             this.isSaving = true;
 
-            // Step 2: Create product with image URLs
+            // Step 2: Create or Update product
             const productDto = {
                 name: this.newProduct.name,
                 description: this.newProduct.description,
                 basePrice: this.newProduct.basePrice,
                 type: this.newProduct.type || PRODUCT_TYPE.SIMPLE,
                 isActive: this.newProduct.isActive ?? true,
-                publicId: uploadResponse.public_id,
-                secureUrl: uploadResponse.secure_url
+                publicId: publicId,
+                secureUrl: secureUrl
             };
 
-            console.log('🚀 Creating product with data:', productDto);
+            console.log('🚀 Saving product with data:', productDto);
 
-            const createdProduct = await firstValueFrom(this.productService.createProduct(productDto));
-
-            console.log('✅ Product created successfully:', createdProduct);
+            if (isUpdate && this.product.id) {
+                const updatedProduct = await firstValueFrom(this.productService.updateProduct(this.product.id, productDto));
+                console.log('✅ Product updated successfully:', updatedProduct);
+                this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Product updated successfully', life: 3000 });
+            } else {
+                // Ensure publicId and secureUrl are present for creation
+                if (!productDto.publicId || !productDto.secureUrl) {
+                    throw new Error('Image data missing for new product');
+                }
+                const createdProduct = await firstValueFrom(this.productService.createProduct(productDto as any));
+                console.log('✅ Product created successfully:', createdProduct);
+                this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Product created successfully', life: 3000 });
+            }
 
             this.isSaving = false;
-
-            this.messageService.add({
-                severity: 'success',
-                summary: 'Success',
-                detail: 'Product created successfully',
-                life: 3000
-            });
 
             // Reset form and close dialog
             this.hideDialog();
@@ -599,18 +640,12 @@ export class Products implements OnInit {
             // Refresh the products list
             this.loadProducts(this.currentPage, this.pageSize);
         } catch (error: any) {
-            console.error('❌ Error during product creation:', error);
-            console.error('Error details:', {
-                message: error.message,
-                status: error.status,
-                statusText: error.statusText,
-                error: error.error
-            });
+            console.error('❌ Error during product save:', error);
 
             this.isUploading = false;
             this.isSaving = false;
 
-            let errorMessage = 'Failed to create product';
+            let errorMessage = 'Failed to save product';
 
             if (error.status === 0) {
                 errorMessage = 'Network error - please check your connection';

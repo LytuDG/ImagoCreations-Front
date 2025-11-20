@@ -48,7 +48,16 @@ export class ProductService {
      * @returns Observable of updated product
      */
     updateProduct(id: string, productDto: Partial<CreateProductDto>): Observable<Product> {
-        return this.http.put<Product>(UPDATE_PRODUCT_ENDPOINT(id), productDto);
+        return this.http.patch<Product>(UPDATE_PRODUCT_ENDPOINT(id), productDto);
+    }
+
+    /**
+     * Delete a product
+     * @param id - Product ID
+     * @returns Observable of void
+     */
+    deleteProduct(id: string): Observable<void> {
+        return this.http.delete<void>(UPDATE_PRODUCT_ENDPOINT(id));
     }
 
     /**
