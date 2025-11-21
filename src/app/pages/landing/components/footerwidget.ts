@@ -5,53 +5,34 @@ import { Router, RouterModule } from '@angular/router';
     selector: 'footer-widget',
     imports: [RouterModule],
     template: `
-        <div class="py-12 px-12 mx-0 mt-20 lg:mx-20">
-            <div class="grid grid-cols-12 gap-4">
-                <div class="col-span-12 md:col-span-2">
-                    <a (click)="router.navigate(['/pages/landing'], { fragment: 'home' })" class="flex flex-wrap items-center justify-center md:justify-start md:mb-0 mb-6 cursor-pointer">
-                        <img src="img/imago.svg" alt="imago logo" class="h-40 inline-block" />
-                        <!-- <h4 class="font-medium text-3xl text-surface-900 dark:text-surface-0">SAKAI</h4> -->
+        <div class="py-8 px-6 mx-0 mt-12 border-t border-surface-200 dark:border-surface-700">
+            <div class="max-w-7xl mx-auto">
+                <div class="flex flex-col items-center gap-6">
+                    <!-- Logo -->
+                    <a (click)="router.navigate(['/'], { fragment: 'home' })" class="cursor-pointer">
+                        <img src="img/imago.svg" alt="imago logo" class="h-16 inline-block opacity-80 hover:opacity-100 transition-opacity" />
                     </a>
-                </div>
 
-                <div class="col-span-12 md:col-span-10">
-                    <div class="grid grid-cols-12 gap-8 text-center md:text-left">
-                        <div class="col-span-12 md:col-span-3">
-                            <h4 class="font-medium text-2xl leading-normal mb-6 text-surface-900 dark:text-surface-0">Company</h4>
-                            <a class="leading-normal text-xl block cursor-pointer mb-2 text-surface-700 dark:text-surface-100">About Us</a>
-                            <a class="leading-normal text-xl block cursor-pointer mb-2 text-surface-700 dark:text-surface-100">News</a>
-                            <a class="leading-normal text-xl block cursor-pointer mb-2 text-surface-700 dark:text-surface-100">Investor Relations</a>
-                            <a class="leading-normal text-xl block cursor-pointer mb-2 text-surface-700 dark:text-surface-100">Careers</a>
-                            <a class="leading-normal text-xl block cursor-pointer text-surface-700 dark:text-surface-100">Media Kit</a>
-                        </div>
-
-                        <div class="col-span-12 md:col-span-3">
-                            <h4 class="font-medium text-2xl leading-normal mb-6 text-surface-900 dark:text-surface-0">Resources</h4>
-                            <a class="leading-normal text-xl block cursor-pointer mb-2 text-surface-700 dark:text-surface-100">Get Started</a>
-                            <a class="leading-normal text-xl block cursor-pointer mb-2 text-surface-700 dark:text-surface-100">Learn</a>
-                            <a class="leading-normal text-xl block cursor-pointer text-surface-700 dark:text-surface-100">Case Studies</a>
-                        </div>
-
-                        <div class="col-span-12 md:col-span-3">
-                            <h4 class="font-medium text-2xl leading-normal mb-6 text-surface-900 dark:text-surface-0">Community</h4>
-                            <a class="leading-normal text-xl block cursor-pointer mb-2 text-surface-700 dark:text-surface-100">Discord</a>
-                            <a class="leading-normal text-xl flex items-center cursor-pointer mb-2 text-surface-700 dark:text-surface-100">Events<img src="https://primefaces.org/cdn/templates/sakai/landing/new-badge.svg" alt="badge" class="ml-2" /></a>
-                            <a class="leading-normal text-xl block cursor-pointer mb-2 text-surface-700 dark:text-surface-100">FAQ</a>
-                            <a class="leading-normal text-xl block cursor-pointer text-surface-700 dark:text-surface-100">Blog</a>
-                        </div>
-
-                        <div class="col-span-12 md:col-span-3">
-                            <h4 class="font-medium text-2xl leading-normal mb-6 text-surface-900 dark:text-surface-0">Legal</h4>
-                            <a class="leading-normal text-xl block cursor-pointer mb-2 text-surface-700 dark:text-surface-100">Brand Policy</a>
-                            <a class="leading-normal text-xl block cursor-pointer mb-2 text-surface-700 dark:text-surface-100">Privacy Policy</a>
-                            <a class="leading-normal text-xl block cursor-pointer text-surface-700 dark:text-surface-100">Terms of Service</a>
-                        </div>
+                    <!-- Links -->
+                    <div class="flex flex-wrap items-center justify-center gap-6 text-surface-600 dark:text-surface-400">
+                        <a class="text-sm hover:text-surface-900 dark:hover:text-surface-0 cursor-pointer transition-colors">About</a>
+                        <span class="text-surface-300 dark:text-surface-600">•</span>
+                        <a class="text-sm hover:text-surface-900 dark:hover:text-surface-0 cursor-pointer transition-colors">Contact</a>
+                        <span class="text-surface-300 dark:text-surface-600">•</span>
+                        <a class="text-sm hover:text-surface-900 dark:hover:text-surface-0 cursor-pointer transition-colors">Privacy Policy</a>
+                        <span class="text-surface-300 dark:text-surface-600">•</span>
+                        <a class="text-sm hover:text-surface-900 dark:hover:text-surface-0 cursor-pointer transition-colors">Terms of Service</a>
                     </div>
+
+                    <!-- Copyright -->
+                    <p class="text-xs text-surface-500 dark:text-surface-500">© {{ currentYear }} ImagoCreations. All rights reserved.</p>
                 </div>
             </div>
         </div>
     `
 })
 export class FooterWidget {
+    currentYear = new Date().getFullYear();
+
     constructor(public router: Router) {}
 }
