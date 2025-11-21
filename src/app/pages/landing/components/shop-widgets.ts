@@ -26,8 +26,8 @@ interface SortOption {
             <!-- Header Section -->
             <div class="max-w-7xl mx-auto">
                 <div class="text-center mb-12">
-                    <h2 class="text-4xl font-bold text-surface-900 dark:text-surface-0 mb-3">Nuestros Productos</h2>
-                    <p class="text-lg text-surface-600 dark:text-surface-400">Descubre nuestra colección exclusiva</p>
+                    <h2 class="text-4xl font-bold text-surface-900 dark:text-surface-0 mb-3">Our Products</h2>
+                    <p class="text-lg text-surface-600 dark:text-surface-400">Discover our exclusive collection</p>
                 </div>
 
                 <!-- Filters Section -->
@@ -35,36 +35,35 @@ interface SortOption {
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <!-- Search by Name -->
                         <div class="flex flex-col gap-2">
-                            <label class="text-sm font-semibold text-surface-700 dark:text-surface-300"> Buscar Producto </label>
+                            <label class="text-sm font-semibold text-surface-700 dark:text-surface-300"> Search Product </label>
                             <span class="p-input-icon-left w-full">
-                                <i class="pi pi-search"></i>
-                                <input type="text" pInputText [(ngModel)]="searchTerm" (ngModelChange)="onSearchChange()" placeholder="Nombre del producto..." class="w-full" />
+                                <input type="text" pInputText [(ngModel)]="searchTerm" (ngModelChange)="onSearchChange()" placeholder="Product name..." class="w-full" />
                             </span>
                         </div>
 
                         <!-- Filter by Type -->
                         <div class="flex flex-col gap-2">
-                            <label class="text-sm font-semibold text-surface-700 dark:text-surface-300"> Tipo de Producto </label>
-                            <p-select [options]="productTypes" [(ngModel)]="selectedType" (ngModelChange)="onFilterChange()" placeholder="Todos los tipos" [showClear]="true" styleClass="w-full" />
+                            <label class="text-sm font-semibold text-surface-700 dark:text-surface-300"> Product Type </label>
+                            <p-select [options]="productTypes" [(ngModel)]="selectedType" (ngModelChange)="onFilterChange()" placeholder="All types" [showClear]="true" styleClass="w-full" />
                         </div>
 
                         <!-- Sort Options -->
                         <div class="flex flex-col gap-2">
-                            <label class="text-sm font-semibold text-surface-700 dark:text-surface-300"> Ordenar por </label>
-                            <p-select [options]="sortOptions" [(ngModel)]="selectedSort" (ngModelChange)="onFilterChange()" optionLabel="label" placeholder="Seleccionar orden" styleClass="w-full" />
+                            <label class="text-sm font-semibold text-surface-700 dark:text-surface-300"> Sort by </label>
+                            <p-select [options]="sortOptions" [(ngModel)]="selectedSort" (ngModelChange)="onFilterChange()" optionLabel="label" placeholder="Select order" styleClass="w-full" />
                         </div>
                     </div>
 
                     <!-- Active Filters Display -->
                     <div *ngIf="hasActiveFilters()" class="flex flex-wrap gap-2 mt-4 pt-4 border-t border-surface-200 dark:border-surface-700">
-                        <span class="text-sm font-semibold text-surface-600 dark:text-surface-400">Filtros activos:</span>
-                        <p-tag *ngIf="searchTerm" [value]="'Búsqueda: ' + searchTerm" severity="info" (click)="clearSearch()" styleClass="cursor-pointer">
+                        <span class="text-sm font-semibold text-surface-600 dark:text-surface-400">Active filters:</span>
+                        <p-tag *ngIf="searchTerm" [value]="'Search: ' + searchTerm" severity="info" (click)="clearSearch()" styleClass="cursor-pointer">
                             <i class="pi pi-times ml-2"></i>
                         </p-tag>
-                        <p-tag *ngIf="selectedType" [value]="'Tipo: ' + selectedType" severity="success" (click)="clearType()" styleClass="cursor-pointer">
+                        <p-tag *ngIf="selectedType" [value]="'Type: ' + selectedType" severity="success" (click)="clearType()" styleClass="cursor-pointer">
                             <i class="pi pi-times ml-2"></i>
                         </p-tag>
-                        <button pButton label="Limpiar todo" icon="pi pi-filter-slash" (click)="clearAllFilters()" class="p-button-text p-button-sm"></button>
+                        <button pButton label="Clear all" icon="pi pi-filter-slash" (click)="clearAllFilters()" class="p-button-text p-button-sm"></button>
                     </div>
                 </div>
 
@@ -94,8 +93,8 @@ interface SortOption {
                                 onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22300%22%3E%3Crect fill=%22%23f0f0f0%22 width=%22400%22 height=%22300%22/%3E%3Ctext fill=%22%23999%22 font-family=%22sans-serif%22 font-size=%2224%22 dy=%2210.5%22 font-weight=%22bold%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22%3ENo Image%3C/text%3E%3C/svg%3E'"
                             />
                             <div class="absolute top-3 right-3">
-                                <span *ngIf="product.isActive" class="px-3 py-1 bg-green-500 text-white text-xs font-semibold rounded-full shadow-lg"> Disponible </span>
-                                <span *ngIf="!product.isActive" class="px-3 py-1 bg-red-500 text-white text-xs font-semibold rounded-full shadow-lg"> No disponible </span>
+                                <span *ngIf="product.isActive" class="px-3 py-1 bg-green-500 text-white text-xs font-semibold rounded-full shadow-lg"> Available </span>
+                                <span *ngIf="!product.isActive" class="px-3 py-1 bg-red-500 text-white text-xs font-semibold rounded-full shadow-lg"> Unavailable </span>
                             </div>
                         </div>
 
@@ -113,13 +112,13 @@ interface SortOption {
 
                             <div class="flex items-center justify-between mt-auto pt-4 border-t border-surface-200 dark:border-surface-700">
                                 <div class="flex flex-col">
-                                    <span class="text-xs text-surface-500 dark:text-surface-400">Precio</span>
+                                    <span class="text-xs text-surface-500 dark:text-surface-400">Price</span>
                                     <span class="text-2xl font-bold text-primary"> \${{ product.basePrice.toFixed(2) }} </span>
                                 </div>
                                 <button
                                     pButton
                                     icon="pi pi-shopping-cart"
-                                    label="Agregar"
+                                    label="Add"
                                     (click)="addToCart(product)"
                                     [disabled]="!product.isActive"
                                     class="p-button-rounded"
@@ -133,9 +132,9 @@ interface SortOption {
                 <!-- Empty State -->
                 <div *ngIf="!loading && products.length === 0" class="text-center py-16">
                     <i class="pi pi-inbox text-6xl text-surface-300 dark:text-surface-600 mb-4"></i>
-                    <h3 class="text-2xl font-bold text-surface-700 dark:text-surface-300 mb-2">No se encontraron productos</h3>
-                    <p class="text-surface-500 dark:text-surface-400 mb-6">Intenta ajustar los filtros de búsqueda</p>
-                    <button pButton label="Limpiar filtros" icon="pi pi-filter-slash" (click)="clearAllFilters()" class="p-button-outlined"></button>
+                    <h3 class="text-2xl font-bold text-surface-700 dark:text-surface-300 mb-2">No products found</h3>
+                    <p class="text-surface-500 dark:text-surface-400 mb-6">Try adjusting your search filters</p>
+                    <button pButton label="Clear filters" icon="pi pi-filter-slash" (click)="clearAllFilters()" class="p-button-outlined"></button>
                 </div>
 
                 <!-- Pagination -->
@@ -178,16 +177,16 @@ export class ShopWindget implements OnInit {
     // Options
     productTypes = [
         { label: 'Simple', value: PRODUCT_TYPE.SIMPLE },
-        { label: 'Variante', value: PRODUCT_TYPE.VARIANT }
+        { label: 'Variant', value: PRODUCT_TYPE.VARIANT }
     ];
 
     sortOptions: SortOption[] = [
-        { label: 'Nombre (A-Z)', value: ['name', 'ASC'] },
-        { label: 'Nombre (Z-A)', value: ['name', 'DESC'] },
-        { label: 'Precio (Menor a Mayor)', value: ['basePrice', 'ASC'] },
-        { label: 'Precio (Mayor a Menor)', value: ['basePrice', 'DESC'] },
-        { label: 'Más recientes', value: ['created_at', 'DESC'] },
-        { label: 'Más antiguos', value: ['created_at', 'ASC'] }
+        { label: 'Name (A-Z)', value: ['name', 'ASC'] },
+        { label: 'Name (Z-A)', value: ['name', 'DESC'] },
+        { label: 'Price (Low to High)', value: ['basePrice', 'ASC'] },
+        { label: 'Price (High to Low)', value: ['basePrice', 'DESC'] },
+        { label: 'Newest', value: ['created_at', 'DESC'] },
+        { label: 'Oldest', value: ['created_at', 'ASC'] }
     ];
 
     ngOnInit() {
@@ -229,7 +228,7 @@ export class ShopWindget implements OnInit {
                 this.message.add({
                     severity: 'error',
                     summary: 'Error',
-                    detail: 'No se pudieron cargar los productos',
+                    detail: 'Could not load products',
                     life: 3000
                 });
                 this.loading = false;
@@ -265,8 +264,8 @@ export class ShopWindget implements OnInit {
         if (!product.isActive) {
             this.message.add({
                 severity: 'warn',
-                summary: 'Producto no disponible',
-                detail: 'Este producto no está disponible actualmente',
+                summary: 'Product unavailable',
+                detail: 'This product is currently unavailable',
                 life: 3000
             });
             return;
@@ -275,8 +274,8 @@ export class ShopWindget implements OnInit {
         this.cart.addToCart(product, 1);
         this.message.add({
             severity: 'success',
-            summary: 'Agregado al carrito',
-            detail: `${product.name} ha sido agregado al carrito`,
+            summary: 'Added to cart',
+            detail: `${product.name} has been added to cart`,
             life: 3000
         });
     }
