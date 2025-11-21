@@ -10,7 +10,10 @@ import { InputTextModule } from 'primeng/inputtext';
 import { SelectModule } from 'primeng/select';
 import { PaginatorModule, PaginatorState } from 'primeng/paginator';
 import { TagModule } from 'primeng/tag';
-import { PRODUCT_TYPE } from '@/core/models/product/product';
+import { SliderModule } from 'primeng/slider';
+import { CheckboxModule } from 'primeng/checkbox';
+import { AccordionModule } from 'primeng/accordion';
+import { DividerModule } from 'primeng/divider';
 
 interface SortOption {
     label: string;
@@ -20,133 +23,169 @@ interface SortOption {
 @Component({
     selector: 'shop-widget',
     standalone: true,
-    imports: [CommonModule, FormsModule, ButtonModule, SkeletonModule, InputTextModule, SelectModule, PaginatorModule, TagModule],
+    imports: [CommonModule, FormsModule, ButtonModule, SkeletonModule, InputTextModule, SelectModule, PaginatorModule, TagModule, SliderModule, CheckboxModule, AccordionModule, DividerModule],
     template: `
-        <div id="shop" class="px-4 py-12 md:px-6 lg:px-8 bg-surface-50 dark:bg-surface-950">
-            <!-- Header Section -->
-            <div class="max-w-7xl mx-auto">
-                <div class="text-center mb-12">
-                    <h2 class="text-4xl font-bold text-surface-900 dark:text-surface-0 mb-3">Our Products</h2>
-                    <p class="text-lg text-surface-600 dark:text-surface-400">Discover our exclusive collection</p>
-                </div>
-
-                <!-- Filters Section -->
-                <div class="bg-white dark:bg-surface-900 rounded-2xl shadow-lg p-6 mb-8">
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <!-- Search by Name -->
-                        <div class="flex flex-col gap-2">
-                            <label class="text-sm font-semibold text-surface-700 dark:text-surface-300"> Search Product </label>
-                            <span class="p-input-icon-left w-full">
-                                <input type="text" pInputText [(ngModel)]="searchTerm" (ngModelChange)="onSearchChange()" placeholder="Product name..." class="w-full" />
-                            </span>
-                        </div>
-
-                        <!-- Filter by Type -->
-                        <div class="flex flex-col gap-2">
-                            <label class="text-sm font-semibold text-surface-700 dark:text-surface-300"> Product Type </label>
-                            <p-select [options]="productTypes" [(ngModel)]="selectedType" (ngModelChange)="onFilterChange()" placeholder="All types" [showClear]="true" styleClass="w-full" />
-                        </div>
-
-                        <!-- Sort Options -->
-                        <div class="flex flex-col gap-2">
-                            <label class="text-sm font-semibold text-surface-700 dark:text-surface-300"> Sort by </label>
-                            <p-select [options]="sortOptions" [(ngModel)]="selectedSort" (ngModelChange)="onFilterChange()" optionLabel="label" placeholder="Select order" styleClass="w-full" />
-                        </div>
-                    </div>
-
-                    <!-- Active Filters Display -->
-                    <div *ngIf="hasActiveFilters()" class="flex flex-wrap gap-2 mt-4 pt-4 border-t border-surface-200 dark:border-surface-700">
-                        <span class="text-sm font-semibold text-surface-600 dark:text-surface-400">Active filters:</span>
-                        <p-tag *ngIf="searchTerm" [value]="'Search: ' + searchTerm" severity="info" (click)="clearSearch()" styleClass="cursor-pointer">
-                            <i class="pi pi-times ml-2"></i>
-                        </p-tag>
-                        <p-tag *ngIf="selectedType" [value]="'Type: ' + selectedType" severity="success" (click)="clearType()" styleClass="cursor-pointer">
-                            <i class="pi pi-times ml-2"></i>
-                        </p-tag>
-                        <button pButton label="Clear all" icon="pi pi-filter-slash" (click)="clearAllFilters()" class="p-button-text p-button-sm"></button>
-                    </div>
-                </div>
-
-                <!-- Loading Skeleton -->
-                <div *ngIf="loading" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <div *ngFor="let i of [1, 2, 3, 4, 5, 6]" class="bg-white dark:bg-surface-900 rounded-2xl shadow-md overflow-hidden">
-                        <p-skeleton width="100%" height="250px"></p-skeleton>
-                        <div class="p-5">
-                            <p-skeleton width="70%" height="1.5rem" styleClass="mb-3"></p-skeleton>
-                            <p-skeleton width="40%" height="2rem" styleClass="mb-3"></p-skeleton>
-                            <p-skeleton width="100%" height="1rem" styleClass="mb-2"></p-skeleton>
-                            <p-skeleton width="100%" height="1rem" styleClass="mb-4"></p-skeleton>
-                            <p-skeleton width="100%" height="3rem"></p-skeleton>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Products Grid -->
-                <div *ngIf="!loading && products.length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <div *ngFor="let product of products" class="group bg-white dark:bg-surface-900 rounded-2xl shadow-md hover:shadow-2xl transition-all duration-300 overflow-hidden flex flex-col">
-                        <!-- Product Image -->
-                        <div class="relative overflow-hidden bg-surface-100 dark:bg-surface-800 aspect-[4/3]">
-                            <img
-                                [src]="product.picture || product.secureUrl"
-                                [alt]="product.name"
-                                class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                                onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22300%22%3E%3Crect fill=%22%23f0f0f0%22 width=%22400%22 height=%22300%22/%3E%3Ctext fill=%22%23999%22 font-family=%22sans-serif%22 font-size=%2224%22 dy=%2210.5%22 font-weight=%22bold%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22%3ENo Image%3C/text%3E%3C/svg%3E'"
+        <div id="shop" class="py-16 bg-surface-50 dark:bg-surface-950">
+            <div class="w-full max-w-[1920px] mx-auto px-4 md:px-8 lg:px-12">
+                <!-- Main Layout -->
+                <div class="flex flex-col lg:flex-row gap-12">
+                    <!-- Sidebar Filters (Left) -->
+                    <div class="w-full lg:w-1/4 xl:w-1/5 flex-shrink-0 space-y-8">
+                        <!-- Search (Mobile/Sidebar) -->
+                        <div class="relative">
+                            <i class="pi pi-search absolute left-3 top-1/2 -translate-y-1/2 text-surface-400"></i>
+                            <input
+                                type="text"
+                                pInputText
+                                [(ngModel)]="searchTerm"
+                                (ngModelChange)="onSearchChange()"
+                                placeholder="Search collection..."
+                                class="w-full pl-10 !rounded-full !bg-white dark:!bg-surface-900 !border-surface-200 dark:!border-surface-700 shadow-sm"
                             />
-                            <div class="absolute top-3 right-3">
-                                <span *ngIf="product.isActive" class="px-3 py-1 bg-green-500 text-white text-xs font-semibold rounded-full shadow-lg"> Available </span>
-                                <span *ngIf="!product.isActive" class="px-3 py-1 bg-red-500 text-white text-xs font-semibold rounded-full shadow-lg"> Unavailable </span>
-                            </div>
                         </div>
 
-                        <!-- Product Details -->
-                        <div class="p-5 flex flex-col flex-1">
-                            <div class="flex justify-between items-start mb-3">
-                                <h3 class="text-xl font-bold text-surface-900 dark:text-surface-0 line-clamp-2 flex-1">
-                                    {{ product.name }}
-                                </h3>
+                        <div class="bg-white dark:bg-surface-900 rounded-3xl p-6 shadow-sm border border-surface-100 dark:border-surface-800">
+                            <h3 class="text-xl font-serif font-medium text-surface-900 dark:text-surface-0 mb-6">Filters</h3>
+
+                            <!-- Price Range (Client Side) -->
+                            <div class="mb-8">
+                                <h4 class="text-sm font-bold text-surface-900 dark:text-surface-0 uppercase tracking-wider mb-4">Price Range</h4>
+                                <p-slider [(ngModel)]="priceRange" [range]="true" [min]="0" [max]="1000" (onChange)="onPriceChange()" styleClass="w-full mb-4"></p-slider>
+                                <div class="flex justify-between text-sm text-surface-600 dark:text-surface-400">
+                                    <span>\${{ priceRange[0] }}</span>
+                                    <span>\${{ priceRange[1] }}</span>
+                                </div>
                             </div>
 
-                            <p class="text-surface-600 dark:text-surface-400 text-sm line-clamp-3 mb-4 flex-1">
-                                {{ product.description }}
-                            </p>
+                            <p-divider styleClass="my-6"></p-divider>
 
-                            <div class="flex items-center justify-between mt-auto pt-4 border-t border-surface-200 dark:border-surface-700">
-                                <div class="flex flex-col">
-                                    <span class="text-xs text-surface-500 dark:text-surface-400">Price</span>
-                                    <span class="text-2xl font-bold text-primary"> \${{ product.basePrice.toFixed(2) }} </span>
+                            <!-- Availability (Mock) -->
+                            <div>
+                                <h4 class="text-sm font-bold text-surface-900 dark:text-surface-0 uppercase tracking-wider mb-4">Availability</h4>
+                                <div class="flex flex-col gap-3">
+                                    <div class="flex items-center gap-2">
+                                        <p-checkbox [binary]="true" inputId="stock-in" [(ngModel)]="inStockOnly" (onChange)="onFilterChange()"></p-checkbox>
+                                        <label for="stock-in" class="text-sm text-surface-700 dark:text-surface-300 cursor-pointer">In Stock</label>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <p-checkbox [binary]="true" inputId="stock-pre" [disabled]="true"></p-checkbox>
+                                        <label for="stock-pre" class="text-sm text-surface-400 dark:text-surface-600 cursor-not-allowed">Pre-order</label>
+                                    </div>
                                 </div>
-                                <button
-                                    pButton
-                                    icon="pi pi-shopping-cart"
-                                    label="Add"
-                                    (click)="addToCart(product)"
-                                    [disabled]="!product.isActive"
-                                    class="p-button-rounded"
-                                    [ngClass]="product.isActive ? 'p-button-primary' : 'p-button-secondary'"
-                                ></button>
                             </div>
                         </div>
                     </div>
-                </div>
 
-                <!-- Empty State -->
-                <div *ngIf="!loading && products.length === 0" class="text-center py-16">
-                    <i class="pi pi-inbox text-6xl text-surface-300 dark:text-surface-600 mb-4"></i>
-                    <h3 class="text-2xl font-bold text-surface-700 dark:text-surface-300 mb-2">No products found</h3>
-                    <p class="text-surface-500 dark:text-surface-400 mb-6">Try adjusting your search filters</p>
-                    <button pButton label="Clear filters" icon="pi pi-filter-slash" (click)="clearAllFilters()" class="p-button-outlined"></button>
-                </div>
+                    <!-- Product Grid (Right) -->
+                    <div class="flex-1">
+                        <!-- Top Bar -->
+                        <div class="flex flex-col sm:flex-row justify-between items-center mb-8 gap-4">
+                            <div>
+                                <h2 class="text-3xl font-serif text-surface-900 dark:text-surface-0">Corporate Collection</h2>
+                                <p class="text-surface-500 dark:text-surface-400 mt-1 text-sm">Refined apparel for your brand.</p>
+                            </div>
 
-                <!-- Pagination -->
-                <div *ngIf="!loading && totalRecords > 0" class="mt-8">
-                    <p-paginator
-                        [rows]="pageSize"
-                        [totalRecords]="totalRecords"
-                        [first]="(currentPage - 1) * pageSize"
-                        (onPageChange)="onPageChange($event)"
-                        [rowsPerPageOptions]="[6, 12, 24, 48]"
-                        styleClass="bg-white dark:bg-surface-900 rounded-xl shadow-md"
-                    ></p-paginator>
+                            <div class="flex items-center gap-3">
+                                <span class="text-sm text-surface-500 hidden sm:block">Sort by:</span>
+                                <p-select
+                                    [options]="sortOptions"
+                                    [(ngModel)]="selectedSort"
+                                    (ngModelChange)="onFilterChange()"
+                                    optionLabel="label"
+                                    placeholder="Featured"
+                                    styleClass="!border-none !bg-transparent !text-surface-900 dark:!text-surface-0 font-medium"
+                                />
+                            </div>
+                        </div>
+
+                        <!-- Active Filters -->
+                        <div *ngIf="hasActiveFilters()" class="flex flex-wrap gap-2 mb-6">
+                            <p-tag *ngIf="searchTerm" [value]="'Search: ' + searchTerm" severity="secondary" [rounded]="true" (click)="clearSearch()" styleClass="cursor-pointer px-3 !bg-surface-200 !text-surface-700">
+                                <i class="pi pi-times ml-2 text-xs"></i>
+                            </p-tag>
+
+                            <p-tag *ngIf="inStockOnly" value="In Stock Only" severity="secondary" [rounded]="true" (click)="inStockOnly = false; onFilterChange()" styleClass="cursor-pointer px-3 !bg-surface-200 !text-surface-700">
+                                <i class="pi pi-times ml-2 text-xs"></i>
+                            </p-tag>
+                            <button class="text-sm text-surface-500 hover:text-surface-900 underline ml-2" (click)="clearAllFilters()">Clear All</button>
+                        </div>
+
+                        <!-- Loading -->
+                        <div *ngIf="loading" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                            <div *ngFor="let i of [1, 2, 3, 4, 5, 6, 7, 8]" class="flex flex-col gap-4">
+                                <p-skeleton width="100%" height="300px" styleClass="rounded-xl"></p-skeleton>
+                                <div class="flex justify-between">
+                                    <p-skeleton width="60%" height="1.5rem"></p-skeleton>
+                                    <p-skeleton width="20%" height="1.5rem"></p-skeleton>
+                                </div>
+                                <p-skeleton width="40%" height="1rem"></p-skeleton>
+                            </div>
+                        </div>
+
+                        <!-- Products -->
+                        <div *ngIf="!loading && filteredProducts.length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                            <div
+                                *ngFor="let product of filteredProducts"
+                                class="group bg-white dark:bg-surface-900 rounded-xl border border-surface-100 dark:border-surface-800 overflow-hidden hover:shadow-lg transition-all duration-300 flex flex-col h-full"
+                            >
+                                <!-- Image -->
+                                <div class="relative bg-surface-100 dark:bg-surface-800 aspect-[3/4] overflow-hidden group">
+                                    <img
+                                        [src]="product.picture || product.secureUrl"
+                                        [alt]="product.name"
+                                        class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+                                        onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MDAiIGhlaWdodD0iNDAwIiB2aWV3Qm94PSIwIDAgNDAwIDQwMCI+PHJlY3Qgd2lkdGg9IjQwMCIgaGVpZ2h0PSI0MDAiIGZpbGw9IiNmMmYyZjIiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjIwIiBmaWxsPSIjOTk5IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+Tm8gSW1hZ2U8L3RleHQ+PC9zdmc+'"
+                                    />
+
+                                    <div class="absolute top-3 left-3" *ngIf="!product.isActive">
+                                        <span class="px-3 py-1 bg-white/90 dark:bg-black/90 backdrop-blur-md text-surface-900 dark:text-surface-0 text-xs font-medium rounded-full"> Sold Out </span>
+                                    </div>
+
+                                    <!-- Price Badge on Image -->
+                                    <div class="absolute bottom-3 right-3">
+                                        <span class="px-4 py-2 bg-white/90 dark:bg-surface-900/90 backdrop-blur-md text-surface-900 dark:text-surface-0 font-bold text-lg rounded-xl shadow-lg border border-surface-100 dark:border-surface-700">
+                                            \${{ product.basePrice.toFixed(2) }}
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <!-- Content -->
+                                <div class="p-5 flex flex-col flex-1">
+                                    <div class="mb-4">
+                                        <h3 class="text-lg font-serif font-medium text-surface-900 dark:text-surface-0 line-clamp-1 mb-2" [title]="product.name">
+                                            {{ product.name }}
+                                        </h3>
+                                        <p class="text-sm text-surface-500 dark:text-surface-400 line-clamp-2 leading-relaxed">
+                                            {{ product.description || 'Experience premium quality and style with this exclusive item from our corporate collection.' }}
+                                        </p>
+                                    </div>
+
+                                    <div class="mt-auto">
+                                        <button
+                                            pButton
+                                            pRipple
+                                            label="Add to Cart"
+                                            icon="pi pi-shopping-bag"
+                                            class="w-full p-button-primary p-button-lg rounded-xl font-medium"
+                                            (click)="addToCart(product); $event.stopPropagation()"
+                                            [disabled]="!product.isActive"
+                                        ></button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Empty State -->
+                        <div *ngIf="!loading && filteredProducts.length === 0" class="py-20 text-center">
+                            <p class="text-xl text-surface-400 font-serif italic">No products match your refinement.</p>
+                            <button class="mt-4 text-primary-600 hover:underline" (click)="clearAllFilters()">Clear Filters</button>
+                        </div>
+
+                        <!-- Pagination -->
+                        <div *ngIf="!loading && totalRecords > 0" class="mt-16 flex justify-center">
+                            <p-paginator [rows]="pageSize" [totalRecords]="totalRecords" [first]="(currentPage - 1) * pageSize" (onPageChange)="onPageChange($event)" styleClass="!bg-transparent !border-none"></p-paginator>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -159,26 +198,24 @@ export class ShopWindget implements OnInit {
     productService = inject(ProductService);
 
     products: Product[] = [];
+    filteredProducts: Product[] = []; // For client-side filtering
     loading: boolean = true;
 
     // Pagination
     currentPage: number = 1;
-    pageSize: number = 6;
+    pageSize: number = 12; // Increased for grid alignment
     totalRecords: number = 0;
 
     // Filters
     searchTerm: string = '';
-    selectedType: string | null = null;
     selectedSort: SortOption | null = null;
+
+    // Client-side Filters
+    priceRange: number[] = [0, 1000];
+    inStockOnly: boolean = false;
 
     // Debounce timer for search
     private searchDebounce: any;
-
-    // Options
-    productTypes = [
-        { label: 'Simple', value: PRODUCT_TYPE.SIMPLE },
-        { label: 'Variant', value: PRODUCT_TYPE.VARIANT }
-    ];
 
     sortOptions: SortOption[] = [
         { label: 'Name (A-Z)', value: ['name', 'ASC'] },
@@ -202,17 +239,10 @@ export class ShopWindget implements OnInit {
             isActive: true // Only show active products on landing page
         };
 
-        // Apply search filter
         if (this.searchTerm && this.searchTerm.trim()) {
             filters.nameLike = this.searchTerm.trim();
         }
 
-        // Apply type filter
-        if (this.selectedType) {
-            filters.type = this.selectedType;
-        }
-
-        // Apply sorting
         if (this.selectedSort) {
             filters.sort = this.selectedSort.value;
         }
@@ -221,6 +251,7 @@ export class ShopWindget implements OnInit {
             next: (response) => {
                 this.products = response.data;
                 this.totalRecords = response.total;
+                this.applyClientSideFilters();
                 this.loading = false;
             },
             error: (error) => {
@@ -236,27 +267,48 @@ export class ShopWindget implements OnInit {
         });
     }
 
+    // Client-side filtering logic
+    applyClientSideFilters() {
+        this.filteredProducts = this.products.filter((product) => {
+            // Price Range
+            const price = product.basePrice;
+            if (price < this.priceRange[0] || price > this.priceRange[1]) {
+                return false;
+            }
+
+            // In Stock (Mock logic - assuming isActive is stock for now, or just filtering active)
+            if (this.inStockOnly && !product.isActive) {
+                return false;
+            }
+
+            return true;
+        });
+    }
+
     onSearchChange() {
-        // Debounce search to avoid too many API calls
         if (this.searchDebounce) {
             clearTimeout(this.searchDebounce);
         }
         this.searchDebounce = setTimeout(() => {
-            this.currentPage = 1; // Reset to first page on search
+            this.currentPage = 1;
             this.loadProducts();
         }, 500);
     }
 
     onFilterChange() {
-        this.currentPage = 1; // Reset to first page on filter change
+        this.currentPage = 1;
         this.loadProducts();
+    }
+
+    onPriceChange() {
+        // Just re-apply client filters, don't reload from server
+        this.applyClientSideFilters();
     }
 
     onPageChange(event: PaginatorState) {
         this.currentPage = event.first! / event.rows! + 1;
         this.pageSize = event.rows!;
         this.loadProducts();
-        // Scroll to top of products section
         document.getElementById('shop')?.scrollIntoView({ behavior: 'smooth' });
     }
 
@@ -281,7 +333,7 @@ export class ShopWindget implements OnInit {
     }
 
     hasActiveFilters(): boolean {
-        return !!(this.searchTerm || this.selectedType);
+        return !!(this.searchTerm || this.inStockOnly);
     }
 
     clearSearch() {
@@ -289,15 +341,11 @@ export class ShopWindget implements OnInit {
         this.onFilterChange();
     }
 
-    clearType() {
-        this.selectedType = null;
-        this.onFilterChange();
-    }
-
     clearAllFilters() {
         this.searchTerm = '';
-        this.selectedType = null;
         this.selectedSort = null;
+        this.priceRange = [0, 1000];
+        this.inStockOnly = false;
         this.onFilterChange();
     }
 }
