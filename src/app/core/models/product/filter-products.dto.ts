@@ -29,5 +29,7 @@ export interface PaginationMeta {
 
 export interface FilterProductsResponse {
     data: any[]; // Will be Product[] but using any for flexibility
-    meta: PaginationMeta;
+    total: number;
+    currentPage: number;
+    totalPages: number;
 }

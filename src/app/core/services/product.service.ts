@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 import { Product } from '@/core/models/product/product';
 import { CreateProductDto } from '@/core/models/product/create-product.dto';
 import { FilterProductsDto, FilterProductsResponse } from '@/core/models/product/filter-products.dto';
-import { CREATE_PRODUCT_ENDPOINT, UPDATE_PRODUCT_ENDPOINT, FILTER_PRODUCTS_ENDPOINT } from '@/core/constants/endpoints/product/product';
+import { CREATE_PRODUCT_ENDPOINT, UPDATE_PRODUCT_ENDPOINT, FILTER_PRODUCTS_ENDPOINT, PUBLIC_FILTER_PRODUCTS_ENDPOINT } from '@/core/constants/endpoints/product/product';
 
 // Re-export Product for convenience
 export type { Product } from '@/core/models/product/product';
@@ -61,12 +61,11 @@ export class ProductService {
     }
 
     /**
-     * Filter products with pagination
-     * @param filters - Filter criteria (can be sent as query params or body)
-     * @returns Observable of filtered products with pagination metadata
+     * Build HTTP params from filter DTO
+     * @param filters - Filter criteria
+     * @returns HttpParams object
      */
-    filterProducts(filters: FilterProductsDto = {}): Observable<FilterProductsResponse> {
-        // Build query params (these take priority over body params according to API docs)
+    private buildFilterParams(filters: FilterProductsDto): HttpParams {
         let params = new HttpParams();
         if (filters.page !== undefined) {
             params = params.set('page', filters.page.toString());
@@ -107,8 +106,27 @@ export class ProductService {
                 params = params.append('sort', sortValue);
             });
         }
-        // Send POST request with query params and body
+        return params;
+    }
+
+    /**
+     * Filter products with pagination (authenticated endpoint)
+     * @param filters - Filter criteria (can be sent as query params or body)
+     * @returns Observable of filtered products with pagination metadata
+     */
+    filterProducts(filters: FilterProductsDto = {}): Observable<FilterProductsResponse> {
+        const params = this.buildFilterParams(filters);
         return this.http.post<FilterProductsResponse>(FILTER_PRODUCTS_ENDPOINT, filters, { params });
+    }
+
+    /**
+     * Filter public products with pagination (public/landing endpoint - no auth required)
+     * @param filters - Filter criteria (can be sent as query params or body)
+     * @returns Observable of filtered products with pagination metadata
+     */
+    filterPublicProducts(filters: FilterProductsDto = {}): Observable<FilterProductsResponse> {
+        const params = this.buildFilterParams(filters);
+        return this.http.post<FilterProductsResponse>(PUBLIC_FILTER_PRODUCTS_ENDPOINT, filters, { params });
     }
 
     // Demo data methods below - kept for backward compatibility
