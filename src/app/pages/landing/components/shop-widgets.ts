@@ -90,7 +90,7 @@ export class ShopWindget implements OnInit {
     }
 
     addToCart(product: Product) {
-        this.cart.addToCart(product);
+        this.cart.addToCart(product, 1);
         this.message.add({
             severity: 'success',
             summary: 'Success',

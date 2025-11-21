@@ -36,8 +36,8 @@ import { AuthService } from '@/core/services/auth.service';
                 </li>
             </ul>
             <div class="flex border-t lg:border-t-0 border-surface py-4 lg:py-0 mt-4 lg:mt-0 gap-2">
-                <p-overlaybadge [value]="cart.products().length">
-                    <button type="button" class="topbar-widget-cart">
+                <p-overlaybadge [value]="cart.totalItems()">
+                    <button type="button" class="topbar-widget-cart" routerLink="/cart">
                         <i class="pi pi-shopping-cart"></i>
                     </button>
                 </p-overlaybadge>

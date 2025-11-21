@@ -1,14 +1,14 @@
 export enum PRIVATE_ROUTES {
-  ADMIN = 'admin',
+    ADMIN = 'admin'
 }
 
 export enum ADMIN_ROUTES {
-  ADMIN_USERS = 'user',
-  ADMIN_AGENCIES = 'agency',
-  ADMIN_PRODUCTS = 'product',
-  ADMIN_DASHBOARD = 'dashboard',
-  ADMIN_ORDERS = 'orders',
-  ADMIN_CONFIG = 'config'
+    ADMIN_USERS = 'user',
+    ADMIN_AGENCIES = 'agency',
+    ADMIN_PRODUCTS = 'product',
+    ADMIN_DASHBOARD = 'dashboard',
+    ADMIN_ORDERS = 'orders',
+    ADMIN_CONFIG = 'config'
 }
 
 export enum PUBLIC_ROUTES {
@@ -17,18 +17,18 @@ export enum PUBLIC_ROUTES {
     NOTFOUND = 'notfound',
     LOGIN = 'auth/login',
     EXAMPLES = 'examples',
-    AUTH= 'auth',
+    AUTH = 'auth',
+    CART = 'cart'
 }
 
 export enum PUBLIC_BASE_ROUTES {
-     BASE = '/',
+    BASE = '/',
     HOME = '/home',
     NOTFOUND = '/notfound',
     LOGIN = '/auth/login',
     EXAMPLES = '/examples',
-    AUTH= '/auth',
+    AUTH = '/auth'
 }
-
 
 export enum AUTH_ROUTES {
     LOGIN = 'login',

@@ -22,6 +22,10 @@ export const appRoutes: Routes = [
     // { path: 'documentation', component: Documentation },
     { path: PUBLIC_ROUTES.EXAMPLES, loadChildren: () => import('./app/pages/uikit/uikit.routes') },
     { path: PUBLIC_ROUTES.AUTH, loadChildren: () => import('./app/pages/auth/auth.routes') },
+    {
+        path: PUBLIC_ROUTES.CART,
+        loadComponent: () => import('./app/pages/cart/cart').then((m) => m.Cart)
+    },
     { path: PUBLIC_ROUTES.NOTFOUND, component: Notfound },
     { path: '**', redirectTo: PUBLIC_ROUTES.NOTFOUND }
 ];
