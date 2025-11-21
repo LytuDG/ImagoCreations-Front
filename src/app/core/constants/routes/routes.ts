@@ -18,7 +18,8 @@ export enum PUBLIC_ROUTES {
     LOGIN = 'auth/login',
     EXAMPLES = 'examples',
     AUTH = 'auth',
-    CART = 'cart'
+    CART = 'cart',
+    QUOTE_INFO = 'quote-info'
 }
 
 export enum PUBLIC_BASE_ROUTES {

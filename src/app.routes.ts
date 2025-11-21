@@ -26,6 +26,10 @@ export const appRoutes: Routes = [
         path: PUBLIC_ROUTES.CART,
         loadComponent: () => import('./app/pages/cart/cart').then((m) => m.Cart)
     },
+    {
+        path: PUBLIC_ROUTES.QUOTE_INFO,
+        loadComponent: () => import('./app/pages/quote-customer-info/quote-customer-info').then((m) => m.QuoteCustomerInfo)
+    },
     { path: PUBLIC_ROUTES.NOTFOUND, component: Notfound },
     { path: '**', redirectTo: PUBLIC_ROUTES.NOTFOUND }
 ];

@@ -57,4 +57,19 @@ export class CartService {
     public setQuoteFile(file: File | null) {
         this.quoteFile.set(file);
     }
+
+    public customerInfo = signal<CustomerInfo | null>(null);
+
+    public setCustomerInfo(info: CustomerInfo) {
+        this.customerInfo.set(info);
+    }
+}
+
+export interface CustomerInfo {
+    companyName: string;
+    contactPerson: string;
+    email: string;
+    phone: string;
+    address?: string;
+    notes?: string;
 }
