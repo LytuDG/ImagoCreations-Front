@@ -33,7 +33,6 @@ interface SortOption {
                     <div class="w-full lg:w-1/4 xl:w-1/5 flex-shrink-0 space-y-8">
                         <!-- Search (Mobile/Sidebar) -->
                         <div class="relative">
-                            <i class="pi pi-search absolute left-3 top-1/2 -translate-y-1/2 text-surface-400"></i>
                             <input
                                 type="text"
                                 pInputText
@@ -107,66 +106,83 @@ interface SortOption {
                             <p-tag *ngIf="inStockOnly" value="In Stock Only" severity="secondary" [rounded]="true" (click)="inStockOnly = false; onFilterChange()" styleClass="cursor-pointer px-3 !bg-surface-200 !text-surface-700">
                                 <i class="pi pi-times ml-2 text-xs"></i>
                             </p-tag>
-                            <button class="text-sm text-surface-500 hover:text-surface-900 underline ml-2" (click)="clearAllFilters()">Clear All</button>
                         </div>
 
                         <!-- Loading -->
-                        <div *ngIf="loading" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                            <div *ngFor="let i of [1, 2, 3, 4, 5, 6, 7, 8]" class="flex flex-col gap-4">
-                                <p-skeleton width="100%" height="300px" styleClass="rounded-xl"></p-skeleton>
-                                <div class="flex justify-between">
-                                    <p-skeleton width="60%" height="1.5rem"></p-skeleton>
-                                    <p-skeleton width="20%" height="1.5rem"></p-skeleton>
+                        <div *ngIf="loading" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-8 gap-y-16">
+                            <div *ngFor="let i of [1, 2, 3, 4, 5, 6, 7, 8]" class="flex flex-col h-full">
+                                <!-- Image Skeleton Container -->
+                                <div class="relative aspect-[3/4] rounded-xl overflow-hidden mb-6">
+                                    <p-skeleton width="100%" height="100%"></p-skeleton>
                                 </div>
-                                <p-skeleton width="40%" height="1rem"></p-skeleton>
+
+                                <!-- Content Skeleton -->
+                                <div class="flex flex-col flex-1 px-1">
+                                    <!-- Header -->
+                                    <div class="flex justify-between items-start gap-4 mb-2">
+                                        <p-skeleton width="60%" height="1.75rem"></p-skeleton>
+                                        <p-skeleton width="25%" height="1.75rem"></p-skeleton>
+                                    </div>
+
+                                    <!-- Description -->
+                                    <p-skeleton width="80%" height="1rem" styleClass="mb-8"></p-skeleton>
+
+                                    <!-- Button -->
+                                    <div class="mt-auto">
+                                        <p-skeleton width="100%" height="3.75rem" styleClass="rounded-xl"></p-skeleton>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
                         <!-- Products -->
-                        <div *ngIf="!loading && filteredProducts.length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                            <div
-                                *ngFor="let product of filteredProducts"
-                                class="group bg-white dark:bg-surface-900 rounded-xl border border-surface-100 dark:border-surface-800 overflow-hidden hover:shadow-lg transition-all duration-300 flex flex-col h-full"
-                            >
-                                <!-- Image -->
-                                <div class="relative bg-surface-100 dark:bg-surface-800 aspect-[3/4] overflow-hidden group">
+                        <div *ngIf="!loading && filteredProducts.length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-8 gap-y-16">
+                            <div *ngFor="let product of filteredProducts" class="group flex flex-col h-full">
+                                <!-- Image Container -->
+                                <div class="relative aspect-[3/4] rounded-xl overflow-hidden bg-surface-100 dark:bg-surface-800 cursor-pointer mb-6 transition-all duration-500 hover:shadow-2xl">
                                     <img
                                         [src]="product.picture || product.secureUrl"
                                         [alt]="product.name"
-                                        class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+                                        class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                                         onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MDAiIGhlaWdodD0iNDAwIiB2aWV3Qm94PSIwIDAgNDAwIDQwMCI+PHJlY3Qgd2lkdGg9IjQwMCIgaGVpZ2h0PSI0MDAiIGZpbGw9IiNmMmYyZjIiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjIwIiBmaWxsPSIjOTk5IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+Tm8gSW1hZ2U8L3RleHQ+PC9zdmc+'"
                                     />
 
-                                    <div class="absolute top-3 left-3" *ngIf="!product.isActive">
-                                        <span class="px-3 py-1 bg-white/90 dark:bg-black/90 backdrop-blur-md text-surface-900 dark:text-surface-0 text-xs font-medium rounded-full"> Sold Out </span>
+                                    <!-- Sold Out Badge -->
+                                    <div class="absolute top-4 left-4" *ngIf="!product.isActive">
+                                        <span class="px-4 py-2 bg-black/60 backdrop-blur-md text-white text-xs font-bold tracking-wider uppercase rounded-full border border-white/10"> Sold Out </span>
                                     </div>
 
-                                    <!-- Price Badge on Image -->
-                                    <div class="absolute bottom-3 right-3">
-                                        <span class="px-4 py-2 bg-white/90 dark:bg-surface-900/90 backdrop-blur-md text-surface-900 dark:text-surface-0 font-bold text-lg rounded-xl shadow-lg border border-surface-100 dark:border-surface-700">
-                                            \${{ product.basePrice.toFixed(2) }}
-                                        </span>
+                                    <!-- Decorative Arrow (New Detail) -->
+                                    <div class="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-all duration-500 translate-y-4 group-hover:translate-y-0">
+                                        <div class="w-12 h-12 rounded-full bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center text-white shadow-xl hover:bg-white hover:text-surface-900 transition-colors">
+                                            <i class="pi pi-arrow-up-right text-lg"></i>
+                                        </div>
                                     </div>
                                 </div>
 
                                 <!-- Content -->
-                                <div class="p-5 flex flex-col flex-1">
-                                    <div class="mb-4">
-                                        <h3 class="text-lg font-serif font-medium text-surface-900 dark:text-surface-0 line-clamp-1 mb-2" [title]="product.name">
+                                <div class="flex flex-col flex-1 px-1">
+                                    <!-- Header -->
+                                    <div class="flex justify-between items-start gap-4 mb-2">
+                                        <h3 class="font-serif text-xl font-medium text-surface-900 dark:text-surface-0 leading-tight cursor-pointer group-hover:text-primary-600 transition-colors" [title]="product.name">
                                             {{ product.name }}
                                         </h3>
-                                        <p class="text-sm text-surface-500 dark:text-surface-400 line-clamp-2 leading-relaxed">
-                                            {{ product.description || 'Experience premium quality and style with this exclusive item from our corporate collection.' }}
-                                        </p>
+                                        <span class="font-serif text-xl text-surface-900 dark:text-surface-0 whitespace-nowrap"> \${{ product.basePrice.toFixed(2) }} </span>
                                     </div>
 
+                                    <!-- Description -->
+                                    <p class="text-sm text-surface-500 dark:text-surface-400 line-clamp-1 mb-8 font-light tracking-wide">
+                                        {{ product.description || 'Premium quality corporate item' }}
+                                    </p>
+
+                                    <!-- Action Button -->
                                     <div class="mt-auto">
                                         <button
                                             pButton
                                             pRipple
                                             label="Add to Cart"
                                             icon="pi pi-shopping-bag"
-                                            class="w-full p-button-primary p-button-lg rounded-xl font-medium"
+                                            class="w-full p-button-outlined p-button-lg !rounded-xl font-medium !border-surface-200 dark:!border-surface-700 !text-surface-900 dark:!text-surface-0 hover:!bg-primary-600 hover:!border-primary-600 hover:!text-white transition-all duration-300 py-4"
                                             (click)="addToCart(product); $event.stopPropagation()"
                                             [disabled]="!product.isActive"
                                         ></button>
