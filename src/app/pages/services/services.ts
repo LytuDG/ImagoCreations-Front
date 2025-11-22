@@ -52,65 +52,113 @@ import { inject, OnInit } from '@angular/core';
                     </div>
                 </div>
 
-                <div class="services-section py-20 px-6 lg:px-20 bg-surface-50 dark:bg-surface-800">
-                    <div class="text-center mb-16">
-                        <h2 class="text-4xl font-bold text-surface-900 dark:text-surface-0 mb-4">Our Premium Services</h2>
-                        <p class="text-xl text-surface-600 dark:text-surface-200">Tailored solutions for individuals and businesses.</p>
+                <div class="services-section py-24 px-6 lg:px-20 bg-surface-50 dark:bg-surface-900 relative overflow-hidden">
+                    <!-- Decorative Background Elements -->
+                    <div class="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
+                        <div class="absolute top-[10%] left-[-5%] w-96 h-96 bg-primary-100/40 dark:bg-primary-900/10 rounded-full blur-3xl"></div>
+                        <div class="absolute bottom-[10%] right-[-5%] w-96 h-96 bg-blue-100/40 dark:bg-blue-900/10 rounded-full blur-3xl"></div>
                     </div>
 
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center mb-20">
-                        <div class="order-2 lg:order-1">
-                            <h3 class="text-3xl font-bold text-surface-900 dark:text-surface-0 mb-4">Personalization Services</h3>
-                            <p class="text-lg text-surface-600 dark:text-surface-200 mb-6 leading-relaxed">
-                                Make it truly yours. We offer high-quality personalization for a wide range of products. From custom apparel to unique gifts, we ensure every detail reflects your style. Perfect for corporate gifts, events, or personal
-                                use.
+                    <div class="text-center mb-20 relative z-10">
+                        <h2 class="text-4xl lg:text-5xl font-bold text-surface-900 dark:text-surface-0 mb-6">Our Premium Services</h2>
+                        <p class="text-xl text-surface-600 dark:text-surface-300 max-w-2xl mx-auto">Tailored solutions designed to elevate your personal style and corporate identity.</p>
+                    </div>
+
+                    <!-- Service 1: Personalization -->
+                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-16 items-center mb-32 relative z-10">
+                        <div class="lg:col-span-7 order-2 lg:order-1">
+                            <div class="flex items-center gap-3 mb-4">
+                                <div class="w-10 h-10 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center text-green-600 dark:text-green-400">
+                                    <i class="pi pi-star-fill"></i>
+                                </div>
+                                <span class="font-bold text-green-600 dark:text-green-400 tracking-wider text-sm uppercase">Custom Made</span>
+                            </div>
+                            <h3 class="text-3xl lg:text-4xl font-bold text-surface-900 dark:text-surface-0 mb-6">Personalization Services</h3>
+                            <p class="text-lg text-surface-600 dark:text-surface-300 mb-8 leading-relaxed">
+                                Make it truly yours. We offer high-quality personalization for a wide range of products. From custom apparel to unique gifts, we ensure every detail reflects your style.
                             </p>
-                            <ul class="list-none p-0 m-0 text-surface-600 dark:text-surface-200 mb-8">
-                                <li class="flex items-center mb-3">
-                                    <i class="pi pi-check-circle text-green-500 mr-3 text-xl"></i>
-                                    <span class="text-lg">Custom Apparel & Accessories</span>
-                                </li>
-                                <li class="flex items-center mb-3">
-                                    <i class="pi pi-check-circle text-green-500 mr-3 text-xl"></i>
-                                    <span class="text-lg">Personalized Gifts & Mugs</span>
-                                </li>
-                                <li class="flex items-center">
-                                    <i class="pi pi-check-circle text-green-500 mr-3 text-xl"></i>
-                                    <span class="text-lg">High-Quality Printing</span>
-                                </li>
-                            </ul>
-                            <button pButton pRipple label="Explore Personalization" class="p-button-outlined p-button-rounded"></button>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+                                <div class="flex items-center gap-3 p-4 rounded-xl bg-white dark:bg-surface-800 shadow-sm border border-surface-100 dark:border-surface-700">
+                                    <i class="pi pi-check-circle text-green-500 text-xl"></i>
+                                    <span class="font-medium text-surface-700 dark:text-surface-200">Custom Apparel</span>
+                                </div>
+                                <div class="flex items-center gap-3 p-4 rounded-xl bg-white dark:bg-surface-800 shadow-sm border border-surface-100 dark:border-surface-700">
+                                    <i class="pi pi-check-circle text-green-500 text-xl"></i>
+                                    <span class="font-medium text-surface-700 dark:text-surface-200">Personalized Gifts</span>
+                                </div>
+                                <div class="flex items-center gap-3 p-4 rounded-xl bg-white dark:bg-surface-800 shadow-sm border border-surface-100 dark:border-surface-700">
+                                    <i class="pi pi-check-circle text-green-500 text-xl"></i>
+                                    <span class="font-medium text-surface-700 dark:text-surface-200">High-Quality Printing</span>
+                                </div>
+                                <div class="flex items-center gap-3 p-4 rounded-xl bg-white dark:bg-surface-800 shadow-sm border border-surface-100 dark:border-surface-700">
+                                    <i class="pi pi-check-circle text-green-500 text-xl"></i>
+                                    <span class="font-medium text-surface-700 dark:text-surface-200">Bulk Orders</span>
+                                </div>
+                            </div>
+
+                            <button pButton pRipple label="Explore Personalization" icon="pi pi-arrow-right" iconPos="right" class="p-button-rounded p-button-outlined px-6 py-3"></button>
                         </div>
-                        <div class="order-1 lg:order-2 flex justify-center">
-                            <img src="img/services/personalization.png" alt="Personalization Service" class="w-full max-w-sm mx-auto rounded-3xl shadow-xl hover:scale-105 transition-transform duration-500 block" />
+
+                        <div class="lg:col-span-5 order-1 lg:order-2 flex justify-center relative">
+                            <!-- Decorative Blob behind image -->
+                            <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-green-100/50 dark:bg-green-900/20 rounded-full blur-2xl -z-10"></div>
+                            <div class="relative">
+                                <img src="img/services/personalization.png" alt="Personalization Service" class="w-72 h-auto rounded-2xl shadow-2xl rotate-3 hover:rotate-0 transition-all duration-500 border-4 border-white dark:border-surface-700" />
+                                <!-- Floating Badge -->
+                                <div class="absolute -bottom-6 -right-6 bg-white dark:bg-surface-800 p-4 rounded-xl shadow-lg animate-bounce-slow">
+                                    <i class="pi pi-heart-fill text-red-500 text-2xl"></i>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-                        <div class="flex justify-center">
-                            <img src="img/services/brand-design.png" alt="Brand Design Service" class="w-full max-w-sm mx-auto rounded-3xl shadow-xl hover:scale-105 transition-transform duration-500 block" />
+                    <!-- Service 2: Brand Design -->
+                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-16 items-center relative z-10">
+                        <div class="lg:col-span-5 flex justify-center relative">
+                            <!-- Decorative Blob behind image -->
+                            <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-blue-100/50 dark:bg-blue-900/20 rounded-full blur-2xl -z-10"></div>
+                            <div class="relative">
+                                <img src="img/services/brand-design.png" alt="Brand Design Service" class="w-72 h-auto rounded-2xl shadow-2xl -rotate-3 hover:rotate-0 transition-all duration-500 border-4 border-white dark:border-surface-700" />
+                                <!-- Floating Badge -->
+                                <div class="absolute -top-6 -left-6 bg-white dark:bg-surface-800 p-4 rounded-xl shadow-lg animate-bounce-slow" style="animation-delay: 1s;">
+                                    <i class="pi pi-palette text-blue-500 text-2xl"></i>
+                                </div>
+                            </div>
                         </div>
-                        <div>
-                            <h3 class="text-3xl font-bold text-surface-900 dark:text-surface-0 mb-4">Brand Design for Businesses</h3>
-                            <p class="text-lg text-surface-600 dark:text-surface-200 mb-6 leading-relaxed">
-                                Your brand is your story. We help you tell it with impact. Our professional design team creates cohesive brand identities that resonate with your audience. From logos to complete brand guidelines, we build the visual
-                                foundation of your success.
+
+                        <div class="lg:col-span-7">
+                            <div class="flex items-center gap-3 mb-4">
+                                <div class="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400">
+                                    <i class="pi pi-briefcase"></i>
+                                </div>
+                                <span class="font-bold text-blue-600 dark:text-blue-400 tracking-wider text-sm uppercase">For Business</span>
+                            </div>
+                            <h3 class="text-3xl lg:text-4xl font-bold text-surface-900 dark:text-surface-0 mb-6">Brand Design for Businesses</h3>
+                            <p class="text-lg text-surface-600 dark:text-surface-300 mb-8 leading-relaxed">
+                                Your brand is your story. Our professional design team creates cohesive brand identities that resonate with your audience and build the visual foundation of your success.
                             </p>
-                            <ul class="list-none p-0 m-0 text-surface-600 dark:text-surface-200 mb-8">
-                                <li class="flex items-center mb-3">
-                                    <i class="pi pi-check-circle text-blue-500 mr-3 text-xl"></i>
-                                    <span class="text-lg">Logo Design & Identity</span>
-                                </li>
-                                <li class="flex items-center mb-3">
-                                    <i class="pi pi-check-circle text-blue-500 mr-3 text-xl"></i>
-                                    <span class="text-lg">Brand Guidelines & Strategy</span>
-                                </li>
-                                <li class="flex items-center">
-                                    <i class="pi pi-check-circle text-blue-500 mr-3 text-xl"></i>
-                                    <span class="text-lg">Marketing Collateral</span>
-                                </li>
-                            </ul>
-                            <button pButton pRipple label="Start Your Brand Journey" class="p-button-outlined p-button-rounded"></button>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+                                <div class="flex items-center gap-3 p-4 rounded-xl bg-white dark:bg-surface-800 shadow-sm border border-surface-100 dark:border-surface-700">
+                                    <i class="pi pi-check-circle text-blue-500 text-xl"></i>
+                                    <span class="font-medium text-surface-700 dark:text-surface-200">Logo Design</span>
+                                </div>
+                                <div class="flex items-center gap-3 p-4 rounded-xl bg-white dark:bg-surface-800 shadow-sm border border-surface-100 dark:border-surface-700">
+                                    <i class="pi pi-check-circle text-blue-500 text-xl"></i>
+                                    <span class="font-medium text-surface-700 dark:text-surface-200">Brand Guidelines</span>
+                                </div>
+                                <div class="flex items-center gap-3 p-4 rounded-xl bg-white dark:bg-surface-800 shadow-sm border border-surface-100 dark:border-surface-700">
+                                    <i class="pi pi-check-circle text-blue-500 text-xl"></i>
+                                    <span class="font-medium text-surface-700 dark:text-surface-200">Marketing Collateral</span>
+                                </div>
+                                <div class="flex items-center gap-3 p-4 rounded-xl bg-white dark:bg-surface-800 shadow-sm border border-surface-100 dark:border-surface-700">
+                                    <i class="pi pi-check-circle text-blue-500 text-xl"></i>
+                                    <span class="font-medium text-surface-700 dark:text-surface-200">Social Media Kits</span>
+                                </div>
+                            </div>
+
+                            <button pButton pRipple label="Start Your Brand Journey" icon="pi pi-arrow-right" iconPos="right" class="p-button-rounded p-button-outlined px-6 py-3"></button>
                         </div>
                     </div>
                 </div>
