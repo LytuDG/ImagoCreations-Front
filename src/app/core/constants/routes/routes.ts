@@ -19,7 +19,8 @@ export enum PUBLIC_ROUTES {
     EXAMPLES = 'examples',
     AUTH = 'auth',
     CART = 'cart',
-    QUOTE_INFO = 'quote-info'
+    QUOTE_INFO = 'quote-info',
+    SERVICES = 'services'
 }
 
 export enum PUBLIC_BASE_ROUTES {

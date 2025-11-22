@@ -43,22 +43,13 @@ import { AgencyFormComponent } from './agency-form.dialog';
         <p-toolbar class="mb-6">
             <ng-template #start>
                 <p-button label="Nueva Agencia" icon="pi pi-plus" severity="secondary" class="mr-2" (onClick)="openNew()" />
-                <p-button
-                    label="Editar Agencia"
-                    icon="pi pi-pencil"
-                    severity="secondary"
-                    class="mr-2"
-                    (onClick)="editAgency()"
-                    [disabled]="!selectedAgency"
-                />
-                <p-button severity="secondary" label="Eliminar" icon="pi pi-trash" outlined
-                    (onClick)="deleteAgency()" [disabled]="!selectedAgency" />
+                <p-button label="Editar Agencia" icon="pi pi-pencil" severity="secondary" class="mr-2" (onClick)="editAgency()" [disabled]="!selectedAgency" />
+                <p-button severity="secondary" label="Eliminar" icon="pi pi-trash" outlined (onClick)="deleteAgency()" [disabled]="!selectedAgency" />
             </ng-template>
 
             <ng-template #end>
                 <p-button label="Exportar" icon="pi pi-upload" severity="secondary" (onClick)="exportCSV()" />
-                <p-button label="Recargar" icon="pi pi-refresh" severity="secondary" class="ml-1"
-                    (onClick)="loadAgencies()" [loading]="loading()" />
+                <p-button label="Recargar" icon="pi pi-refresh" severity="secondary" class="ml-1" (onClick)="loadAgencies()" [loading]="loading()" />
             </ng-template>
         </p-toolbar>
 
@@ -108,7 +99,7 @@ import { AgencyFormComponent } from './agency-form.dialog';
             </ng-template>
 
             <ng-template #body let-agency>
-                <tr [class.bg-primary-50]="selectedAgency?.id === agency.id">
+                <tr [ngClass]="{ 'bg-primary-50': selectedAgency?.id === agency.id }">
                     <td style="width: 3rem">
                         <p-radioButton [value]="agency" [(ngModel)]="selectedAgency" />
                     </td>
@@ -130,9 +121,7 @@ import { AgencyFormComponent } from './agency-form.dialog';
                     <td colspan="5" class="text-center py-6">
                         <div class="flex flex-column align-items-center gap-3">
                             <i class="pi pi-building text-6xl text-color-secondary"></i>
-                            <span class="text-xl text-color-secondary font-medium">
-                                No se encontraron agencias
-                            </span>
+                            <span class="text-xl text-color-secondary font-medium"> No se encontraron agencias </span>
                             <p-button label="Recargar" icon="pi pi-refresh" (onClick)="loadAgencies()" />
                         </div>
                     </td>
@@ -141,15 +130,7 @@ import { AgencyFormComponent } from './agency-form.dialog';
         </p-table>
 
         <!-- Usar el componente del formulario -->
-        <app-agency-form
-            [visible]="agencyDialog"
-            [isEditMode]="isEditMode"
-            [agency]="selectedAgencyForEdit"
-            (save)="saveAgency($event)"
-            (cancel)="hideDialog()"
-            (hide)="hideDialog()"
-            [saving]="saving()"
-        ></app-agency-form>
+        <app-agency-form [visible]="agencyDialog" [isEditMode]="isEditMode" [agency]="selectedAgencyForEdit" (save)="saveAgency($event)" (cancel)="hideDialog()" (hide)="hideDialog()" [saving]="saving()"></app-agency-form>
 
         <p-confirmdialog [style]="{ width: '450px' }" />
     `,
