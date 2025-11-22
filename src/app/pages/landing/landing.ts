@@ -11,6 +11,9 @@ import { HeroWidget } from './components/herowidget';
 import { FooterWidget } from './components/footerwidget';
 import { ShopWindget } from './components/shop-widgets';
 
+import { SeoService } from '@/core/services/seo.service';
+import { inject, OnInit } from '@angular/core';
+
 @Component({
     selector: 'app-landing',
     standalone: true,
@@ -28,4 +31,12 @@ import { ShopWindget } from './components/shop-widgets';
         </div>
     `
 })
-export class Landing {}
+export class Landing implements OnInit {
+    private seoService = inject(SeoService);
+
+    ngOnInit() {
+        this.seoService.updateTitle('Imago Creations - Home');
+        this.seoService.updateDescription('Premium custom business uniforms and workwear.');
+        this.seoService.updateUrl('https://imagocreations.com/');
+    }
+}

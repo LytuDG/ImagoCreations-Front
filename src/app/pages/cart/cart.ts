@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CartService } from '@/core/services/cart.service';
 import { ButtonModule } from 'primeng/button';
@@ -13,6 +13,8 @@ import { TopbarWidget } from '../landing/components/topbarwidget';
 import { FooterWidget } from '../landing/components/footerwidget';
 import { DialogModule } from 'primeng/dialog';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
+
+import { SeoService } from '@/core/services/seo.service';
 
 @Component({
     selector: 'app-cart',
@@ -193,10 +195,17 @@ import { ProgressSpinnerModule } from 'primeng/progressspinner';
         `
     ]
 })
-export class Cart {
+export class Cart implements OnInit {
     cart = inject(CartService);
     messageService = inject(MessageService);
     router = inject(Router);
+    seoService = inject(SeoService);
+
+    ngOnInit() {
+        this.seoService.updateTitle('Shopping Cart - Imago Creations');
+        this.seoService.updateDescription('Review your custom uniform order.');
+        this.seoService.updateUrl('https://imagocreations.com/cart');
+    }
 
     showSpecs = false;
     showFileWarning = false;

@@ -1,7 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
 import { AppFloatingConfigurator } from '../../layout/component/app.floatingconfigurator';
+import { SeoService } from '@/core/services/seo.service';
 
 @Component({
     selector: 'app-notfound',
@@ -65,4 +66,18 @@ import { AppFloatingConfigurator } from '../../layout/component/app.floatingconf
             </div>
         </div>`
 })
-export class Notfound {}
+export class Notfound implements OnInit {
+    private seoService = inject(SeoService);
+
+    ngOnInit() {
+        this.seoService.updateTitle('Page Not Found - Imago Creations');
+        this.seoService.updateType('object');
+        this.seoService.updateDescription('The page you are looking for does not exist.');
+        // Robots meta tag is handled globally or can be added here if specific noindex is needed dynamically
+        // For now, we rely on the fact that 404 pages are generally not indexed, but adding a meta tag is safer
+        const meta = document.createElement('meta');
+        meta.name = 'robots';
+        meta.content = 'noindex, nofollow';
+        document.head.appendChild(meta);
+    }
+}

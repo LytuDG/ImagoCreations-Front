@@ -6,6 +6,9 @@ import { RippleModule } from 'primeng/ripple';
 import { TopbarWidget } from '../landing/components/topbarwidget';
 import { FooterWidget } from '../landing/components/footerwidget';
 
+import { SeoService } from '@/core/services/seo.service';
+import { inject, OnInit } from '@angular/core';
+
 @Component({
     selector: 'app-services',
     standalone: true,
@@ -101,4 +104,12 @@ import { FooterWidget } from '../landing/components/footerwidget';
         </div>
     `
 })
-export class ServicesComponent {}
+export class ServicesComponent implements OnInit {
+    private seoService = inject(SeoService);
+
+    ngOnInit() {
+        this.seoService.updateTitle('Our Services - Imago Creations');
+        this.seoService.updateDescription('Explore our custom uniform design and manufacturing services.');
+        this.seoService.updateUrl('https://imagocreations.com/services');
+    }
+}

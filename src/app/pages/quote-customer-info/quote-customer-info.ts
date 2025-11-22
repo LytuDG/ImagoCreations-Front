@@ -13,6 +13,8 @@ import { FooterWidget } from '../landing/components/footerwidget';
 import { MessageService } from 'primeng/api';
 import { ToastModule } from 'primeng/toast';
 
+import { SeoService } from '@/core/services/seo.service';
+
 @Component({
     selector: 'app-quote-customer-info',
     standalone: true,
@@ -97,6 +99,7 @@ export class QuoteCustomerInfo {
     cart = inject(CartService);
     router = inject(Router);
     messageService = inject(MessageService);
+    seoService = inject(SeoService);
 
     info: CustomerInfo = {
         companyName: '',
@@ -112,6 +115,9 @@ export class QuoteCustomerInfo {
     quoteId = Math.floor(100000 + Math.random() * 900000);
 
     ngOnInit() {
+        this.seoService.updateTitle('Request a Quote - Imago Creations');
+        this.seoService.updateUrl('https://imagocreations.com/quote-info');
+
         // Redirect if cart is empty
         if (this.cart.items().length === 0) {
             this.router.navigate(['/cart']);
