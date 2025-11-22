@@ -18,15 +18,37 @@ import { inject, OnInit } from '@angular/core';
             <div class="landing-wrapper overflow-hidden">
                 <topbar-widget class="py-6 px-6 mx-0 md:mx-12 lg:mx-20 lg:px-20 flex items-center justify-between relative lg:static" />
 
-                <div
-                    class="hero-section relative overflow-hidden flex flex-col justify-center items-center text-center py-20 px-6 lg:px-20"
-                    style="background: url('img/services/hero-bg.png') no-repeat center center; background-size: cover; min-height: 60vh;"
-                >
-                    <div class="absolute inset-0 bg-black/60 z-0"></div>
-                    <div class="z-10 relative text-white max-w-4xl">
-                        <h1 class="text-5xl lg:text-7xl font-bold mb-6 drop-shadow-lg">Elevate Your Brand with Unique Designs</h1>
-                        <p class="text-xl lg:text-2xl mb-8 opacity-90">At Imago Creations, we bring your vision to life through personalized merchandise and professional brand design.</p>
-                        <button pButton pRipple label="Get Started" class="p-button-rounded p-button-lg text-xl px-8 py-4 font-bold bg-primary-500 border-none hover:bg-primary-600"></button>
+                <div class="hero-section relative py-20 px-6 lg:px-20 overflow-hidden flex flex-col items-center justify-center min-h-[70vh]" style="background: url('img/services/mesh-bg.png') no-repeat center center; background-size: cover;">
+                    <div class="text-center z-10 max-w-4xl mb-12">
+                        <span class="inline-block py-1 px-3 rounded-full bg-white/30 backdrop-blur-md border border-white/20 text-surface-900 font-semibold text-sm mb-4"> PREMIUM SERVICES </span>
+                        <h1 class="text-5xl lg:text-7xl font-bold mb-6 text-surface-900 leading-tight">Crafting Your <span class="text-primary-600">Identity</span></h1>
+                        <p class="text-xl text-surface-700 font-medium leading-relaxed max-w-2xl mx-auto">From bespoke merchandise to comprehensive brand strategies, we design the future of your business.</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 z-10 w-full max-w-5xl">
+                        <!-- Glass Card 1 -->
+                        <div class="bg-white/20 backdrop-blur-xl border border-white/30 p-8 rounded-3xl hover:bg-white/30 transition-all duration-300 cursor-pointer group shadow-xl">
+                            <div class="flex items-center justify-between mb-6">
+                                <div class="w-12 h-12 rounded-full bg-primary-100 flex items-center justify-center text-primary-600 group-hover:scale-110 transition-transform">
+                                    <i class="pi pi-palette text-xl"></i>
+                                </div>
+                                <i class="pi pi-arrow-right text-surface-600 group-hover:translate-x-1 transition-transform"></i>
+                            </div>
+                            <h3 class="text-2xl font-bold text-surface-900 mb-2">Personalization</h3>
+                            <p class="text-surface-700">Custom apparel, gifts, and accessories tailored to your unique style.</p>
+                        </div>
+
+                        <!-- Glass Card 2 -->
+                        <div class="bg-white/20 backdrop-blur-xl border border-white/30 p-8 rounded-3xl hover:bg-white/30 transition-all duration-300 cursor-pointer group shadow-xl">
+                            <div class="flex items-center justify-between mb-6">
+                                <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 group-hover:scale-110 transition-transform">
+                                    <i class="pi pi-briefcase text-xl"></i>
+                                </div>
+                                <i class="pi pi-arrow-right text-surface-600 group-hover:translate-x-1 transition-transform"></i>
+                            </div>
+                            <h3 class="text-2xl font-bold text-surface-900 mb-2">Brand Design</h3>
+                            <p class="text-surface-700">Professional logos, identity systems, and marketing collateral.</p>
+                        </div>
                     </div>
                 </div>
 
@@ -59,14 +81,14 @@ import { inject, OnInit } from '@angular/core';
                             </ul>
                             <button pButton pRipple label="Explore Personalization" class="p-button-outlined p-button-rounded"></button>
                         </div>
-                        <div class="order-1 lg:order-2">
-                            <img src="img/services/personalization.png" alt="Personalization Service" class="w-full max-w-lg mx-auto rounded-3xl shadow-2xl hover:scale-105 transition-transform duration-500" />
+                        <div class="order-1 lg:order-2 flex justify-center">
+                            <img src="img/services/personalization.png" alt="Personalization Service" class="w-full max-w-sm mx-auto rounded-3xl shadow-xl hover:scale-105 transition-transform duration-500 block" />
                         </div>
                     </div>
 
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-                        <div>
-                            <img src="img/services/brand-design.png" alt="Brand Design Service" class="w-full max-w-lg mx-auto rounded-3xl shadow-2xl hover:scale-105 transition-transform duration-500" />
+                        <div class="flex justify-center">
+                            <img src="img/services/brand-design.png" alt="Brand Design Service" class="w-full max-w-sm mx-auto rounded-3xl shadow-xl hover:scale-105 transition-transform duration-500 block" />
                         </div>
                         <div>
                             <h3 class="text-3xl font-bold text-surface-900 dark:text-surface-0 mb-4">Brand Design for Businesses</h3>
