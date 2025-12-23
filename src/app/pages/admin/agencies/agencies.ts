@@ -143,7 +143,7 @@ export class Agencies implements OnInit {
 
     agencyDialog: boolean = false;
     agencies = signal<Agency[]>([]);
-    selectedAgency!: Agency;
+    selectedAgency: Agency | null = null;
     selectedAgencyForEdit: Agency | null = null;
     loading = signal(false);
     isEditMode: boolean = false;
@@ -212,7 +212,7 @@ export class Agencies implements OnInit {
             header: 'Confirmar',
             icon: 'pi pi-exclamation-triangle',
             accept: () => {
-                this.agencies.set(this.agencies().filter((val) => val.id !== this.selectedAgency.id));
+                this.agencies.set(this.agencies().filter((val) => val.id !== this.selectedAgency?.id));
                 this.selectedAgency = null!;
                 this.messageService.add({
                     severity: 'success',
@@ -242,7 +242,7 @@ export class Agencies implements OnInit {
                 phoneCountryCode: agencyData.phoneCountryCode
             };
 
-            this.agencyService.editAgency(this.selectedAgency.id!, agencyUpdate).subscribe({
+            this.agencyService.editAgency(this.selectedAgency?.id!, agencyUpdate).subscribe({
                 next: (response: ApiResponse<Agency>) => {
                     this.saving.set(false);
                     this.agencyDialog = false;

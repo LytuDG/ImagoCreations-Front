@@ -6,6 +6,7 @@ export enum ADMIN_ROUTES {
     ADMIN_USERS = 'user',
     ADMIN_AGENCIES = 'agency',
     ADMIN_PRODUCTS = 'product',
+    ADMIN_ATTRIBUTES = 'attribute',
     ADMIN_DASHBOARD = 'dashboard',
     ADMIN_ORDERS = 'orders',
     ADMIN_CONFIG = 'config'

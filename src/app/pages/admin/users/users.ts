@@ -340,7 +340,7 @@ export class Users implements OnInit {
         this.dt.exportCSV();
     }
 
-    getRoleSeverity(role: string): string {
+    getRoleSeverity(role: string): 'success' | 'info' | 'warn' | 'danger' | 'secondary' | 'contrast' | null {
         if (!role) return 'secondary';
 
         switch (role.toUpperCase()) {

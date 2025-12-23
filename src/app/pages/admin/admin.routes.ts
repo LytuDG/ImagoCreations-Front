@@ -7,6 +7,7 @@ import { Crud } from "../crud/crud";
 import { Dashboard } from "../dashboard/dashboard";
 import { Empty } from "../empty/empty";
 import { Products } from "./products/products";
+import { Attributes } from "./attributes/attribute.component";
 
 export default [
     {
@@ -34,7 +35,10 @@ export default [
     {
         path: ADMIN_ROUTES.ADMIN_PRODUCTS,
         component: Products
-
-    }
+    },
+    {
+        path: ADMIN_ROUTES.ADMIN_ATTRIBUTES,
+        component: Attributes
+    },
 
 ] as Routes

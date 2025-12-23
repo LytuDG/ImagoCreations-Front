@@ -139,6 +139,11 @@ export class AppMenu {
                         routerLink: [ADMIN_ROUTES.ADMIN_PRODUCTS]
                     },
                     {
+                        label: 'Atributos',
+                        icon: 'pi pi-fw pi-tag',
+                        routerLink: [ADMIN_ROUTES.ADMIN_ATTRIBUTES]
+                    },
+                    {
                         label: 'Orders',
                         icon: 'pi pi-fw pi-shop',
                         routerLink: [ADMIN_ROUTES.ADMIN_ORDERS]
