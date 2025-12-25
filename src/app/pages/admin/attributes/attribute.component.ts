@@ -1,4 +1,4 @@
-// modules/attributes/components/attribute-list/attribute-list.component.ts
+// pages/attributes/components/attribute-list/attribute-list.component.ts
 import { Component, inject, OnInit, signal, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -18,6 +18,7 @@ import { AttributeService } from './services/attribute.service';
 import { Attribute } from './models/attribute';
 import { ApiResponse } from '@/core/models/apiResponse';
 import { AttributeFormComponent } from './attribute-form.dialog';
+import { AttributeValuesDialogComponent } from './attribute-values.dialog';
 
 type TagSeverity = "success" | "info" | "warn" | "danger" | "secondary" | "contrast" | null | undefined;
 
@@ -38,7 +39,8 @@ type TagSeverity = "success" | "info" | "warn" | "danger" | "secondary" | "contr
     IconFieldModule,
     ConfirmDialogModule,
     RadioButtonModule,
-    AttributeFormComponent
+    AttributeFormComponent,
+    AttributeValuesDialogComponent
   ],
   template: `
     <p-toast />
@@ -138,6 +140,7 @@ type TagSeverity = "success" | "info" | "warn" | "danger" | "secondary" | "contr
           <th style="min-width:12rem">Reutilizable</th>
           <th style="min-width:12rem">Visible B2B</th>
           <th style="min-width:12rem">Visible B2C</th>
+          <th style="min-width:10rem">Acciones</th> <!-- Nueva columna -->
         </tr>
       </ng-template>
 
@@ -177,12 +180,25 @@ type TagSeverity = "success" | "info" | "warn" | "danger" | "secondary" | "contr
               [severity]="attribute.visibleB2C ? 'success' : 'secondary'"
             />
           </td>
+          <td style="min-width: 10rem">
+            <!-- Botón para gestionar valores (solo si el atributo tiene ID) -->
+            @if (attribute.id) {
+              <p-button
+                icon="pi pi-list"
+                [rounded]="true"
+                [text]="true"
+                severity="help"
+                [title]="'Gestionar valores de ' + attribute.name"
+                (onClick)="manageAttributeValues(attribute)"
+              />
+            }
+          </td>
         </tr>
       </ng-template>
 
       <ng-template #emptymessage>
         <tr>
-          <td colspan="7" class="text-center py-6">
+          <td colspan="8" class="text-center py-6">
             <div class="flex flex-column align-items-center gap-3">
               <i class="pi pi-tag text-6xl text-color-secondary"></i>
               <span class="text-xl text-color-secondary font-medium">
@@ -204,7 +220,18 @@ type TagSeverity = "success" | "info" | "warn" | "danger" | "secondary" | "contr
       (cancel)="hideDialog()"
       (hide)="hideDialog()"
       [saving]="saving()"
+      (manageValues)="onManageValues($event)"
     ></app-attribute-form>
+
+    <!-- Componente para gestionar valores de atributo -->
+    <app-attribute-values-dialog
+      [visible]="attributeValuesDialog"
+      [attribute]="selectedAttributeForValues"
+      (save)="onAttributeValuesSaved($event)"
+      (cancel)="hideAttributeValuesDialog()"
+      (hide)="hideAttributeValuesDialog()"
+      [saving]="savingAttributeValues()"
+    ></app-attribute-values-dialog>
 
     <p-confirmdialog [style]="{ width: '450px' }" />
   `,
@@ -216,12 +243,15 @@ export class Attributes implements OnInit {
   private confirmationService = inject(ConfirmationService);
 
   attributeDialog: boolean = false;
+  attributeValuesDialog: boolean = false; // <-- Nuevo estado para el diálogo de valores
   attributes = signal<Attribute[]>([]);
   selectedAttribute: Attribute | null = null;
   selectedAttributeForEdit: Attribute | null = null;
+  selectedAttributeForValues: Attribute | null = null; // <-- Atributo seleccionado para gestionar valores
   loading = signal(false);
   isEditMode: boolean = false;
   saving = signal(false);
+  savingAttributeValues = signal(false); // <-- Nuevo estado para guardar valores
   totalRecords: number = 0;
 
   // Calcular first record
@@ -232,8 +262,6 @@ export class Attributes implements OnInit {
   requestBody: any = {
     page: 1,
     limit: 10,
-/*     sortField: 'name',
-    sortDirection: 'asc' */
   };
 
   @ViewChild('dt') dt!: Table;
@@ -257,9 +285,7 @@ export class Attributes implements OnInit {
     this.attributeService.getAttribute(params).subscribe({
         next: (response: ApiResponse<Attribute>) => {
         this.attributes.set(response.data || []);
-
-        this.totalRecords = response.total || 0;  // Solo response.total
-
+        this.totalRecords = response.total || 0;
         this.loading.set(false);
         },
         error: (error) => {
@@ -277,20 +303,20 @@ export class Attributes implements OnInit {
     });
   }
 
-    onPageChange(event: any): void {
-        const first = event?.first ?? 0;
-        const rows = event?.rows ?? this.requestBody.limit;
+  onPageChange(event: any): void {
+    const first = event?.first ?? 0;
+    const rows = event?.rows ?? this.requestBody.limit;
 
-        const pageNumber = Math.floor(first / rows) + 1;
-        const pageSize = rows;
+    const pageNumber = Math.floor(first / rows) + 1;
+    const pageSize = rows;
 
-        // Actualizar parámetros
-        this.requestBody.page = pageNumber;
-        this.requestBody.limit = pageSize;
+    // Actualizar parámetros
+    this.requestBody.page = pageNumber;
+    this.requestBody.limit = pageSize;
 
-        // Recargar datos
-        this.loadAttributes();
-    }
+    // Recargar datos
+    this.loadAttributes();
+  }
 
   timeOut: any;
   applyFilter(event: Event, column: string): void {
@@ -322,6 +348,40 @@ export class Attributes implements OnInit {
     this.isEditMode = true;
     this.selectedAttributeForEdit = this.selectedAttribute;
     this.attributeDialog = true;
+  }
+
+  manageAttributeValues(attribute: Attribute) {
+    if (!attribute.id) return;
+
+    this.selectedAttributeForValues = attribute;
+    this.attributeValuesDialog = true;
+  }
+
+  onManageValues(attributeId: string) {
+    const attribute = this.attributes().find(attr => attr.id === attributeId);
+    if (attribute) {
+      this.selectedAttributeForValues = attribute;
+      this.attributeValuesDialog = true;
+    }
+  }
+
+  onAttributeValuesSaved(event: any) {
+    this.savingAttributeValues.set(false);
+    this.attributeValuesDialog = false;
+    this.selectedAttributeForValues = null;
+
+    this.messageService.add({
+      severity: 'success',
+      summary: 'Éxito',
+      detail: 'Valores guardados correctamente',
+      life: 3000
+    });
+  }
+
+  hideAttributeValuesDialog() {
+    this.attributeValuesDialog = false;
+    this.selectedAttributeForValues = null;
+    this.savingAttributeValues.set(false);
   }
 
   deleteAttribute() {

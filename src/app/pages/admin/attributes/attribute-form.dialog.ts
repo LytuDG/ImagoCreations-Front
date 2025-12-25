@@ -1,4 +1,4 @@
-// modules/attributes/components/attribute-form.dialog.ts
+// pages/attributes/attribute-form.dialog.ts
 import { Component, EventEmitter, Input, Output, OnInit, OnChanges, SimpleChanges, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -10,6 +10,12 @@ import { DialogModule } from 'primeng/dialog';
 import { Attribute } from './models/attribute';
 import { AgencyService } from '../agencies/agency.service';
 import { Agency } from '../agencies/models/agency';
+import {
+  AttributeInputType,
+  ATTRIBUTE_TYPE_OPTIONS,
+  ATTRIBUTE_TYPE_CONFIG,
+  requiresValues
+} from './constants/attribute-types';
 
 @Component({
   selector: 'app-attribute-form',
@@ -61,7 +67,29 @@ import { Agency } from '../agencies/models/agency';
               placeholder="Selecciona un tipo"
               class="w-full"
               [disabled]="saving"
-            ></p-select>
+              (onChange)="onInputTypeChange()"
+            >
+              <ng-template #option let-option>
+                <div class="flex align-items-center gap-2">
+                  <i [class]="option.icon" class="text-color-secondary"></i>
+                  <div class="flex flex-column">
+                    <span class="font-medium">{{ option.label }}</span>
+                    <small class="text-color-secondary text-sm">{{ option.description }}</small>
+                  </div>
+                </div>
+              </ng-template>
+            </p-select>
+            @if (selectedTypeConfig) {
+              <small class="text-color-secondary block mt-2">
+                <i [class]="selectedTypeConfig.icon" class="mr-1"></i>
+                {{ selectedTypeConfig.description }}
+                @if (selectedTypeConfig.supportsValues) {
+                  <span class="ml-2 text-primary font-medium">
+                    (Requiere valores predefinidos)
+                  </span>
+                }
+              </small>
+            }
           </div>
 
           <!-- Campo Agency con Select y Filtro -->
@@ -145,6 +173,31 @@ import { Agency } from '../agencies/models/agency';
                 </div>
             </div>
           </div>
+
+          <!-- Sección para gestión de valores (solo para tipos que los requieren) -->
+          @if (showValuesSection && attribute?.id) {
+            <div class="field mt-4">
+              <div class="flex align-items-center justify-content-between mb-3">
+                <label class="block font-bold mb-0">Valores Predefinidos</label>
+                <p-button
+                  label="Gestionar Valores"
+                  icon="pi pi-cog"
+                  size="small"
+                  (onClick)="manageAttributeValues()"
+                  [disabled]="saving"
+                />
+              </div>
+              <div class="p-3 border surface-border border-round bg-surface-50">
+                <div class="text-center py-3">
+                  <i class="pi pi-info-circle text-color-secondary text-xl mr-2"></i>
+                  <span class="text-color-secondary">
+                    Este atributo requiere valores predefinidos.
+                    Haz clic en "Gestionar Valores" para agregarlos.
+                  </span>
+                </div>
+              </div>
+            </div>
+          }
         </div>
       </ng-template>
 
@@ -180,6 +233,7 @@ export class AttributeFormComponent implements OnInit, OnChanges {
   @Output() save = new EventEmitter<Attribute>();
   @Output() cancel = new EventEmitter<void>();
   @Output() hide = new EventEmitter<void>();
+  @Output() manageValues = new EventEmitter<string>(); // Emitirá el attributeId
 
   // Datos locales para el formulario
   localAttribute: Attribute = this.getDefaultAttribute();
@@ -189,16 +243,14 @@ export class AttributeFormComponent implements OnInit, OnChanges {
   filteredAgencies: Agency[] = [];
   loadingAgencies: boolean = false;
 
-  // Opciones para el dropdown/select
-  inputTypeOptions = [
-    { label: 'Texto', value: 'text' },
-    { label: 'Número', value: 'number' },
-    { label: 'Select', value: 'select' },
-    { label: 'Checkbox', value: 'checkbox' },
-    { label: 'Radio', value: 'radio' },
-    { label: 'Textarea', value: 'textarea' },
-    { label: 'Fecha', value: 'date' }
-  ];
+  // Opciones para el dropdown/select usando las constantes
+  inputTypeOptions = ATTRIBUTE_TYPE_OPTIONS;
+
+  // Configuración del tipo seleccionado
+  selectedTypeConfig: any = null;
+
+  // Controlar si mostrar la sección de valores
+  showValuesSection: boolean = false;
 
   ngOnInit() {
     this.resetForm();
@@ -217,15 +269,13 @@ export class AttributeFormComponent implements OnInit, OnChanges {
 
     const params = {
       page: 1,
-      pageSize: 100, // Cargar suficientes agencias
-/*       sortField: 'name',
-      sortDirection: 'ASC' */
+      pageSize: 100,
     };
 
     this.agencyService.getAgencies(params).subscribe({
       next: (response) => {
         this.allAgencies = response.data || [];
-        this.filteredAgencies = [...this.allAgencies]; // Copia para filtrar
+        this.filteredAgencies = [...this.allAgencies];
         this.loadingAgencies = false;
       },
       error: (error) => {
@@ -243,9 +293,40 @@ export class AttributeFormComponent implements OnInit, OnChanges {
     } else {
       this.localAttribute = this.getDefaultAttribute();
     }
+
+    // Actualizar configuración del tipo seleccionado
+    this.updateSelectedTypeConfig();
+  }
+
+  // Cuando cambia el tipo de input
+  onInputTypeChange() {
+    this.updateSelectedTypeConfig();
+  }
+
+  // Actualizar la configuración del tipo seleccionado
+  updateSelectedTypeConfig() {
+    if (this.localAttribute.inputType) {
+      this.selectedTypeConfig = ATTRIBUTE_TYPE_CONFIG[this.localAttribute.inputType];
+      this.showValuesSection = requiresValues(this.localAttribute.inputType);
+    } else {
+      this.selectedTypeConfig = null;
+      this.showValuesSection = false;
+    }
+  }
+
+  // Para gestionar valores (solo si es edición y el atributo ya tiene ID)
+  manageAttributeValues() {
+    if (this.attribute?.id) {
+      this.manageValues.emit(this.attribute.id);
+    }
   }
 
   onSave() {
+    // Validación adicional: si requiere valores y es nuevo, mostrar advertencia
+    if (requiresValues(this.localAttribute.inputType) && !this.attribute?.id) {
+      console.warn('⚠️ Este tipo requiere valores predefinidos. Deberás agregarlos después de guardar.');
+    }
+
     this.save.emit({ ...this.localAttribute });
   }
 
@@ -260,7 +341,7 @@ export class AttributeFormComponent implements OnInit, OnChanges {
   getDefaultAttribute(): Attribute {
     return {
       name: '',
-      inputType: 'text',
+      inputType: AttributeInputType.TEXT, // Valor por defecto
       agencyId: '',
       required: false,
       reusable: true,
