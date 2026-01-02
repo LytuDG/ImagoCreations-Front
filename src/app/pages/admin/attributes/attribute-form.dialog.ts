@@ -70,7 +70,7 @@ import {
               (onChange)="onInputTypeChange()"
             >
               <ng-template #option let-option>
-                <div class="flex align-items-center gap-2">
+                <div class="flex items-center gap-2">
                   <i [class]="option.icon" class="text-color-secondary"></i>
                   <div class="flex flex-column">
                     <span class="font-medium">{{ option.label }}</span>
@@ -122,10 +122,12 @@ import {
           <!-- Campos Booleanos - Alineados a la izquierda -->
           <div class="justify-start">
             <label class="block font-bold mb-2">Configuración</label>
-            <div class="flex flex-col gap-3 p-3 surface-border border-round">
-                <div class="flex justify-content-between">
-                    <span class="font-medium mr-3 self-center">Requerido</span>
-                    <p-toggleButton
+        <!--grid-cols-2-->
+            <div [style]="{'grid-template-columns': 'repeat(2, minmax(0, 0.3fr))'}" class="grid gap-4 p-3 surface-border border-round">
+                <!-- Fila 1 -->
+                <span class="font-medium flex items-center">Requerido</span>
+                <div class="flex justify-start">
+                <p-toggleButton
                     [(ngModel)]="localAttribute.required"
                     onLabel="Sí"
                     offLabel="No"
@@ -133,11 +135,13 @@ import {
                     offIcon="pi pi-times"
                     [style]="{ 'width': '80px' }"
                     [disabled]="saving"
-                    />
+                />
                 </div>
-                <div class="flex justify-content-between">
-                    <span class="font-medium mr-3 self-center">Reutilizable</span>
-                    <p-toggleButton
+
+                <!-- Fila 2 -->
+                <span class="font-medium flex items-center">Reutilizable</span>
+                <div class="flex justify-start">
+                <p-toggleButton
                     [(ngModel)]="localAttribute.reusable"
                     onLabel="Sí"
                     offLabel="No"
@@ -145,11 +149,13 @@ import {
                     offIcon="pi pi-times"
                     [style]="{ 'width': '80px' }"
                     [disabled]="saving"
-                    />
+                />
                 </div>
-                <div class="flex justify-content-between">
-                    <span class="font-medium mr-3 self-center">Visible B2B</span>
-                    <p-toggleButton
+
+                <!-- Fila 3 -->
+                <span class="font-medium flex items-center">Visible B2B</span>
+                <div class="flex justify-start">
+                <p-toggleButton
                     [(ngModel)]="localAttribute.visibleB2B"
                     onLabel="Sí"
                     offLabel="No"
@@ -157,11 +163,13 @@ import {
                     offIcon="pi pi-times"
                     [style]="{ 'width': '80px' }"
                     [disabled]="saving"
-                    />
+                />
                 </div>
-                <div class="flex justify-content-between">
-                    <span class="font-medium mr-3 self-center">Visible B2C</span>
-                    <p-toggleButton
+
+                <!-- Fila 4 -->
+                <span class="font-medium flex items-center">Visible B2C</span>
+                <div class="flex justify-start">
+                <p-toggleButton
                     [(ngModel)]="localAttribute.visibleB2C"
                     onLabel="Sí"
                     offLabel="No"
@@ -169,7 +177,7 @@ import {
                     offIcon="pi pi-times"
                     [style]="{ 'width': '80px' }"
                     [disabled]="saving"
-                    />
+                />
                 </div>
             </div>
           </div>
@@ -177,7 +185,7 @@ import {
           <!-- Sección para gestión de valores (solo para tipos que los requieren) -->
           @if (showValuesSection && attribute?.id) {
             <div class="field mt-4">
-              <div class="flex align-items-center justify-content-between mb-3">
+              <div class="flex items-center justify-content-between mb-3">
                 <label class="block font-bold mb-0">Valores Predefinidos</label>
                 <p-button
                   label="Gestionar Valores"

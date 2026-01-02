@@ -62,6 +62,17 @@ type TagSeverity = "success" | "info" | "warn" | "danger" | "secondary" | "contr
           (onClick)="editAttribute()"
           [disabled]="!selectedAttribute"
         />
+
+        <p-button
+          label="Gestionar Valores"
+          icon="pi pi-list"
+          severity="secondary"
+          class="mr-2"
+          (onClick)="manageSelectedAttributeValues()"
+          [disabled]="!selectedAttribute"
+          pTooltip="Gestionar valores del atributo seleccionado"
+        />
+
         <p-button
           severity="secondary"
           label="Eliminar"
@@ -96,7 +107,6 @@ type TagSeverity = "success" | "info" | "warn" | "danger" | "secondary" | "contr
       [rows]="requestBody.limit"
       [paginator]="true"
       [globalFilterFields]="['name', 'inputType']"
-      [tableStyle]="{ 'min-width': '75rem' }"
       [(selection)]="selectedAttribute"
       [rowHover]="true"
       dataKey="id"
@@ -127,79 +137,77 @@ type TagSeverity = "success" | "info" | "warn" | "danger" | "secondary" | "contr
 
       <ng-template #header>
         <tr>
-          <th style="width: 3rem"></th>
-          <th pSortableColumn="name" style="min-width:20rem">
+          <th></th>
+          <th pSortableColumn="name">
             Nombre
             <p-sortIcon field="name" />
           </th>
-          <th pSortableColumn="inputType" style="min-width:15rem">
+          <th pSortableColumn="inputType">
             Tipo de Campo
             <p-sortIcon field="inputType" />
           </th>
-          <th style="min-width:12rem">Requerido</th>
-          <th style="min-width:12rem">Reutilizable</th>
-          <th style="min-width:12rem">Visible B2B</th>
-          <th style="min-width:12rem">Visible B2C</th>
-          <th style="min-width:10rem">Acciones</th> <!-- Nueva columna -->
+          <th>Requerido</th>
+          <th>Reutilizable</th>
+          <th>Visible B2B</th>
+          <th>Visible B2C</th>
         </tr>
       </ng-template>
 
       <ng-template #body let-attribute>
-        <tr [ngClass]="{ 'bg-primary-50': selectedAttribute?.id === attribute.id }">
-          <td style="width: 3rem">
-            <p-radioButton [value]="attribute" [(ngModel)]="selectedAttribute" />
+        <tr
+          (click)="selectRow(attribute)"
+          [ngClass]="{
+            'bg-primary-50': selectedAttribute?.id === attribute.id,
+            'cursor-pointer': true
+          }"
+          class="hover:bg-surface-100 transition-colors duration-150"
+        >
+          <td class="w-12 p-3" (click)="$event.stopPropagation()">
+            <div class="flex h-full items-center">
+              <p-radioButton
+                [value]="attribute"
+                [(ngModel)]="selectedAttribute"
+              />
+            </div>
           </td>
-          <td style="min-width: 20rem">{{ attribute.name }}</td>
-          <td style="min-width: 15rem">
+          <td class="p-3">{{ attribute.name }}</td>
+          <td class="p-3">
             <p-tag
               [value]="getInputTypeLabel(attribute.inputType)"
               [severity]="getInputTypeSeverity(attribute.inputType)"
             />
           </td>
-          <td style="min-width: 12rem">
+          <td class="p-3">
             <p-tag
               [value]="attribute.required ? 'Sí' : 'No'"
               [severity]="attribute.required ? 'success' : 'secondary'"
             />
           </td>
-          <td style="min-width: 12rem">
+          <td class="p-3">
             <p-tag
               [value]="attribute.reusable ? 'Sí' : 'No'"
               [severity]="attribute.reusable ? 'success' : 'secondary'"
             />
           </td>
-          <td style="min-width: 12rem">
+          <td class="p-3">
             <p-tag
               [value]="attribute.visibleB2B ? 'Sí' : 'No'"
               [severity]="attribute.visibleB2B ? 'success' : 'secondary'"
             />
           </td>
-          <td style="min-width: 12rem">
+          <td class="p-3">
             <p-tag
               [value]="attribute.visibleB2C ? 'Sí' : 'No'"
               [severity]="attribute.visibleB2C ? 'success' : 'secondary'"
             />
-          </td>
-          <td style="min-width: 10rem">
-            <!-- Botón para gestionar valores (solo si el atributo tiene ID) -->
-            @if (attribute.id) {
-              <p-button
-                icon="pi pi-list"
-                [rounded]="true"
-                [text]="true"
-                severity="help"
-                [title]="'Gestionar valores de ' + attribute.name"
-                (onClick)="manageAttributeValues(attribute)"
-              />
-            }
           </td>
         </tr>
       </ng-template>
 
       <ng-template #emptymessage>
         <tr>
-          <td colspan="8" class="text-center py-6">
-            <div class="flex flex-column align-items-center gap-3">
+          <td colspan="7" class="text-center py-6">
+            <div class="flex flex-column items-center gap-3">
               <i class="pi pi-tag text-6xl text-color-secondary"></i>
               <span class="text-xl text-color-secondary font-medium">
                 No se encontraron atributos
@@ -243,21 +251,16 @@ export class Attributes implements OnInit {
   private confirmationService = inject(ConfirmationService);
 
   attributeDialog: boolean = false;
-  attributeValuesDialog: boolean = false; // <-- Nuevo estado para el diálogo de valores
+  attributeValuesDialog: boolean = false;
   attributes = signal<Attribute[]>([]);
   selectedAttribute: Attribute | null = null;
   selectedAttributeForEdit: Attribute | null = null;
-  selectedAttributeForValues: Attribute | null = null; // <-- Atributo seleccionado para gestionar valores
+  selectedAttributeForValues: Attribute | null = null;
   loading = signal(false);
   isEditMode: boolean = false;
   saving = signal(false);
-  savingAttributeValues = signal(false); // <-- Nuevo estado para guardar valores
+  savingAttributeValues = signal(false);
   totalRecords: number = 0;
-
-  // Calcular first record
-  get firstRecord(): number {
-    return (this.requestBody.page - 1) * this.requestBody.limit;
-  }
 
   requestBody: any = {
     page: 1,
@@ -303,6 +306,16 @@ export class Attributes implements OnInit {
     });
   }
 
+  // Seleccionar fila al hacer clic en cualquier parte (excepto el radio button)
+  selectRow(attribute: Attribute): void {
+    this.selectedAttribute = attribute;
+  }
+
+  // Deseleccionar fila
+  deselectRow(): void {
+    this.selectedAttribute = null;
+  }
+
   onPageChange(event: any): void {
     const first = event?.first ?? 0;
     const rows = event?.rows ?? this.requestBody.limit;
@@ -314,7 +327,8 @@ export class Attributes implements OnInit {
     this.requestBody.page = pageNumber;
     this.requestBody.limit = pageSize;
 
-    // Recargar datos
+    this.selectedAttribute = null;
+
     this.loadAttributes();
   }
 
@@ -332,6 +346,8 @@ export class Attributes implements OnInit {
       // Volver a la primera página cuando se filtra
       this.requestBody.page = 1;
 
+      this.selectedAttribute = null;
+
       this.loadAttributes();
     }, 500);
   }
@@ -348,6 +364,21 @@ export class Attributes implements OnInit {
     this.isEditMode = true;
     this.selectedAttributeForEdit = this.selectedAttribute;
     this.attributeDialog = true;
+  }
+
+  // Método para gestionar valores del atributo seleccionado desde el toolbar
+  manageSelectedAttributeValues() {
+    if (!this.selectedAttribute?.id) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Selección requerida',
+        detail: 'Por favor, selecciona un atributo para gestionar sus valores',
+        life: 3000
+      });
+      return;
+    }
+
+    this.manageAttributeValues(this.selectedAttribute);
   }
 
   manageAttributeValues(attribute: Attribute) {

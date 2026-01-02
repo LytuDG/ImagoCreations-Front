@@ -52,7 +52,7 @@ import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
 
     <p-dialog
       [(visible)]="visible"
-      [style]="{ maxHeight: '80vh' }"
+      [style]="{ maxHeight: '80vh', minWidth: '49vw' }"
       [header]="dialogHeader"
       [modal]="true"
       [draggable]="false"
@@ -61,73 +61,72 @@ import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
     >
       <ng-template #content>
         <!-- Formulario para crear/editar valor -->
-        <div class="flex flex-col gap-4 p-fluid mb-4">
+        <div class="flex flex-col gap-4 mb-4 justify-center">
             @if(showForm){
-                <h5 class="m-0">{{ isEditingValue ? 'Editar Valor' : 'Nuevo Valor' }}</h5>
-
                 <!-- Contenedor principal en grid -->
-                <div class="grid">
-                <!-- Valor (texto) - Ocupa toda la fila -->
-                <div class="col-12 field">
-                    <label for="value" class="block font-bold mb-2">Valor *</label>
-                    <input
-                    type="text"
-                    pInputText
-                    id="value"
-                    [(ngModel)]="editingValue.value"
-                    required
-                    class="w-full"
-                    placeholder="Ej: Rojo, XL, Algodón..."
-                    [disabled]="saving"
-                    />
-                </div>
-
-                <!-- Sección de Modificador de Precio -->
-                <div class="col-12 field">
-                    <label class="block font-bold mb-2">Modificador de Precio</label>
-                    <div class="grid">
-                    <!-- Tipo de Modificador -->
-                    <div class="col-12 md:col-6">
-                        <label class="block text-sm mb-2">Tipo</label>
-                        <div class="flex gap-3">
-                        <!-- Opciones de radio button -->
-                        <div class="flex align-items-center">
-                            <p-radiobutton inputId="fixed" name="modifierType" value="fixed" [(ngModel)]="editingValue.modifierType" [disabled]="saving" />
-                            <label for="fixed" class="ml-2 cursor-pointer">Fijo</label>
-                        </div>
-                        <div class="flex align-items-center">
-                            <p-radiobutton inputId="percent" name="modifierType" value="percent" [(ngModel)]="editingValue.modifierType" [disabled]="saving" />
-                            <label for="percent" class="ml-2 cursor-pointer">Porcentaje</label>
-                        </div>
-                        </div>
+                <div class="grid justify-center">
+                    <!-- Valor (texto) - Ocupa toda la fila -->
+                    <div class="col-12 field mb-4">
+                        <h5 class="m-0">{{ isEditingValue ? 'Editar Valor' : 'Nuevo Valor' }}</h5>
+                        <label for="value" class="block font-bold mb-2">Valor</label>
+                        <input
+                        type="text"
+                        pInputText
+                        id="value"
+                        [(ngModel)]="editingValue.value"
+                        required
+                        class="w-full"
+                        placeholder="Ej: Rojo, XL, Algodón..."
+                        [disabled]="saving"
+                        />
                     </div>
 
-                    <!-- Monto del Modificador -->
-                    <div class="col-12 md:col-6">
-                        <label for="priceModifier" class="block text-sm mb-2">Monto</label>
-                        <!-- Uso correcto de p-inputgroup -->
-                        <p-inputgroup>
-                        <p-inputgroup-addon>
-                            {{ editingValue.modifierType === 'percent' ? '%' : '$' }}
-                        </p-inputgroup-addon>
-                        <p-inputnumber
-                            id="priceModifier"
-                            [(ngModel)]="editingValue.priceModifier"
-                            mode="decimal"
-                            [min]="editingValue.modifierType === 'percent' ? 0 : -100000"
-                            [max]="editingValue.modifierType === 'percent' ? 100 : 100000"
-                            [minFractionDigits]="2"
-                            [maxFractionDigits]="2"
-                            class="w-full"
-                            [disabled]="saving">
-                        </p-inputnumber>
-                        </p-inputgroup>
+                    <!-- Sección de Modificador de Precio -->
+                    <div class="col-12">
+                        <label class="font-bold mt-2">Modificador de Precio</label>
+                        <div class="mb-6 mt-2">
+                        <!-- Tipo de Modificador -->
+                          <div class="col-12 md:col-6 mb-6">
+                            <label class="block text-sm mb-2">Tipo</label>
+                            <div class="flex gap-3">
+                            <!-- Opciones de radio button -->
+                              <div class="flex items-center">
+                                <p-radiobutton inputId="fixed" name="modifierType" value="fixed" [(ngModel)]="editingValue.modifierType" [disabled]="saving" />
+                                <label for="fixed" class="ml-2 cursor-pointer">Fijo</label>
+                              </div>
+                              <div class="flex items-center">
+                                <p-radiobutton inputId="percent" name="modifierType" value="percent" [(ngModel)]="editingValue.modifierType" [disabled]="saving" />
+                                <label for="percent" class="ml-2 cursor-pointer">Porcentaje</label>
+                              </div>
+                            </div>
+                          </div>
+
+                        <!-- Monto del Modificador -->
+                          <div class="col-12 md:col-6">
+                            <label for="priceModifier" class="block text-sm mb-2">Monto</label>
+                            <!-- Uso correcto de p-inputgroup -->
+                            <p-inputgroup>
+                            <p-inputgroup-addon>
+                                {{ editingValue.modifierType === 'percent' ? '%' : '$' }}
+                            </p-inputgroup-addon>
+                            <p-inputnumber
+                                id="priceModifier"
+                                [(ngModel)]="editingValue.priceModifier"
+                                mode="decimal"
+                                [min]="editingValue.modifierType === 'percent' ? 0 : -100000"
+                                [max]="editingValue.modifierType === 'percent' ? 100 : 100000"
+                                [minFractionDigits]="2"
+                                [maxFractionDigits]="2"
+                                class="w-full"
+                                [disabled]="saving">
+                            </p-inputnumber>
+                            </p-inputgroup>
+                          </div>
+                        </div>
                     </div>
-                    </div>
-                </div>
 
                 <!-- Orden y Estado en la misma fila -->
-                <div class="col-12 grid">
+                  <div class="col-12 grid">
                     <div class="col-12 md:col-6 field">
                     <label for="order" class="block font-bold mb-2">Orden</label>
                     <p-inputnumber
@@ -141,9 +140,9 @@ import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
                     <small class="text-color-secondary">Controla el orden de visualización</small>
                     </div>
 
-                    <div class="col-12 md:col-6 field">
-                    <label class="block font-bold mb-2">Estado</label>
-                    <div class="flex align-items-center">
+                    <div class="col-12 md:col-6 field mt-6">
+                      <label class="block font-bold mb-2">Estado</label>
+                      <div class="flex items-center">
                         <p-togglebutton
                         [(ngModel)]="editingValue.isActive"
                         onLabel="Activo"
@@ -153,25 +152,24 @@ import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
                         [style]="{ 'width': '120px' }"
                         [disabled]="saving">
                         </p-togglebutton>
+                      </div>
                     </div>
-                    </div>
+                  </div>
+
+                <!-- Botones del formulario -->
+                <div class="flex justify-between col-12 mt-6">
+                  <p-button label="Cancelar" icon="pi pi-times" text (click)="cancelEditValue()" [disabled]="saving" />
+                  <p-button label="Guardar Valor" icon="pi pi-check" (click)="saveValue()" [disabled]="!editingValue.value || saving" [loading]="saving" />
                 </div>
                 </div>
                 <!-- Fin del contenedor grid -->
-
-                <!-- Botones del formulario -->
-                <div class="flex justify-end gap-2 mt-4">
-                <p-button label="Cancelar" icon="pi pi-times" text (click)="cancelEditValue()" [disabled]="saving" />
-                <p-button label="Guardar Valor" icon="pi pi-check" (click)="saveValue()" [disabled]="!editingValue.value || saving" [loading]="saving" />
-                </div>
-
                 <p-divider />
             }
         </div>
 
         <!-- Lista de valores existentes -->
         <div class="flex flex-col">
-          <div class="flex justify-content-between align-items-center mb-3">
+          <div class="flex justify-between">
             <h5 class="m-0">Valores Configurados</h5>
             <p-button
               label="Nuevo Valor"
@@ -202,7 +200,7 @@ import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
               </ng-template>
 
               <ng-template #body let-value>
-                <tr [ngClass]="{ 'bg-surface-100': editingValue?.id === value.id }">
+                <tr [ngClass]="{ 'bg-surface-100': editingValue.id === value.id }">
                   <td style="min-width: 8rem">
                     <span class="font-medium">{{ value.value }}</span>
                     @if (value.code) {
@@ -261,7 +259,7 @@ import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
               <ng-template #emptymessage>
                 <tr>
                   <td colspan="5" class="text-center py-4">
-                    <div class="flex flex-column align-items-center gap-2">
+                    <div class="flex flex-column items-center gap-2">
                       <i class="pi pi-inbox text-4xl text-color-secondary"></i>
                       <span class="text-color-secondary">No hay valores configurados</span>
                     </div>
@@ -313,7 +311,7 @@ export class AttributeValuesDialogComponent implements OnInit, OnChanges {
   // Header dinámico del diálogo
   get dialogHeader(): string {
     if (!this.attribute) return 'Valores de Atributo';
-    return `Valores de: ${this.attribute.name}`;
+    return `${this.attribute.name}`;
   }
 
   ngOnInit() {
