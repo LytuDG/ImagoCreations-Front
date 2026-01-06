@@ -53,6 +53,10 @@ export class AttributeValueService {
     );
   }
 
+  getAttributeValueById(id: string): Observable<AttributeValue> {
+    return this.http.get<AttributeValue>(ATTRIBUTE_ENDPOINTS.ATTRIBUTE_VALUE.BY_ID(id));
+  }
+
   /**
    * Crear un nuevo valor de atributo
    */

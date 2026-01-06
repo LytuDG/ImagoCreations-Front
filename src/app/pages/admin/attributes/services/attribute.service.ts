@@ -52,6 +52,10 @@ export class AttributeService {
     );
   }
 
+  getAttributeById(id: string): Observable<Attribute> {
+    return this.http.get<Attribute>(ATTRIBUTE_ENDPOINTS.ATTRIBUTE.BY_ID(id));
+  }
+
   createAttribute(attribute: Attribute): Observable<ApiResponse<Attribute>>{
     return this.http.post<ApiResponse<Attribute>>(ATTRIBUTE_ENDPOINTS.ATTRIBUTE.BASE, attribute);
   }

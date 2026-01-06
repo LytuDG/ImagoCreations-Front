@@ -1,3 +1,4 @@
+import { ProductAttributeValue } from "@/pages/admin/products/models/product-atribute-value";
 export interface Product {
     id?: string;
     name: string;
@@ -16,6 +17,7 @@ export interface Product {
         publicId: string;
         secureId: string;
     };
+    attributes?: ProductAttributeValue[];
 }
 
 export type ProductType = 'simple' | 'variant';
@@ -24,3 +26,4 @@ export enum PRODUCT_TYPE {
     SIMPLE = 'simple',
     VARIANT = 'variant'
 }
+

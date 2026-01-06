@@ -1,4 +1,4 @@
-import { Component, OnInit, signal, ViewChild } from '@angular/core';
+import { Component, OnInit, signal, ViewChild, inject } from '@angular/core';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { Table, TableModule } from 'primeng/table';
 import { CommonModule } from '@angular/common';
@@ -27,7 +27,18 @@ import { ImageUploadService } from '@/core/services/image-upload.service';
 import { ToggleSwitchModule } from 'primeng/toggleswitch';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, forkJoin, Observable, tap } from 'rxjs';
+import { MultiSelectModule } from 'primeng/multiselect';
+import { CheckboxModule } from 'primeng/checkbox';
+import { CardModule } from 'primeng/card';
+import { TooltipModule } from 'primeng/tooltip';
+import { Attribute } from '../attributes/models/attribute';
+import { AttributeValue } from '../attributes/models/attributeValue';
+import { AttributeValueService } from '../attributes/services/attribute-value.service';
+import { AttributeService } from '../attributes/services/attribute.service';
+import { ProductAttributeValue } from './models/product-atribute-value';
+import { ProductAttributeValueService } from './service/product-atributte-value.service';
+import { ProductAttributesDialog } from './product-attribute-form.dialog';
 
 interface Column {
     field: string;
@@ -65,19 +76,27 @@ interface ExportColumn {
         IconFieldModule,
         ConfirmDialogModule,
         ToggleSwitchModule,
-        ProgressSpinnerModule
+        ProgressSpinnerModule,
+        MultiSelectModule,
+        CheckboxModule,
+        CardModule,
+        TooltipModule,
+        ProductAttributesDialog
     ],
     template: `
         <p-toast />
 
-        <p-toolbar styleClass="mb-6">
+        <p-toolbar class="mb-6">
             <ng-template #start>
                 <p-button label="New" icon="pi pi-plus" severity="secondary" class="mr-2" (onClick)="openNew()" />
-                <p-button severity="secondary" label="Delete" icon="pi pi-trash" outlined (onClick)="deleteSelectedProducts()" [disabled]="!selectedProducts || !selectedProducts.length" />
+                <p-button label="Edit" icon="pi pi-pencil" severity="secondary" class="mr-2" (onClick)="editSelectedProduct()" [disabled]="!selectedProduct" />
+                <p-button label="Manage Attributes" icon="pi pi-tags" severity="secondary" class="mr-2" (onClick)="manageAttributes()" [disabled]="!selectedProduct" />
+                <p-button severity="secondary" label="Delete" icon="pi pi-trash" outlined (onClick)="deleteSelectedProduct()" [disabled]="!selectedProduct" />
             </ng-template>
 
             <ng-template #end>
                 <p-button label="Export" icon="pi pi-upload" severity="secondary" (onClick)="exportCSV()" />
+                <p-button label="Refresh" icon="pi pi-refresh" severity="secondary" class="ml-1" (onClick)="loadProducts()" [loading]="loading()" />
             </ng-template>
         </p-toolbar>
 
@@ -92,28 +111,33 @@ interface ExportColumn {
             [loading]="loading()"
             (onLazyLoad)="onPageChange($event)"
             [globalFilterFields]="['name', 'sku', 'type']"
-            [tableStyle]="{ 'min-width': '75rem' }"
-            [(selection)]="selectedProducts"
+            [tableStyle]="{ 'min-width': '85rem' }"
+            [(selection)]="selectedProduct"
             [rowHover]="true"
             dataKey="id"
+            selectionMode="single"
             currentPageReportTemplate="Showing {first} to {last} of {totalRecords} products"
             [showCurrentPageReport]="true"
             [rowsPerPageOptions]="[10, 20, 50]"
+            [first]="(currentPage - 1) * pageSize"
         >
             <ng-template #caption>
                 <div class="flex items-center justify-between">
                     <h5 class="m-0">Manage Products</h5>
                     <p-iconfield>
                         <p-inputicon styleClass="pi pi-search" />
-                        <input pInputText type="text" (input)="onGlobalFilter(dt, $event)" placeholder="Search..." />
+                        <input
+                            pInputText
+                            type="text"
+                            (keyup)="applyFilter($event, 'name')"
+                            placeholder="Search by name, SKU or type..."
+                        />
                     </p-iconfield>
                 </div>
             </ng-template>
             <ng-template #header>
                 <tr>
-                    <th style="width: 3rem">
-                        <p-tableHeaderCheckbox />
-                    </th>
+                    <th style="width: 3rem"></th>
                     <th style="min-width: 12rem">SKU</th>
                     <th pSortableColumn="name" style="min-width:16rem">
                         Name
@@ -128,38 +152,84 @@ interface ExportColumn {
                         Type
                         <p-sortIcon field="type" />
                     </th>
+                    <th style="min-width: 12rem">Attributes</th>
                     <th pSortableColumn="isActive" style="min-width: 10rem">
                         Status
                         <p-sortIcon field="isActive" />
                     </th>
-                    <th style="min-width: 12rem"></th>
                 </tr>
             </ng-template>
             <ng-template #body let-product>
-                <tr>
-                    <td style="width: 3rem">
-                        <p-tableCheckbox [value]="product" />
+                <tr
+                    (click)="selectRow(product)"
+                    [ngClass]="{
+                        'bg-primary-50': selectedProduct?.id === product.id,
+                        'cursor-pointer': true
+                    }"
+                    class="hover:bg-surface-100 transition-colors duration-150"
+                >
+                    <td class="w-12 p-3" (click)="$event.stopPropagation()">
+                        <div class="flex h-full items-center">
+                            <p-radioButton
+                                [value]="product"
+                                [(ngModel)]="selectedProduct"
+                            />
+                        </div>
                     </td>
-                    <td style="min-width: 12rem">{{ product.sku || 'N/A' }}</td>
-                    <td style="min-width: 16rem">{{ product.name }}</td>
-                    <td>
+                    <td class="p-3" style="min-width: 12rem">{{ product.sku || 'N/A' }}</td>
+                    <td class="p-3" style="min-width: 16rem">{{ product.name }}</td>
+                    <td class="p-3">
                         <img [src]="product.picture" [alt]="product.name" style="width: 64px; height: 64px; object-fit: cover;" class="rounded" />
                     </td>
-                    <td>{{ product.basePrice | currency: 'USD' }}</td>
-                    <td>
-                        <p-tag [value]="product.type" [severity]="product.type === 'simple' ? 'info' : 'secondary'" />
+                    <td class="p-3">{{ product.basePrice | currency: 'USD' }}</td>
+                    <td class="p-3">
+                        <p-tag [value]="product.type" [severity]="getTypeSeverity(product.type)" />
                     </td>
-                    <td>
+                    <td class="p-3">
+                        @if (productAttributesMap[product.id]?.length) {
+                            <div class="flex flex-wrap gap-1">
+                                @for (attr of productAttributesMap[product.id] | slice:0:3; track attr.id) {
+                                    <p-tag
+                                        [value]="getAttributeDisplay(attr)"
+                                        severity="info"
+                                        styleClass="text-xs"
+                                    />
+                                }
+                                @if (productAttributesMap[product.id].length > 3) {
+                                    <p-tag
+                                        [value]="'+' + (productAttributesMap[product.id].length - 3)"
+                                        severity="contrast"
+                                        styleClass="text-xs"
+                                    />
+                                }
+                            </div>
+                        }
+                        @if (!productAttributesMap[product.id]?.length) {
+                            <span class="text-gray-400 text-sm">No attributes</span>
+                        }
+                    </td>
+                    <td class="p-3">
                         <p-tag [value]="product.isActive ? 'Active' : 'Inactive'" [severity]="product.isActive ? 'success' : 'danger'" />
                     </td>
-                    <td>
-                        <p-button icon="pi pi-pencil" class="mr-2" [rounded]="true" [outlined]="true" (click)="editProduct(product)" />
-                        <p-button icon="pi pi-trash" severity="danger" [rounded]="true" [outlined]="true" (click)="deleteProduct(product)" />
+                </tr>
+            </ng-template>
+
+            <ng-template #emptymessage>
+                <tr>
+                    <td colspan="8" class="text-center py-6">
+                        <div class="flex flex-column items-center gap-3">
+                            <i class="pi pi-box text-6xl text-color-secondary"></i>
+                            <span class="text-xl text-color-secondary font-medium">
+                                No products found
+                            </span>
+                            <p-button label="Refresh" icon="pi pi-refresh" (onClick)="loadProducts()" />
+                        </div>
                     </td>
                 </tr>
             </ng-template>
         </p-table>
 
+        <!-- Diálogo principal de producto -->
         <p-dialog [(visible)]="productDialog" [style]="{ width: '600px' }" [modal]="true" [closable]="!isUploading && !isSaving" [closeOnEscape]="!isUploading && !isSaving">
             <ng-template #header>
                 <div class="flex items-center gap-3">
@@ -172,42 +242,54 @@ interface ExportColumn {
                 <div class="flex flex-col gap-5">
                     <!-- Image Upload Section -->
                     <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-primary transition-colors">
-                        <div *ngIf="!selectedFile && !imagePreview" class="flex flex-col items-center gap-3">
-                            <i class="pi pi-cloud-upload text-5xl text-gray-400"></i>
-                            <div>
-                                <p class="font-semibold text-gray-700 mb-1">Click to upload product image</p>
-                                <p class="text-sm text-gray-500">PNG, JPG, GIF or WebP (max. 10MB)</p>
+                        @if (!selectedFile && !imagePreview) {
+                            <div class="flex flex-col items-center gap-3">
+                                <i class="pi pi-cloud-upload text-5xl text-gray-400"></i>
+                                <div>
+                                    <p class="font-semibold text-gray-700 mb-1">Click to upload product image</p>
+                                    <p class="text-sm text-gray-500">PNG, JPG, GIF or WebP (max. 10MB)</p>
+                                </div>
+                                <input type="file" #fileInput (change)="onFileSelect($event)" accept="image/*" class="hidden" id="imageUpload" />
+                                <p-button label="Choose Image" icon="pi pi-upload" (onClick)="fileInput.click()" [disabled]="isUploading || isSaving" />
                             </div>
-                            <input type="file" #fileInput (change)="onFileSelect($event)" accept="image/*" class="hidden" id="imageUpload" />
-                            <p-button label="Choose Image" icon="pi pi-upload" (onClick)="fileInput.click()" [disabled]="isUploading || isSaving" />
-                        </div>
+                        }
 
-                        <div *ngIf="selectedFile || imagePreview" class="flex flex-col items-center gap-3">
-                            <img *ngIf="imagePreview" [src]="imagePreview" alt="Product preview" class="max-h-48 rounded-lg shadow-md" />
-                            <div class="flex items-center gap-2 text-sm text-gray-600">
-                                <i class="pi pi-file"></i>
-                                <span>{{ selectedFile?.name }}</span>
-                                <span class="text-gray-400">{{ formatFileSize(selectedFile?.size) }}</span>
+                        @if (selectedFile || imagePreview) {
+                            <div class="flex flex-col items-center gap-3">
+                                @if (imagePreview) {
+                                    <img [src]="imagePreview" alt="Product preview" class="max-h-48 rounded-lg shadow-md" />
+                                }
+                                <div class="flex items-center gap-2 text-sm text-gray-600">
+                                    <i class="pi pi-file"></i>
+                                    <span>{{ selectedFile?.name }}</span>
+                                    <span class="text-gray-400">{{ formatFileSize(selectedFile?.size) }}</span>
+                                </div>
+                                <p-button label="Change Image" icon="pi pi-refresh" severity="secondary" [outlined]="true" (onClick)="fileInput.click()" [disabled]="isUploading || isSaving" />
+                                <input type="file" #fileInput (change)="onFileSelect($event)" accept="image/*" class="hidden" />
                             </div>
-                            <p-button label="Change Image" icon="pi pi-refresh" severity="secondary" [outlined]="true" (onClick)="fileInput.click()" [disabled]="isUploading || isSaving" />
-                            <input type="file" #fileInput (change)="onFileSelect($event)" accept="image/*" class="hidden" />
-                        </div>
+                        }
 
-                        <small class="text-red-500 block mt-2" *ngIf="submitted && !selectedFile">Product image is required.</small>
+                        @if (submitted && !selectedFile) {
+                            <small class="text-red-500 block mt-2">Product image is required.</small>
+                        }
                     </div>
 
                     <!-- Product Name -->
                     <div>
                         <label for="productName" class="block font-semibold mb-2 text-gray-700"> Product Name <span class="text-red-500">*</span> </label>
                         <input type="text" pInputText id="productName" [(ngModel)]="newProduct.name" placeholder="Enter product name" [disabled]="isUploading || isSaving" class="w-full" fluid />
-                        <small class="text-red-500" *ngIf="submitted && !newProduct.name">Product name is required.</small>
+                        @if (submitted && !newProduct.name) {
+                            <small class="text-red-500">Product name is required.</small>
+                        }
                     </div>
 
                     <!-- Description -->
                     <div>
                         <label for="productDescription" class="block font-semibold mb-2 text-gray-700"> Description <span class="text-red-500">*</span> </label>
                         <textarea id="productDescription" pTextarea [(ngModel)]="newProduct.description" placeholder="Describe the product features and characteristics" [disabled]="isUploading || isSaving" rows="4" class="w-full" fluid></textarea>
-                        <small class="text-red-500" *ngIf="submitted && !newProduct.description">Description is required.</small>
+                        @if (submitted && !newProduct.description) {
+                            <small class="text-red-500">Description is required.</small>
+                        }
                     </div>
 
                     <!-- Base Price and Product Type -->
@@ -215,7 +297,9 @@ interface ExportColumn {
                         <div>
                             <label for="basePrice" class="block font-semibold mb-2 text-gray-700"> Base Price <span class="text-red-500">*</span> </label>
                             <p-inputnumber id="basePrice" [(ngModel)]="newProduct.basePrice" mode="currency" currency="USD" locale="en-US" [disabled]="isUploading || isSaving" placeholder="0.00" [min]="0" class="w-full" fluid />
-                            <small class="text-red-500" *ngIf="submitted && !newProduct.basePrice">Base price is required.</small>
+                            @if (submitted && !newProduct.basePrice) {
+                                <small class="text-red-500">Base price is required.</small>
+                            }
                         </div>
 
                         <div>
@@ -223,6 +307,48 @@ interface ExportColumn {
                             <p-select id="productType" [(ngModel)]="newProduct.type" [options]="productTypes" optionLabel="label" optionValue="value" placeholder="Select type" [disabled]="isUploading || isSaving" class="w-full" fluid />
                         </div>
                     </div>
+
+                    <!-- Sección de atributos (solo para edición) -->
+                    @if (product.id) {
+                        <div class="border-t pt-4 mt-4">
+                            <div class="flex items-center justify-between mb-3">
+                                <label class="block font-semibold text-gray-700">Product Attributes</label>
+                                <p-button
+                                    label="Manage Attributes"
+                                    icon="pi pi-tags"
+                                    severity="secondary"
+                                    [outlined]="true"
+                                    size="small"
+                                    (onClick)="openAttributesDialog()"
+                                    [disabled]="isUploading || isSaving"
+                                />
+                            </div>
+
+                            @if (currentProductAttributes.length) {
+                                <div class="space-y-2">
+                                    @for (attr of currentProductAttributes; track attr.id) {
+                                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                            <div>
+                                                <span class="font-medium">{{ getAttributeName(attr.attributeId) }}</span>
+                                                <span class="text-gray-600 ml-2">→ {{ getAttributeValueText(attr.attributeValueId) }}</span>
+                                                <div class="text-xs text-gray-500 mt-1">
+                                                    <span class="mr-3">Required: {{ attr.required ? 'Yes' : 'No' }}</span>
+                                                    <span>Order: {{ attr.sortOrder }}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                            }
+
+                            @if (!currentProductAttributes.length) {
+                                <div class="text-center py-4 text-gray-400">
+                                    <i class="pi pi-tags text-xl mr-2"></i>
+                                    No attributes assigned yet
+                                </div>
+                            }
+                        </div>
+                    }
 
                     <!-- Active Status -->
                     <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
@@ -234,16 +360,20 @@ interface ExportColumn {
                     </div>
 
                     <!-- Upload Progress -->
-                    <div *ngIf="isUploading" class="flex items-center gap-3 p-4 bg-blue-50 rounded-lg border border-blue-200">
-                        <p-progressSpinner [style]="{ width: '30px', height: '30px' }" strokeWidth="4" />
-                        <span class="text-blue-700 font-medium">Uploading image...</span>
-                    </div>
+                    @if (isUploading) {
+                        <div class="flex items-center gap-3 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                            <p-progressSpinner [style]="{ width: '30px', height: '30px' }" strokeWidth="4" />
+                            <span class="text-blue-700 font-medium">Uploading image...</span>
+                        </div>
+                    }
 
                     <!-- Save Progress -->
-                    <div *ngIf="isSaving" class="flex items-center gap-3 p-4 bg-green-50 rounded-lg border border-green-200">
-                        <p-progressSpinner [style]="{ width: '30px', height: '30px' }" strokeWidth="4" />
-                        <span class="text-green-700 font-medium">Creating product...</span>
-                    </div>
+                    @if (isSaving) {
+                        <div class="flex items-center gap-3 p-4 bg-green-50 rounded-lg border border-green-200">
+                            <p-progressSpinner [style]="{ width: '30px', height: '30px' }" strokeWidth="4" />
+                            <span class="text-green-700 font-medium">Creating product...</span>
+                        </div>
+                    }
                 </div>
             </ng-template>
 
@@ -255,76 +385,74 @@ interface ExportColumn {
             </ng-template>
         </p-dialog>
 
+        <app-product-attributes-dialog
+            [visible]="attributesDialog"
+            [product]="selectedProduct"
+            [existingAttributes]="currentProductAttributes"
+            (save)="onAttributesSaved()"
+            (cancel)="closeAttributesDialog()"
+            (hide)="closeAttributesDialog()"
+        />
+
         <p-confirmdialog [style]="{ width: '450px' }" />
     `,
     providers: [MessageService, ProductService, ConfirmationService]
 })
 export class Products implements OnInit {
-    productDialog: boolean = false;
+    private productService = inject(ProductService);
+    private messageService = inject(MessageService);
+    private confirmationService = inject(ConfirmationService);
+    private imageUploadService = inject(ImageUploadService);
+    private sanitizer = inject(DomSanitizer);
+    private productAttributeValueService = inject(ProductAttributeValueService);
+    private attributeService = inject(AttributeService);
+    private attributeValueService = inject(AttributeValueService);
 
+    productDialog: boolean = false;
+    attributesDialog: boolean = false;
     uploadedFiles: any[] = [];
     products = signal<Product[]>([]);
-
     product!: Product;
+    selectedProduct: Product | null = null;
 
-    selectedProducts!: Product[] | null;
-
-    // Pagination and loading state
     loading = signal<boolean>(false);
     totalRecords = 0;
     pageSize = 10;
     currentPage = 1;
-
     submitted: boolean = false;
 
     statuses!: any[];
-
     @ViewChild('dt') dt!: Table;
-
     exportColumns!: ExportColumn[];
-
     cols!: Column[];
 
-    // New Product properties
     newProduct: Partial<Product> = {};
     productTypes = [
         { label: 'Simple Product', value: PRODUCT_TYPE.SIMPLE },
         { label: 'Product with Variants', value: PRODUCT_TYPE.VARIANT }
     ];
 
-    // Image upload state
     isUploading = false;
     isSaving = false;
     selectedFile: File | null = null;
     imagePreview: SafeUrl | null = null;
+    timeOut: any;
 
-    constructor(
-        private productService: ProductService,
-        private messageService: MessageService,
-        private confirmationService: ConfirmationService,
-        private imageUploadService: ImageUploadService,
-        private sanitizer: DomSanitizer
-    ) {}
+    currentProductAttributes: ProductAttributeValue[] = [];
+    productAttributesMap: { [key: string]: ProductAttributeValue[] } = {};
 
-    onUpload(event: any) {
-        for (const file of event.files) {
-            this.uploadedFiles.push(file);
-        }
+    // Cache para atributos y valores
+    private attributesCache: Map<string, Attribute> = new Map();
+    private attributeValuesCache: Map<string, AttributeValue> = new Map();
+    private loadingAttributes: Set<string> = new Set();
+    private loadingAttributeValues: Set<string> = new Set();
 
-        this.messageService.add({ severity: 'info', summary: 'Success', detail: 'File Uploaded' });
+    ngOnInit() {
+        this.initializeColumns();
     }
 
     exportCSV() {
         this.dt.exportCSV();
-    }
-
-    loadingTable() {
-        this.dt.loading = !this.dt.loading;
-    }
-
-    ngOnInit() {
-        this.initializeColumns();
-        // Don't call loadProducts() here - lazy loading will trigger onPageChange automatically
     }
 
     initializeColumns() {
@@ -336,54 +464,32 @@ export class Products implements OnInit {
             { field: 'type', header: 'Type' },
             { field: 'isActive', header: 'Status' }
         ];
-
         this.exportColumns = this.cols.map((col) => ({ title: col.header, dataKey: col.field }));
     }
 
-    /**
-     * Load products from API with pagination
-     */
-    loadProducts(page: number = 1, limit: number = 10) {
-        this.loading.set(true);
-        this.currentPage = page;
-        this.pageSize = limit;
-
-        const filters: FilterProductsDto = {
-            page,
-            limit
-            // Only show active products by default (remove this line to show all)
-            // isActive: true
-        };
-
-        this.productService.filterProducts(filters).subscribe({
-            next: (response: any) => {
-                this.products.set(response.data);
-                this.totalRecords = response.total;
-                this.loading.set(false);
-            },
-            error: (error: any) => {
-                console.error('Error loading products:', error);
-                this.messageService.add({
-                    severity: 'error',
-                    summary: 'Error',
-                    detail: 'Failed to load products',
-                    life: 5000
-                });
-                this.loading.set(false);
-            }
-        });
-    }
-
-    /**
-     * Handle pagination events from the table
-     */
     onPageChange(event: any) {
         const page = event.first / event.rows + 1;
+        this.selectedProduct = null;
         this.loadProducts(page, event.rows);
     }
 
-    onGlobalFilter(table: Table, event: Event) {
-        table.filterGlobal((event.target as HTMLInputElement).value, 'contains');
+    applyFilter(event: Event, column: string): void {
+        clearTimeout(this.timeOut);
+        this.timeOut = setTimeout(() => {
+            const filterValue = (event.target as HTMLInputElement).value.trim();
+            if (filterValue) {
+                this.dt.filterGlobal(filterValue, 'contains');
+            } else {
+                this.dt.filterGlobal(null, 'contains');
+            }
+        }, 500);
+    }
+
+    selectRow(product: Product): void {
+        this.selectedProduct = product;
+        if (product.id && !this.productAttributesMap[product.id]) {
+            this.loadProductAttributes(product.id);
+        }
     }
 
     openNew() {
@@ -402,26 +508,25 @@ export class Products implements OnInit {
         this.product = { ...product };
         this.newProduct = { ...product };
         this.imagePreview = product.picture as SafeUrl;
+
+        if (product.id && !this.productAttributesMap[product.id]) {
+            this.loadProductAttributes(product.id);
+        }
+
         this.productDialog = true;
     }
 
-    deleteSelectedProducts() {
-        this.confirmationService.confirm({
-            message: 'Are you sure you want to delete the selected products?',
-            header: 'Confirm',
-            icon: 'pi pi-exclamation-triangle',
-            accept: () => {
-                // TODO: Implement bulk delete API if available
-                this.products.set(this.products().filter((val) => !this.selectedProducts?.includes(val)));
-                this.selectedProducts = null;
-                this.messageService.add({
-                    severity: 'success',
-                    summary: 'Successful',
-                    detail: 'Products Deleted',
-                    life: 3000
-                });
-            }
-        });
+    editSelectedProduct(): void {
+        if (!this.selectedProduct) {
+            this.messageService.add({
+                severity: 'warn',
+                summary: 'Selection Required',
+                detail: 'Please select a product to edit',
+                life: 3000
+            });
+            return;
+        }
+        this.editProduct(this.selectedProduct);
     }
 
     hideDialog() {
@@ -432,6 +537,19 @@ export class Products implements OnInit {
         this.imagePreview = null;
     }
 
+    deleteSelectedProduct(): void {
+        if (!this.selectedProduct) {
+            this.messageService.add({
+                severity: 'warn',
+                summary: 'Selection Required',
+                detail: 'Please select a product to delete',
+                life: 3000
+            });
+            return;
+        }
+        this.deleteProduct(this.selectedProduct);
+    }
+
     deleteProduct(product: Product) {
         this.confirmationService.confirm({
             message: 'Are you sure you want to delete ' + product.name + '?',
@@ -439,78 +557,307 @@ export class Products implements OnInit {
             icon: 'pi pi-exclamation-triangle',
             accept: () => {
                 if (product.id) {
-                    this.productService.deleteProduct(product.id).subscribe({
-                        next: () => {
-                            this.products.set(this.products().filter((val) => val.id !== product.id));
-                            this.product = {} as Product;
-                            this.messageService.add({
-                                severity: 'success',
-                                summary: 'Successful',
-                                detail: 'Product Deleted',
-                                life: 3000
-                            });
-                        },
-                        error: (error) => {
-                            console.error('Error deleting product:', error);
-                            this.messageService.add({
-                                severity: 'error',
-                                summary: 'Error',
-                                detail: 'Failed to delete product',
-                                life: 3000
-                            });
-                        }
-                    });
+                    const productAttributes = this.productAttributesMap[product.id] || [];
+                    const deleteAttributeObservables = productAttributes
+                        .filter(attr => attr.id)
+                        .map(attr =>
+                            this.productAttributeValueService.deleteProductAttribute(attr.id!)
+                        );
+
+                    if (deleteAttributeObservables.length > 0) {
+                        forkJoin(deleteAttributeObservables).subscribe({
+                            next: () => {
+                                this.deleteProductAfterAttributes(product);
+                            },
+                            error: (error) => {
+                                console.error('Error deleting product attributes:', error);
+                                this.messageService.add({
+                                    severity: 'error',
+                                    summary: 'Error',
+                                    detail: 'Failed to delete product attributes',
+                                    life: 3000
+                                });
+                            }
+                        });
+                    } else {
+                        this.deleteProductAfterAttributes(product);
+                    }
                 }
             }
         });
     }
 
-    findIndexById(id: string): number {
-        let index = -1;
-        for (let i = 0; i < this.products().length; i++) {
-            if (this.products()[i].id === id) {
-                index = i;
-                break;
+    private deleteProductAfterAttributes(product: Product): void {
+        this.productService.deleteProduct(product.id!).subscribe({
+            next: () => {
+                delete this.productAttributesMap[product.id!];
+                this.products.set(this.products().filter((val) => val.id !== product.id));
+                this.selectedProduct = null;
+                this.totalRecords = Math.max(0, this.totalRecords - 1);
+
+                if (this.products().length === 0 && this.currentPage > 1) {
+                    this.currentPage--;
+                    this.loadProducts(this.currentPage, this.pageSize);
+                }
+
+                this.messageService.add({
+                    severity: 'success',
+                    summary: 'Successful',
+                    detail: 'Product Deleted',
+                    life: 3000
+                });
+            },
+            error: (error) => {
+                console.error('Error deleting product:', error);
+                this.messageService.add({
+                    severity: 'error',
+                    summary: 'Error',
+                    detail: 'Failed to delete product',
+                    life: 3000
+                });
             }
-        }
-
-        return index;
+        });
     }
 
-    createId(): string {
-        let id = '';
-        var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-        for (var i = 0; i < 5; i++) {
-            id += chars.charAt(Math.floor(Math.random() * chars.length));
-        }
-        return id;
+    loadProducts(page: number = 1, limit: number = 10) {
+        this.loading.set(true);
+        this.currentPage = page;
+        this.pageSize = limit;
+
+        const filters: FilterProductsDto = {
+            page,
+            limit
+        };
+
+        this.productService.filterProducts(filters).subscribe({
+            next: (response: any) => {
+                const products = response.data;
+                this.products.set(products);
+                this.totalRecords = response.total;
+
+                // Crear un array de observables para cargar atributos de todos los productos
+                const attributeObservables: Observable<void>[] = [];
+
+                products.forEach((product: Product) => {
+                    if (product.id) {
+                        // Crear un observable para cada producto
+                        const observable = new Observable<void>(observer => {
+                            this.loadProductAttributes(product.id!).subscribe({
+                                next: () => {
+                                    observer.next();
+                                    observer.complete();
+                                },
+                                error: (error) => {
+                                    console.error('Error loading product attributes for product', product.id, error);
+                                    observer.next(); // Continuar aunque falle
+                                    observer.complete();
+                                }
+                            });
+                        });
+                        attributeObservables.push(observable);
+                    }
+                });
+
+                if (attributeObservables.length > 0) {
+                    // Esperar a que todos los atributos se carguen
+                    forkJoin(attributeObservables).subscribe({
+                        next: () => {
+                            this.loading.set(false);
+                        },
+                        error: (error) => {
+                            console.error('Error loading product attributes:', error);
+                            this.loading.set(false);
+                        }
+                    });
+                } else {
+                    // Si no hay productos o productos sin ID, quitar loading inmediatamente
+                    this.loading.set(false);
+                }
+            },
+            error: (error: any) => {
+                console.error('Error loading products:', error);
+                this.messageService.add({
+                    severity: 'error',
+                    summary: 'Error',
+                    detail: 'Failed to load products',
+                    life: 5000
+                });
+                this.loading.set(false);
+            }
+        });
     }
 
-    getSeverity(status: string | boolean) {
-        if (typeof status === 'boolean') {
-            return status ? 'success' : 'danger';
-        }
-        switch (status) {
-            case 'INSTOCK':
-                return 'success';
-            case 'LOWSTOCK':
-                return 'warn';
-            case 'OUTOFSTOCK':
-                return 'danger';
-            default:
-                return 'info';
-        }
+    // Modificar loadProductAttributes para que devuelva un Observable
+    loadProductAttributes(productId: string): Observable<void> {
+        return new Observable<void>(observer => {
+            this.productAttributeValueService.getProductAttributes({
+                filters: { productId },
+                limit: 100
+            }).subscribe({
+                next: (response) => {
+                    const productAttributes = response.data || [];
+                    this.productAttributesMap[productId] = productAttributes;
+
+                    // Cargar detalles de atributos y esperar a que se completen
+                    this.loadAttributeDetails(productAttributes).subscribe({
+                        next: () => {
+                            if (this.selectedProduct?.id === productId) {
+                                this.currentProductAttributes = productAttributes;
+                            }
+                            observer.next();
+                            observer.complete();
+                        },
+                        error: (error) => {
+                            console.error('Error loading attribute details:', error);
+                            observer.next(); // Continuar aunque falle
+                            observer.complete();
+                        }
+                    });
+                },
+                error: (error) => {
+                    console.error('Error loading product attributes:', error);
+                    observer.next(); // Continuar aunque falle
+                    observer.complete();
+                }
+            });
+        });
     }
 
-    /**
-     * Handle file selection for product image
-     */
+    // Modificar loadAttributeDetails para que devuelva un Observable
+    private loadAttributeDetails(productAttributes: ProductAttributeValue[]): Observable<void> {
+        return new Observable<void>(observer => {
+            if (productAttributes.length === 0) {
+                observer.next();
+                observer.complete();
+                return;
+            }
+
+            const attributeObservables: Observable<any>[] = [];
+
+            productAttributes.forEach(attr => {
+                // Cargar atributo si no está en cache
+                if (attr.attributeId && !this.attributesCache.has(attr.attributeId) && !this.loadingAttributes.has(attr.attributeId)) {
+                    this.loadingAttributes.add(attr.attributeId);
+                    const attributeObservable = this.attributeService.getAttributeById(attr.attributeId).pipe(
+                        tap({
+                            next: (attribute) => {
+                                this.attributesCache.set(attr.attributeId, attribute);
+                                this.loadingAttributes.delete(attr.attributeId);
+                            },
+                            error: (error) => {
+                                console.error('Error loading attribute:', error);
+                                this.loadingAttributes.delete(attr.attributeId);
+                            }
+                        })
+                    );
+                    attributeObservables.push(attributeObservable);
+                }
+
+                // Cargar valor de atributo si no está en cache
+                if (attr.attributeValueId && !this.attributeValuesCache.has(attr.attributeValueId) && !this.loadingAttributeValues.has(attr.attributeValueId)) {
+                    this.loadingAttributeValues.add(attr.attributeValueId);
+                    const attributeValueObservable = this.attributeValueService.getAttributeValueById(attr.attributeValueId).pipe(
+                        tap({
+                            next: (attributeValue) => {
+                                this.attributeValuesCache.set(attr.attributeValueId, attributeValue);
+                                this.loadingAttributeValues.delete(attr.attributeValueId);
+                            },
+                            error: (error) => {
+                                console.error('Error loading attribute value:', error);
+                                this.loadingAttributeValues.delete(attr.attributeValueId);
+                            }
+                        })
+                    );
+                    attributeObservables.push(attributeValueObservable);
+                }
+            });
+
+            if (attributeObservables.length > 0) {
+                forkJoin(attributeObservables).subscribe({
+                    next: () => {
+                        observer.next();
+                        observer.complete();
+                    },
+                    error: (error) => {
+                        console.error('Error loading attribute details:', error);
+                        observer.next(); // Continuar aunque falle
+                        observer.complete();
+                    }
+                });
+            } else {
+                // Si no hay atributos para cargar, completar inmediatamente
+                observer.next();
+                observer.complete();
+            }
+        });
+    }
+
+    // Métodos helpers para obtener nombres y valores
+    getAttributeName(attributeId: string): string {
+        return this.attributesCache.get(attributeId)?.name || attributeId?.substring(0, 8) + '...';
+    }
+
+    getAttributeValueText(attributeValueId: string): string {
+        return this.attributeValuesCache.get(attributeValueId)?.value || attributeValueId?.substring(0, 8) + '...';
+    }
+
+    getAttributeDisplay(attr: ProductAttributeValue): string {
+        const attributeName = this.getAttributeName(attr.attributeId);
+        const attributeValue = this.getAttributeValueText(attr.attributeValueId);
+        return `${attributeName}: ${attributeValue}`;
+    }
+
+    manageAttributes(): void {
+        if (!this.selectedProduct?.id) {
+            this.messageService.add({
+                severity: 'warn',
+                summary: 'Selection Required',
+                detail: 'Please select a product to manage its attributes',
+                life: 3000
+            });
+            return;
+        }
+        this.openAttributesDialog();
+    }
+
+    openAttributesDialog(): void {
+        if (!this.selectedProduct?.id) return;
+        this.attributesDialog = true;
+    }
+
+    closeAttributesDialog(): void {
+        this.attributesDialog = false;
+    }
+
+    onAttributesSaved(): void {
+        if (this.selectedProduct?.id) {
+            // Limpiar cache para este producto
+            if (this.productAttributesMap[this.selectedProduct.id]) {
+                this.productAttributesMap[this.selectedProduct.id].forEach(attr => {
+                    this.attributesCache.delete(attr.attributeId);
+                    this.attributeValuesCache.delete(attr.attributeValueId);
+                });
+            }
+            this.loadProducts()
+            this.loadProductAttributes(this.selectedProduct.id);
+        }
+        this.messageService.add({
+            severity: 'success',
+            summary: 'Success',
+            detail: 'Product attributes saved successfully',
+            life: 3000
+        });
+    }
+
+    getTypeSeverity(type: string): 'success' | 'secondary' | 'info' | 'warn' | 'danger' | 'contrast' | undefined | null {
+        return type === PRODUCT_TYPE.SIMPLE ? 'info' : 'secondary';
+    }
+
     onFileSelect(event: Event): void {
         const input = event.target as HTMLInputElement;
         if (input.files && input.files.length > 0) {
             const file = input.files[0];
 
-            // Validate the file
             const validation = this.imageUploadService.validateImageFile(file);
             if (!validation.isValid) {
                 this.messageService.add({
@@ -524,7 +871,6 @@ export class Products implements OnInit {
 
             this.selectedFile = file;
 
-            // Create preview
             const reader = new FileReader();
             reader.onload = (e: ProgressEvent<FileReader>) => {
                 if (e.target?.result) {
@@ -535,27 +881,18 @@ export class Products implements OnInit {
         }
     }
 
-    /**
-     * Format file size for display
-     */
     formatFileSize(bytes: number | undefined): string {
         if (!bytes) return '0 Bytes';
-
         const k = 1024;
         const sizes = ['Bytes', 'KB', 'MB', 'GB'];
         const i = Math.floor(Math.log(bytes) / Math.log(k));
-
         return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i];
     }
 
-    /**
-     * Save product with image upload (Create or Update)
-     */
-    async saveProduct(): Promise<void> {
+    saveProduct(): void {
         this.submitted = true;
         const isUpdate = !!this.product.id;
 
-        // Validate required fields
         if (!this.newProduct.name || !this.newProduct.description || !this.newProduct.basePrice) {
             this.messageService.add({
                 severity: 'warn',
@@ -566,7 +903,6 @@ export class Products implements OnInit {
             return;
         }
 
-        // Image is required for new products, but optional for updates (if not changing)
         if (!isUpdate && !this.selectedFile) {
             this.messageService.add({
                 severity: 'warn',
@@ -577,35 +913,12 @@ export class Products implements OnInit {
             return;
         }
 
-        try {
+        this.isSaving = true;
+
+        const saveFlow = () => {
             let publicId = this.product.pictureProperties?.publicId;
             let secureUrl = this.product.pictureProperties?.secureId || this.product.picture;
 
-            // Step 1: Upload image to Cloudinary if a new file is selected
-            if (this.selectedFile) {
-                console.log('🚀 Starting image upload...', {
-                    fileName: this.selectedFile.name,
-                    fileSize: this.selectedFile.size,
-                    fileType: this.selectedFile.type
-                });
-
-                this.isUploading = true;
-                const uploadResponse = await firstValueFrom(this.imageUploadService.uploadImage(this.selectedFile, 'product'));
-
-                console.log('✅ Image upload successful:', uploadResponse);
-
-                if (!uploadResponse || !uploadResponse.public_id || !uploadResponse.secure_url) {
-                    throw new Error('Image upload response is incomplete');
-                }
-
-                publicId = uploadResponse.public_id;
-                secureUrl = uploadResponse.secure_url;
-                this.isUploading = false;
-            }
-
-            this.isSaving = true;
-
-            // Step 2: Create or Update product
             const productDto = {
                 name: this.newProduct.name,
                 description: this.newProduct.description,
@@ -616,55 +929,107 @@ export class Products implements OnInit {
                 secureUrl: secureUrl
             };
 
-            console.log('🚀 Saving product with data:', productDto);
+            let productObservable: Observable<any>;
 
             if (isUpdate && this.product.id) {
-                const updatedProduct = await firstValueFrom(this.productService.updateProduct(this.product.id, productDto));
-                console.log('✅ Product updated successfully:', updatedProduct);
-                this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Product updated successfully', life: 3000 });
+                productObservable = this.productService.updateProduct(this.product.id, productDto);
             } else {
-                // Ensure publicId and secureUrl are present for creation
                 if (!productDto.publicId || !productDto.secureUrl) {
-                    throw new Error('Image data missing for new product');
+                    this.messageService.add({
+                        severity: 'error',
+                        summary: 'Error',
+                        detail: 'Image data missing for new product',
+                        life: 5000
+                    });
+                    this.isSaving = false;
+                    return;
                 }
-                const createdProduct = await firstValueFrom(this.productService.createProduct(productDto as any));
-                console.log('✅ Product created successfully:', createdProduct);
-                this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Product created successfully', life: 3000 });
+                productObservable = this.productService.createProduct(productDto as any);
             }
 
-            this.isSaving = false;
+            productObservable.subscribe({
+                next: (result) => {
+                    this.isSaving = false;
+                    this.hideDialog();
+                    this.loadProducts(this.currentPage, this.pageSize);
+                    this.selectedProduct = null;
 
-            // Reset form and close dialog
-            this.hideDialog();
+                    const message = isUpdate ? 'Product updated successfully' : 'Product created successfully';
+                    this.messageService.add({
+                        severity: 'success',
+                        summary: 'Success',
+                        detail: message,
+                        life: 3000
+                    });
 
-            // Refresh the products list
-            this.loadProducts(this.currentPage, this.pageSize);
-        } catch (error: any) {
-            console.error('❌ Error during product save:', error);
+                    if (!isUpdate && result.id) {
+                        setTimeout(() => {
+                            const newProduct = this.products().find(p => p.id === result.id);
+                            if (newProduct) {
+                                this.selectedProduct = newProduct;
+                            }
+                        }, 500);
+                    }
+                },
+                error: (error: any) => {
+                    this.isSaving = false;
+                    let errorMessage = 'Failed to save product';
+                    if (error.status === 0) {
+                        errorMessage = 'Network error - please check your connection';
+                    } else if (error.status === 413) {
+                        errorMessage = 'Image file is too large';
+                    } else if (error.status === 415) {
+                        errorMessage = 'Unsupported file type';
+                    } else if (error.error?.message) {
+                        errorMessage = error.error.message;
+                    } else if (error.message) {
+                        errorMessage = error.message;
+                    }
 
-            this.isUploading = false;
-            this.isSaving = false;
-
-            let errorMessage = 'Failed to save product';
-
-            if (error.status === 0) {
-                errorMessage = 'Network error - please check your connection';
-            } else if (error.status === 413) {
-                errorMessage = 'Image file is too large';
-            } else if (error.status === 415) {
-                errorMessage = 'Unsupported file type';
-            } else if (error.error?.message) {
-                errorMessage = error.error.message;
-            } else if (error.message) {
-                errorMessage = error.message;
-            }
-
-            this.messageService.add({
-                severity: 'error',
-                summary: 'Error',
-                detail: errorMessage,
-                life: 5000
+                    this.messageService.add({
+                        severity: 'error',
+                        summary: 'Error',
+                        detail: errorMessage,
+                        life: 5000
+                    });
+                }
             });
+        };
+
+        if (this.selectedFile) {
+            this.isUploading = true;
+            this.imageUploadService.uploadImage(this.selectedFile, 'product').subscribe({
+                next: (uploadResponse) => {
+                    this.isUploading = false;
+                    if (!uploadResponse?.public_id || !uploadResponse?.secure_url) {
+                        this.messageService.add({
+                            severity: 'error',
+                            summary: 'Error',
+                            detail: 'Image upload failed',
+                            life: 5000
+                        });
+                        this.isSaving = false;
+                        return;
+                    }
+                    saveFlow();
+                },
+                error: (error) => {
+                    this.isUploading = false;
+                    this.isSaving = false;
+                    let errorMessage = 'Failed to upload image';
+                    if (error.error?.message) {
+                        errorMessage = error.error.message;
+                    }
+                    this.messageService.add({
+                        severity: 'error',
+                        summary: 'Error',
+                        detail: errorMessage,
+                        life: 5000
+                    });
+                }
+            });
+        } else {
+            saveFlow();
         }
     }
 }
