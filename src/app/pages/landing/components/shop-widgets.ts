@@ -14,46 +14,16 @@ import { SliderModule } from 'primeng/slider';
 import { CheckboxModule } from 'primeng/checkbox';
 import { AccordionModule } from 'primeng/accordion';
 import { DividerModule } from 'primeng/divider';
-import { ChipModule } from 'primeng/chip';
-import { BadgeModule } from 'primeng/badge';
-import { ProductAttributeValue } from '@/pages/admin/products/models/product-atribute-value';
 
 interface SortOption {
     label: string;
     value: string[];
 }
 
-interface AttributeGroup {
-    id: string;
-    name: string;
-    values: Array<{
-        id: string;
-        name: string;
-        count: number;
-        selected: boolean;
-    }>;
-    selected: boolean;
-}
-
 @Component({
     selector: 'shop-widget',
     standalone: true,
-    imports: [
-        CommonModule,
-        FormsModule,
-        ButtonModule,
-        SkeletonModule,
-        InputTextModule,
-        SelectModule,
-        PaginatorModule,
-        TagModule,
-        SliderModule,
-        CheckboxModule,
-        AccordionModule,
-        DividerModule,
-        ChipModule,
-        BadgeModule,
-    ],
+    imports: [CommonModule, FormsModule, ButtonModule, SkeletonModule, InputTextModule, SelectModule, PaginatorModule, TagModule, SliderModule, CheckboxModule, AccordionModule, DividerModule],
     template: `
         <div id="shop" class="py-16 bg-surface-50 dark:bg-surface-950">
             <div class="w-full max-w-[1920px] mx-auto px-4 md:px-8 lg:px-12">
@@ -74,16 +44,7 @@ interface AttributeGroup {
                         </div>
 
                         <div class="bg-white dark:bg-surface-900 rounded-3xl p-6 shadow-sm border border-surface-100 dark:border-surface-800">
-                            <div class="flex justify-between items-center mb-6">
-                                <h3 class="text-xl font-serif font-medium text-surface-900 dark:text-surface-0">Filters</h3>
-                                <button
-                                    *ngIf="hasActiveFilters()"
-                                    class="text-sm text-primary-600 hover:text-primary-700 font-medium"
-                                    (click)="clearAllFilters()"
-                                >
-                                    Clear all
-                                </button>
-                            </div>
+                            <h3 class="text-xl font-serif font-medium text-surface-900 dark:text-surface-0 mb-6">Filters</h3>
 
                             <!-- Price Range (Client Side) -->
                             <div class="mb-8">
@@ -96,40 +57,6 @@ interface AttributeGroup {
                             </div>
 
                             <p-divider styleClass="my-6"></p-divider>
-
-                            <!-- Attributes Filters -->
-                            <div *ngIf="attributeGroups.length > 0" class="space-y-6">
-                                <h4 class="text-sm font-bold text-surface-900 dark:text-surface-0 uppercase tracking-wider mb-2">Attributes</h4>
-
-                                <div *ngFor="let group of attributeGroups" class="space-y-3">
-                                    <div class="flex items-center justify-between">
-                                        <h5 class="text-sm font-semibold text-surface-700 dark:text-surface-300">{{ group.name }}</h5>
-                                        <span class="text-xs text-surface-500">
-                                            {{ getSelectedAttributeValues(group.id).length }}/{{ group.values.length }}
-                                        </span>
-                                    </div>
-
-                                    <div class="flex flex-wrap gap-2">
-                                        <button
-                                            *ngFor="let value of group.values"
-                                            type="button"
-                                            class="px-3 py-1.5 text-sm rounded-full border transition-all"
-                                            [ngClass]="{
-                                                'border-primary-500 bg-primary-50 text-primary-700': value.selected,
-                                                'border-surface-200 dark:border-surface-700 hover:border-surface-300': !value.selected
-                                            }"
-                                            (click)="toggleAttributeValue(group.id, value.id)"
-                                        >
-                                            <div class="flex items-center gap-1.5">
-                                                <span>{{ value.name }}</span>
-                                                <span class="text-xs text-surface-500">({{ value.count }})</span>
-                                            </div>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <p-divider *ngIf="attributeGroups.length > 0" styleClass="my-6"></p-divider>
 
                             <!-- Availability (Mock) -->
                             <div>
@@ -179,21 +106,6 @@ interface AttributeGroup {
                             <p-tag *ngIf="inStockOnly" value="In Stock Only" severity="secondary" [rounded]="true" (click)="inStockOnly = false; onFilterChange()" styleClass="cursor-pointer px-3 !bg-surface-200 !text-surface-700">
                                 <i class="pi pi-times ml-2 text-xs"></i>
                             </p-tag>
-
-                            <!-- Attribute Filters Chips -->
-                            <ng-container *ngFor="let group of attributeGroups">
-                                <ng-container *ngFor="let value of group.values">
-                                    <p-tag
-                                        *ngIf="value.selected"
-                                        [value]="group.name + ': ' + value.name"
-                                        [rounded]="true"
-                                        (click)="toggleAttributeValue(group.id, value.id)"
-                                        class="cursor-pointer px-3"
-                                    >
-                                        <i class="pi pi-times ml-2 text-xs"></i>
-                                    </p-tag>
-                                </ng-container>
-                            </ng-container>
                         </div>
 
                         <!-- Loading -->
@@ -240,22 +152,10 @@ interface AttributeGroup {
                                         <span class="px-4 py-2 bg-black/60 backdrop-blur-md text-white text-xs font-bold tracking-wider uppercase rounded-full border border-white/10"> Sold Out </span>
                                     </div>
 
-                                    <!-- Product Attributes Badges -->
-                                    <div class="absolute top-4 right-4 flex flex-col gap-2 items-end">
-                                        <div *ngFor="let attr of getProductAttributes(product) | slice:0:2"
-                                             class="px-3 py-1 bg-white/90 backdrop-blur-sm rounded-full shadow-sm text-xs font-medium">
-                                            {{ attr.attribute?.name }}: {{ attr.attributeValue?.value }}
-                                        </div>
-                                        <div *ngIf="getProductAttributes(product).length > 2"
-                                             class="px-3 py-1 bg-white/90 backdrop-blur-sm rounded-full shadow-sm text-xs font-medium">
-                                            +{{ getProductAttributes(product).length - 2 }} more
-                                        </div>
-                                    </div>
-
-                                    <!-- Decorative Arrow -->
-                                    <div class="absolute bottom-4 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-all duration-500 translate-y-4 group-hover:translate-y-0">
-                                        <div class="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center text-white shadow-xl hover:bg-white hover:text-surface-900 transition-colors">
-                                            <i class="pi pi-eye text-sm"></i>
+                                    <!-- Decorative Arrow (New Detail) -->
+                                    <div class="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-all duration-500 translate-y-4 group-hover:translate-y-0">
+                                        <div class="w-12 h-12 rounded-full bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center text-white shadow-xl hover:bg-white hover:text-surface-900 transition-colors">
+                                            <i class="pi pi-arrow-up-right text-lg"></i>
                                         </div>
                                     </div>
                                 </div>
@@ -270,18 +170,8 @@ interface AttributeGroup {
                                         <span class="font-serif text-xl text-surface-900 dark:text-surface-0 whitespace-nowrap"> \${{ product.basePrice.toFixed(2) }} </span>
                                     </div>
 
-                                    <!-- Product Attributes Preview -->
-                                    <div *ngIf="getProductAttributes(product).length > 0" class="mb-3">
-                                        <div class="flex flex-wrap gap-1.5">
-                                            <span *ngFor="let attr of getProductAttributes(product) | slice:0:3"
-                                                  class="text-xs px-2 py-0.5 bg-surface-100 dark:bg-surface-800 rounded text-surface-600 dark:text-surface-400">
-                                                {{ attr.attributeValue?.value }}
-                                            </span>
-                                        </div>
-                                    </div>
-
                                     <!-- Description -->
-                                    <p class="text-sm text-surface-500 dark:text-surface-400 line-clamp-1 mb-4 font-light tracking-wide">
+                                    <p class="text-sm text-surface-500 dark:text-surface-400 line-clamp-1 mb-8 font-light tracking-wide">
                                         {{ product.description || 'Premium quality corporate item' }}
                                     </p>
 
@@ -324,12 +214,12 @@ export class ShopWindget implements OnInit {
     productService = inject(ProductService);
 
     products: Product[] = [];
-    filteredProducts: Product[] = [];
+    filteredProducts: Product[] = []; // For client-side filtering
     loading: boolean = true;
 
     // Pagination
     currentPage: number = 1;
-    pageSize: number = 12;
+    pageSize: number = 12; // Increased for grid alignment
     totalRecords: number = 0;
 
     // Filters
@@ -339,10 +229,6 @@ export class ShopWindget implements OnInit {
     // Client-side Filters
     priceRange: number[] = [0, 1000];
     inStockOnly: boolean = false;
-
-    // Attribute Filters
-    attributeGroups: AttributeGroup[] = [];
-    selectedAttributeValues: Map<string, string[]> = new Map();
 
     // Debounce timer for search
     private searchDebounce: any;
@@ -366,8 +252,7 @@ export class ShopWindget implements OnInit {
         const filters: any = {
             page: this.currentPage,
             limit: this.pageSize,
-            isActive: true,
-            relations: ["pav", "attribute", "attributeValue"]
+            isActive: true // Only show active products on landing page
         };
 
         if (this.searchTerm && this.searchTerm.trim()) {
@@ -378,11 +263,10 @@ export class ShopWindget implements OnInit {
             filters.sort = this.selectedSort.value;
         }
 
-        this.productService.filterProducts(filters).subscribe({
+        this.productService.filterPublicProducts(filters).subscribe({
             next: (response) => {
                 this.products = response.data;
                 this.totalRecords = response.total;
-                this.processAttributes();
                 this.applyClientSideFilters();
                 this.loading = false;
             },
@@ -399,49 +283,6 @@ export class ShopWindget implements OnInit {
         });
     }
 
-    processAttributes() {
-        const attributeMap = new Map<string, Map<string, {name: string, count: number}>>();
-
-        // Count attributes and values
-        this.products.forEach(product => {
-            const attributes = product.productsAttributesValues || [];
-            attributes.forEach(attr => {
-                if (attr.attribute && attr.attributeValue) {
-                    const attributeId = attr.attribute.id!;
-                    const attributeName = attr.attribute.name;
-                    const valueId = attr.attributeValue.id!;
-                    const valueName = attr.attributeValue.value;
-
-                    if (!attributeMap.has(attributeId)) {
-                        attributeMap.set(attributeId, new Map());
-                    }
-
-                    const valueMap = attributeMap.get(attributeId)!;
-                    if (!valueMap.has(valueId)) {
-                        valueMap.set(valueId, { name: valueName, count: 0 });
-                    }
-
-                    valueMap.get(valueId)!.count++;
-                }
-            });
-        });
-
-        // Convert to AttributeGroup array
-        this.attributeGroups = Array.from(attributeMap.entries()).map(([id, valueMap]) => ({
-            id,
-            name: this.products
-                .flatMap(p => p.productsAttributesValues || [])
-                .find(attr => attr.attribute?.id === id)?.attribute?.name || 'Unknown',
-            values: Array.from(valueMap.entries()).map(([valueId, data]) => ({
-                id: valueId,
-                name: data.name,
-                count: data.count,
-                selected: this.isAttributeValueSelected(id, valueId)
-            })),
-            selected: this.getSelectedAttributeValues(id).length > 0
-        }));
-    }
-
     // Client-side filtering logic
     applyClientSideFilters() {
         this.filteredProducts = this.products.filter((product) => {
@@ -451,90 +292,13 @@ export class ShopWindget implements OnInit {
                 return false;
             }
 
-            // In Stock
+            // In Stock (Mock logic - assuming isActive is stock for now, or just filtering active)
             if (this.inStockOnly && !product.isActive) {
                 return false;
             }
 
-            // Attribute Filters
-            if (this.selectedAttributeValues.size > 0) {
-                const productAttributes = product.productsAttributesValues || [];
-
-                // Check each selected attribute group
-                for (const [attributeId, selectedValueIds] of this.selectedAttributeValues.entries()) {
-                    if (selectedValueIds.length === 0) continue;
-
-                    // Product must have at least one of the selected values for this attribute
-                    const hasMatchingValue = productAttributes.some(attr =>
-                        attr.attributeId === attributeId &&
-                        selectedValueIds.includes(attr.attributeValueId)
-                    );
-
-                    if (!hasMatchingValue) {
-                        return false;
-                    }
-                }
-            }
-
             return true;
         });
-    }
-
-    getProductAttributes(product: Product): ProductAttributeValue[] {
-        return product.productsAttributesValues || [];
-    }
-
-    toggleAttributeValue(attributeId: string, valueId: string) {
-        if (!this.selectedAttributeValues.has(attributeId)) {
-            this.selectedAttributeValues.set(attributeId, []);
-        }
-
-        const values = this.selectedAttributeValues.get(attributeId)!;
-        const index = values.indexOf(valueId);
-
-        if (index === -1) {
-            values.push(valueId);
-        } else {
-            values.splice(index, 1);
-        }
-
-        // Update attribute groups UI
-        const group = this.attributeGroups.find(g => g.id === attributeId);
-        if (group) {
-            const value = group.values.find(v => v.id === valueId);
-            if (value) {
-                value.selected = !value.selected;
-            }
-            group.selected = values.length > 0;
-        }
-
-        this.applyClientSideFilters();
-    }
-
-    toggleAttributeGroup(attributeId: string) {
-        const group = this.attributeGroups.find(g => g.id === attributeId);
-        if (!group) return;
-
-        const isSelected = group.selected;
-
-        if (isSelected) {
-            // Deselect all values in this group
-            group.values.forEach(value => value.selected = false);
-            this.selectedAttributeValues.delete(attributeId);
-        } else {
-            // Just mark as selected but don't select all values
-            group.selected = true;
-        }
-
-        this.applyClientSideFilters();
-    }
-
-    isAttributeValueSelected(attributeId: string, valueId: string): boolean {
-        return this.selectedAttributeValues.get(attributeId)?.includes(valueId) || false;
-    }
-
-    getSelectedAttributeValues(attributeId: string): string[] {
-        return this.selectedAttributeValues.get(attributeId) || [];
     }
 
     onSearchChange() {
@@ -553,6 +317,7 @@ export class ShopWindget implements OnInit {
     }
 
     onPriceChange() {
+        // Just re-apply client filters, don't reload from server
         this.applyClientSideFilters();
     }
 
@@ -584,7 +349,7 @@ export class ShopWindget implements OnInit {
     }
 
     hasActiveFilters(): boolean {
-        return !!(this.searchTerm || this.inStockOnly || this.selectedAttributeValues.size > 0);
+        return !!(this.searchTerm || this.inStockOnly);
     }
 
     clearSearch() {
@@ -597,14 +362,6 @@ export class ShopWindget implements OnInit {
         this.selectedSort = null;
         this.priceRange = [0, 1000];
         this.inStockOnly = false;
-        this.selectedAttributeValues.clear();
-
-        // Reset attribute groups UI
-        this.attributeGroups.forEach(group => {
-            group.selected = false;
-            group.values.forEach(value => value.selected = false);
-        });
-
         this.onFilterChange();
     }
 }
