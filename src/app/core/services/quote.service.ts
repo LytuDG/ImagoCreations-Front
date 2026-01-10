@@ -1,0 +1,158 @@
+// src/app/core/services/quote.service.ts
+import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable, map } from 'rxjs';
+import {
+    CREATE_QUOTE_ENDPOINT,
+    QUOTE_BY_ID_ENDPOINT,
+    FILTER_QUOTE_ENDPOINT,
+    QUOTE_ENDPOINT
+} from '../constants/endpoints/quote/quote';
+import { Quote, QuoteResponse, QuoteFilter, QuoteItem } from '../models/quote/quote';
+import { CartItem, CustomerInfo } from './cart.service';
+
+@Injectable({
+    providedIn: 'root'
+})
+export class QuoteService {
+    constructor(private http: HttpClient) {}
+
+    /**
+     * Crear una nueva cotización
+     */
+    createQuote(quoteData: Quote): Observable<QuoteResponse> {
+        // Transformar los datos del carrito al formato requerido por la API
+        const formattedQuote = this.formatQuoteForApi(quoteData);
+
+        return this.http.post<QuoteResponse>(CREATE_QUOTE_ENDPOINT, formattedQuote);
+    }
+
+    /**
+     * Obtener una cotización por ID
+     */
+    getQuoteById(id: string): Observable<Quote> {
+        return this.http.get<Quote>(QUOTE_BY_ID_ENDPOINT(id));
+    }
+
+    /**
+     * Obtener todas las cotizaciones (con filtros)
+     */
+    getQuotes(filter?: QuoteFilter): Observable<{ data: QuoteResponse[], total: number }> {
+        const params = this.buildFilterParams(filter);
+        return this.http.get<{ data: QuoteResponse[], total: number }>(FILTER_QUOTE_ENDPOINT, { params });
+    }
+
+    /**
+     * Actualizar el estado de una cotización
+     */
+    updateQuoteStatus(id: string, status: string, notes?: string): Observable<Quote> {
+        return this.http.patch<Quote>(QUOTE_BY_ID_ENDPOINT(id), {
+            status,
+            adminNotes: notes
+        });
+    }
+
+    /**
+     * Eliminar una cotización
+     */
+    deleteQuote(id: string): Observable<void> {
+        return this.http.delete<void>(QUOTE_BY_ID_ENDPOINT(id));
+    }
+
+    /**
+     * Enviar cotización por email al cliente
+     */
+    sendQuoteEmail(quoteId: string, email: string): Observable<any> {
+        return this.http.post(`${QUOTE_ENDPOINT}/${quoteId}/send`, { email });
+    }
+
+    /**
+     * Convertir items del carrito al formato de la API
+     */
+    private formatQuoteForApi(quote: Quote): any {
+        return {
+            createQuotesItemsDtos: quote.createQuotesItemsDtos.map(item => ({
+                quantity: item.quantity,
+                productId: item.productId,
+                productAttributesIds: item.productAttributesIds
+            })),
+            notes: quote.notes || '',
+            customerInfo: quote.customerInfo
+        };
+    }
+
+    /**
+     * Convertir items del carrito a items de cotización
+     * Usando los tipos que ya existen en CartService
+     */
+    convertCartItemsToQuoteItems(cartItems: CartItem[]): QuoteItem[] {
+        return cartItems.map(item => ({
+            productId: item.product.id!,
+            quantity: item.quantity,
+            productAttributesIds: item.selectedAttributes?.map(attr => attr.valueId) || [],
+            price: this.calculateItemPrice(item),
+            productName: item.product.name,
+            selectedAttributes: item.selectedAttributes || []
+        }));
+    }
+
+    /**
+     * Calcular el precio total de un item del carrito
+     * Usando la misma lógica que CartService
+     */
+    private calculateItemPrice(item: CartItem): number {
+        let price = item.product.basePrice;
+
+        if (item.selectedAttributes?.length) {
+            item.selectedAttributes.forEach(attr => {
+                if (attr.priceModifier) {
+                    price += attr.priceModifier;
+                }
+            });
+        }
+
+        return price;
+    }
+
+    /**
+     * Calcular el total de una cotización
+     */
+    calculateQuoteTotal(quoteItems: QuoteItem[]): number {
+        return quoteItems.reduce((total, item) => {
+            const itemPrice = item.price || 0;
+            return total + (itemPrice * item.quantity);
+        }, 0);
+    }
+
+    /**
+     * Construir parámetros de filtro para la API
+     */
+    private buildFilterParams(filter?: QuoteFilter): any {
+        let params: any = {};
+
+        if (filter?.page) params.page = filter.page.toString();
+        if (filter?.limit) params.limit = filter.limit.toString();
+        if (filter?.search) params.search = filter.search;
+        if (filter?.status) params.status = filter.status;
+        if (filter?.customerEmail) params.customerEmail = filter.customerEmail;
+        if (filter?.sort) params.sort = filter.sort;
+
+        return params;
+    }
+
+    /**
+     * Crear objeto de cotización a partir del carrito e información del cliente
+     */
+    createQuoteFromCart(cartItems: CartItem[], customerInfo: CustomerInfo, notes?: string): Quote {
+        const quoteItems = this.convertCartItemsToQuoteItems(cartItems);
+        const totalAmount = this.calculateQuoteTotal(quoteItems);
+
+        return {
+            createQuotesItemsDtos: quoteItems,
+            customerInfo,
+            notes: notes || '',
+            totalAmount,
+            status: 'PENDING'
+        };
+    }
+}
