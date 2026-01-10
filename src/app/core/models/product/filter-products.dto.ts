@@ -15,6 +15,7 @@ export interface FilterProductsDto {
     nameLike?: string;
     type?: ProductType;
     sku?: string;
+    relations?: string[];
 
     // Sorting
     sort?: string[];

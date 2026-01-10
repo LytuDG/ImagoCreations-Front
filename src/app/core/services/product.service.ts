@@ -115,6 +115,7 @@ export class ProductService {
      * @returns Observable of filtered products with pagination metadata
      */
     filterProducts(filters: FilterProductsDto = {}): Observable<FilterProductsResponse> {
+        filters.relations = ["pav", "attribute", "attributeValue"];
         const params = this.buildFilterParams(filters);
         return this.http.post<FilterProductsResponse>(FILTER_PRODUCTS_ENDPOINT, filters, { params });
     }

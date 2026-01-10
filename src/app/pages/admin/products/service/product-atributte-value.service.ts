@@ -19,11 +19,12 @@ export class ProductAttributeValueService {
         .set('limit', params.limit ? params.limit.toString() : '10');
 
         // Enviar directamente los filters como requestBody
-        const requestBody = params.filters || {};
+        const requestBody: any = params.filters || {};
+        requestBody.relations = ["pav","product", "attribute", "attributeValue"];
 
         return this.http.post<ApiResponse<ProductAttributeValue>>(
         PRODUCT_ATTRIBUTE_VALUE.FILTER,
-        requestBody,  // Solo los filters
+        requestBody,
         { params: httpParams }
         );
     }
@@ -32,8 +33,8 @@ export class ProductAttributeValueService {
         return this.http.get<ProductAttributeValue>(PRODUCT_ATTRIBUTE_VALUE.BY_ID(id));
     }
 
-    createProductAttributeValue(dto: CreateProductAttributeValueDto): Observable<ProductAttributeValue> {
-        return this.http.post<ProductAttributeValue>(PRODUCT_ATTRIBUTE_VALUE.BASE, dto);
+    createProductAttributeValue(pavs: CreateProductAttributeValueDto[]): Observable<ProductAttributeValue[]> {
+        return this.http.post<ProductAttributeValue[]>(PRODUCT_ATTRIBUTE_VALUE.BASE, {pavs});
     }
 
     updateProductAttributeValue(id: string, dto: Partial<CreateProductAttributeValueDto>): Observable<ProductAttributeValue> {

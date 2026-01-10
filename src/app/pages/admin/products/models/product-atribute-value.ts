@@ -10,7 +10,7 @@ export interface ProductAttributeValue {
     required: boolean;
     sortOrder: number;
     product: Product;
-    attribute?: Attribute;
+    attribute: Attribute;
     attributeValue?: AttributeValue;
 }
 
