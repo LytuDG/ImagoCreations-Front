@@ -17,7 +17,7 @@ export interface Product {
         publicId: string;
         secureId: string;
     };
-    attributes?: ProductAttributeValue[];
+    productsAttributesValues?: ProductAttributeValue[];
 }
 
 export type ProductType = 'simple' | 'variant';

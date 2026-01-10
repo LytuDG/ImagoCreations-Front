@@ -27,15 +27,11 @@ import { ImageUploadService } from '@/core/services/image-upload.service';
 import { ToggleSwitchModule } from 'primeng/toggleswitch';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
-import { firstValueFrom, forkJoin, Observable, tap } from 'rxjs';
+import { forkJoin, Observable } from 'rxjs';
 import { MultiSelectModule } from 'primeng/multiselect';
 import { CheckboxModule } from 'primeng/checkbox';
 import { CardModule } from 'primeng/card';
 import { TooltipModule } from 'primeng/tooltip';
-import { Attribute } from '../attributes/models/attribute';
-import { AttributeValue } from '../attributes/models/attributeValue';
-import { AttributeValueService } from '../attributes/services/attribute-value.service';
-import { AttributeService } from '../attributes/services/attribute.service';
 import { ProductAttributeValue } from './models/product-atribute-value';
 import { ProductAttributeValueService } from './service/product-atributte-value.service';
 import { ProductAttributesDialog } from './product-attribute-form.dialog';
@@ -186,25 +182,25 @@ interface ExportColumn {
                         <p-tag [value]="product.type" [severity]="getTypeSeverity(product.type)" />
                     </td>
                     <td class="p-3">
-                        @if (productAttributesMap[product.id]?.length) {
+                        @if (product.productsAttributesValues?.length) {
                             <div class="flex flex-wrap gap-1">
-                                @for (attr of productAttributesMap[product.id] | slice:0:3; track attr.id) {
+                                @for (attr of getProductAttributes(product) | slice:0:3; track attr.id) {
                                     <p-tag
                                         [value]="getAttributeDisplay(attr)"
                                         severity="info"
-                                        styleClass="text-xs"
+                                        class="text-xs"
                                     />
                                 }
-                                @if (productAttributesMap[product.id].length > 3) {
+                                @if (product.productsAttributesValues.length > 3) {
                                     <p-tag
-                                        [value]="'+' + (productAttributesMap[product.id].length - 3)"
+                                        [value]="'+' + (product.productsAttributesValues.length - 3)"
                                         severity="contrast"
-                                        styleClass="text-xs"
+                                        class="text-xs"
                                     />
                                 }
                             </div>
                         }
-                        @if (!productAttributesMap[product.id]?.length) {
+                        @if (!product.productsAttributesValues?.length) {
                             <span class="text-gray-400 text-sm">No attributes</span>
                         }
                     </td>
@@ -324,16 +320,16 @@ interface ExportColumn {
                                 />
                             </div>
 
-                            @if (currentProductAttributes.length) {
+                            @if (product.productsAttributesValues?.length) {
                                 <div class="space-y-2">
-                                    @for (attr of currentProductAttributes; track attr.id) {
+                                    @for (attr of product.productsAttributesValues; track attr.id) {
                                         <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                                             <div>
-                                                <span class="font-medium">{{ getAttributeName(attr.attributeId) }}</span>
-                                                <span class="text-gray-600 ml-2">→ {{ getAttributeValueText(attr.attributeValueId) }}</span>
+                                                <span class="font-medium">{{ attr.attribute?.name }}</span>
+                                                <span class="text-gray-600 ml-2">→ {{ attr.attributeValue?.value }}</span>
                                                 <div class="text-xs text-gray-500 mt-1">
                                                     <span class="mr-3">Required: {{ attr.required ? 'Yes' : 'No' }}</span>
-                                                    <span>Order: {{ attr.sortOrder }}</span>
+                                                    <span>Order: {{ attr.attributeValue?.order }}</span>
                                                 </div>
                                             </div>
                                         </div>
@@ -341,7 +337,7 @@ interface ExportColumn {
                                 </div>
                             }
 
-                            @if (!currentProductAttributes.length) {
+                            @if (!product.productsAttributesValues?.length) {
                                 <div class="text-center py-4 text-gray-400">
                                     <i class="pi pi-tags text-xl mr-2"></i>
                                     No attributes assigned yet
@@ -388,10 +384,11 @@ interface ExportColumn {
         <app-product-attributes-dialog
             [visible]="attributesDialog"
             [product]="selectedProduct"
-            [existingAttributes]="currentProductAttributes"
+            [existingAttributes]="selectedProduct?.productsAttributesValues || []"
             (save)="onAttributesSaved()"
             (cancel)="closeAttributesDialog()"
             (hide)="closeAttributesDialog()"
+            (delete)="onAttributesDeleted()"
         />
 
         <p-confirmdialog [style]="{ width: '450px' }" />
@@ -405,8 +402,6 @@ export class Products implements OnInit {
     private imageUploadService = inject(ImageUploadService);
     private sanitizer = inject(DomSanitizer);
     private productAttributeValueService = inject(ProductAttributeValueService);
-    private attributeService = inject(AttributeService);
-    private attributeValueService = inject(AttributeValueService);
 
     productDialog: boolean = false;
     attributesDialog: boolean = false;
@@ -437,15 +432,6 @@ export class Products implements OnInit {
     selectedFile: File | null = null;
     imagePreview: SafeUrl | null = null;
     timeOut: any;
-
-    currentProductAttributes: ProductAttributeValue[] = [];
-    productAttributesMap: { [key: string]: ProductAttributeValue[] } = {};
-
-    // Cache para atributos y valores
-    private attributesCache: Map<string, Attribute> = new Map();
-    private attributeValuesCache: Map<string, AttributeValue> = new Map();
-    private loadingAttributes: Set<string> = new Set();
-    private loadingAttributeValues: Set<string> = new Set();
 
     ngOnInit() {
         this.initializeColumns();
@@ -487,9 +473,6 @@ export class Products implements OnInit {
 
     selectRow(product: Product): void {
         this.selectedProduct = product;
-        if (product.id && !this.productAttributesMap[product.id]) {
-            this.loadProductAttributes(product.id);
-        }
     }
 
     openNew() {
@@ -508,11 +491,6 @@ export class Products implements OnInit {
         this.product = { ...product };
         this.newProduct = { ...product };
         this.imagePreview = product.picture as SafeUrl;
-
-        if (product.id && !this.productAttributesMap[product.id]) {
-            this.loadProductAttributes(product.id);
-        }
-
         this.productDialog = true;
     }
 
@@ -557,7 +535,7 @@ export class Products implements OnInit {
             icon: 'pi pi-exclamation-triangle',
             accept: () => {
                 if (product.id) {
-                    const productAttributes = this.productAttributesMap[product.id] || [];
+                    const productAttributes = product.productsAttributesValues || [];
                     const deleteAttributeObservables = productAttributes
                         .filter(attr => attr.id)
                         .map(attr =>
@@ -590,7 +568,6 @@ export class Products implements OnInit {
     private deleteProductAfterAttributes(product: Product): void {
         this.productService.deleteProduct(product.id!).subscribe({
             next: () => {
-                delete this.productAttributesMap[product.id!];
                 this.products.set(this.products().filter((val) => val.id !== product.id));
                 this.selectedProduct = null;
                 this.totalRecords = Math.max(0, this.totalRecords - 1);
@@ -633,46 +610,9 @@ export class Products implements OnInit {
             next: (response: any) => {
                 const products = response.data;
                 this.products.set(products);
+                console.log(products[0].productsAttributesValues)
                 this.totalRecords = response.total;
-
-                // Crear un array de observables para cargar atributos de todos los productos
-                const attributeObservables: Observable<void>[] = [];
-
-                products.forEach((product: Product) => {
-                    if (product.id) {
-                        // Crear un observable para cada producto
-                        const observable = new Observable<void>(observer => {
-                            this.loadProductAttributes(product.id!).subscribe({
-                                next: () => {
-                                    observer.next();
-                                    observer.complete();
-                                },
-                                error: (error) => {
-                                    console.error('Error loading product attributes for product', product.id, error);
-                                    observer.next(); // Continuar aunque falle
-                                    observer.complete();
-                                }
-                            });
-                        });
-                        attributeObservables.push(observable);
-                    }
-                });
-
-                if (attributeObservables.length > 0) {
-                    // Esperar a que todos los atributos se carguen
-                    forkJoin(attributeObservables).subscribe({
-                        next: () => {
-                            this.loading.set(false);
-                        },
-                        error: (error) => {
-                            console.error('Error loading product attributes:', error);
-                            this.loading.set(false);
-                        }
-                    });
-                } else {
-                    // Si no hay productos o productos sin ID, quitar loading inmediatamente
-                    this.loading.set(false);
-                }
+                this.loading.set(false);
             },
             error: (error: any) => {
                 console.error('Error loading products:', error);
@@ -687,124 +627,12 @@ export class Products implements OnInit {
         });
     }
 
-    // Modificar loadProductAttributes para que devuelva un Observable
-    loadProductAttributes(productId: string): Observable<void> {
-        return new Observable<void>(observer => {
-            this.productAttributeValueService.getProductAttributes({
-                filters: { productId },
-                limit: 100
-            }).subscribe({
-                next: (response) => {
-                    const productAttributes = response.data || [];
-                    this.productAttributesMap[productId] = productAttributes;
-
-                    // Cargar detalles de atributos y esperar a que se completen
-                    this.loadAttributeDetails(productAttributes).subscribe({
-                        next: () => {
-                            if (this.selectedProduct?.id === productId) {
-                                this.currentProductAttributes = productAttributes;
-                            }
-                            observer.next();
-                            observer.complete();
-                        },
-                        error: (error) => {
-                            console.error('Error loading attribute details:', error);
-                            observer.next(); // Continuar aunque falle
-                            observer.complete();
-                        }
-                    });
-                },
-                error: (error) => {
-                    console.error('Error loading product attributes:', error);
-                    observer.next(); // Continuar aunque falle
-                    observer.complete();
-                }
-            });
-        });
-    }
-
-    // Modificar loadAttributeDetails para que devuelva un Observable
-    private loadAttributeDetails(productAttributes: ProductAttributeValue[]): Observable<void> {
-        return new Observable<void>(observer => {
-            if (productAttributes.length === 0) {
-                observer.next();
-                observer.complete();
-                return;
-            }
-
-            const attributeObservables: Observable<any>[] = [];
-
-            productAttributes.forEach(attr => {
-                // Cargar atributo si no está en cache
-                if (attr.attributeId && !this.attributesCache.has(attr.attributeId) && !this.loadingAttributes.has(attr.attributeId)) {
-                    this.loadingAttributes.add(attr.attributeId);
-                    const attributeObservable = this.attributeService.getAttributeById(attr.attributeId).pipe(
-                        tap({
-                            next: (attribute) => {
-                                this.attributesCache.set(attr.attributeId, attribute);
-                                this.loadingAttributes.delete(attr.attributeId);
-                            },
-                            error: (error) => {
-                                console.error('Error loading attribute:', error);
-                                this.loadingAttributes.delete(attr.attributeId);
-                            }
-                        })
-                    );
-                    attributeObservables.push(attributeObservable);
-                }
-
-                // Cargar valor de atributo si no está en cache
-                if (attr.attributeValueId && !this.attributeValuesCache.has(attr.attributeValueId) && !this.loadingAttributeValues.has(attr.attributeValueId)) {
-                    this.loadingAttributeValues.add(attr.attributeValueId);
-                    const attributeValueObservable = this.attributeValueService.getAttributeValueById(attr.attributeValueId).pipe(
-                        tap({
-                            next: (attributeValue) => {
-                                this.attributeValuesCache.set(attr.attributeValueId, attributeValue);
-                                this.loadingAttributeValues.delete(attr.attributeValueId);
-                            },
-                            error: (error) => {
-                                console.error('Error loading attribute value:', error);
-                                this.loadingAttributeValues.delete(attr.attributeValueId);
-                            }
-                        })
-                    );
-                    attributeObservables.push(attributeValueObservable);
-                }
-            });
-
-            if (attributeObservables.length > 0) {
-                forkJoin(attributeObservables).subscribe({
-                    next: () => {
-                        observer.next();
-                        observer.complete();
-                    },
-                    error: (error) => {
-                        console.error('Error loading attribute details:', error);
-                        observer.next(); // Continuar aunque falle
-                        observer.complete();
-                    }
-                });
-            } else {
-                // Si no hay atributos para cargar, completar inmediatamente
-                observer.next();
-                observer.complete();
-            }
-        });
-    }
-
-    // Métodos helpers para obtener nombres y valores
-    getAttributeName(attributeId: string): string {
-        return this.attributesCache.get(attributeId)?.name || attributeId?.substring(0, 8) + '...';
-    }
-
-    getAttributeValueText(attributeValueId: string): string {
-        return this.attributeValuesCache.get(attributeValueId)?.value || attributeValueId?.substring(0, 8) + '...';
+    getProductAttributes(product: Product): ProductAttributeValue[] {
+        return product.productsAttributesValues || [];
     }
 
     getAttributeDisplay(attr: ProductAttributeValue): string {
-        const attributeName = this.getAttributeName(attr.attributeId);
-        const attributeValue = this.getAttributeValueText(attr.attributeValueId);
-        return `${attributeName}: ${attributeValue}`;
+        return `${attr.attribute?.name || 'Unknown'}: ${attr.attributeValue?.value || 'Unknown'}`;
     }
 
     manageAttributes(): void {
@@ -830,23 +658,18 @@ export class Products implements OnInit {
     }
 
     onAttributesSaved(): void {
-        if (this.selectedProduct?.id) {
-            // Limpiar cache para este producto
-            if (this.productAttributesMap[this.selectedProduct.id]) {
-                this.productAttributesMap[this.selectedProduct.id].forEach(attr => {
-                    this.attributesCache.delete(attr.attributeId);
-                    this.attributeValuesCache.delete(attr.attributeValueId);
-                });
-            }
-            this.loadProducts()
-            this.loadProductAttributes(this.selectedProduct.id);
-        }
+        this.loadProducts(this.currentPage, this.pageSize);
+
         this.messageService.add({
             severity: 'success',
             summary: 'Success',
             detail: 'Product attributes saved successfully',
             life: 3000
         });
+    }
+
+    onAttributesDeleted(): void {
+      this.loadProducts(this.currentPage, this.pageSize);
     }
 
     getTypeSeverity(type: string): 'success' | 'secondary' | 'info' | 'warn' | 'danger' | 'contrast' | undefined | null {
