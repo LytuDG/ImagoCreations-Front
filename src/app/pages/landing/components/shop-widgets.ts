@@ -14,16 +14,61 @@ import { SliderModule } from 'primeng/slider';
 import { CheckboxModule } from 'primeng/checkbox';
 import { AccordionModule } from 'primeng/accordion';
 import { DividerModule } from 'primeng/divider';
+import { ChipModule } from 'primeng/chip';
+import { BadgeModule } from 'primeng/badge';
+import { DialogModule } from 'primeng/dialog';
+import { RadioButtonModule } from 'primeng/radiobutton';
+import { ProductAttributeValue } from '@/pages/admin/products/models/product-atribute-value';
 
 interface SortOption {
     label: string;
     value: string[];
 }
 
+interface AttributeGroup {
+    id: string;
+    name: string;
+    values: Array<{
+        id: string;
+        name: string;
+        count: number;
+        selected: boolean;
+        priceModifier?: number;
+    }>;
+    selected: boolean;
+}
+
+interface ProductAttributeGroup {
+    id: string;
+    name: string;
+    values: Array<{
+        id: string;
+        name: string;
+        priceModifier?: number;
+    }>;
+}
+
 @Component({
     selector: 'shop-widget',
     standalone: true,
-    imports: [CommonModule, FormsModule, ButtonModule, SkeletonModule, InputTextModule, SelectModule, PaginatorModule, TagModule, SliderModule, CheckboxModule, AccordionModule, DividerModule],
+    imports: [
+        CommonModule,
+        FormsModule,
+        ButtonModule,
+        SkeletonModule,
+        InputTextModule,
+        SelectModule,
+        PaginatorModule,
+        TagModule,
+        SliderModule,
+        CheckboxModule,
+        AccordionModule,
+        DividerModule,
+        ChipModule,
+        BadgeModule,
+        DialogModule,
+        RadioButtonModule
+    ],
     template: `
         <div id="shop" class="py-16 bg-surface-50 dark:bg-surface-950">
             <div class="w-full max-w-[1920px] mx-auto px-4 md:px-8 lg:px-12">
@@ -44,7 +89,17 @@ interface SortOption {
                         </div>
 
                         <div class="bg-white dark:bg-surface-900 rounded-3xl p-6 shadow-sm border border-surface-100 dark:border-surface-800">
-                            <h3 class="text-xl font-serif font-medium text-surface-900 dark:text-surface-0 mb-6">Filters</h3>
+                            <div class="flex justify-between items-center mb-6">
+                                <h3 class="text-xl font-serif font-medium text-surface-900 dark:text-surface-0">Filters</h3>
+                                @if (hasActiveFilters()) {
+                                    <button
+                                        class="text-sm text-primary-600 hover:text-primary-700 font-medium"
+                                        (click)="clearAllFilters()"
+                                    >
+                                        Clear all
+                                    </button>
+                                }
+                            </div>
 
                             <!-- Price Range (Client Side) -->
                             <div class="mb-8">
@@ -57,6 +112,52 @@ interface SortOption {
                             </div>
 
                             <p-divider styleClass="my-6"></p-divider>
+
+                            <!-- Attributes Filters -->
+                            @if (attributeGroups.length > 0) {
+                                <div class="space-y-6">
+                                    <h4 class="text-sm font-bold text-surface-900 dark:text-surface-0 uppercase tracking-wider mb-2">Attributes</h4>
+
+                                    @for (group of attributeGroups; track group.id) {
+                                        <div class="space-y-3">
+                                            <div class="flex items-center justify-between">
+                                                <h5 class="text-sm font-semibold text-surface-700 dark:text-surface-300">{{ group.name }}</h5>
+                                                <span class="text-xs text-surface-500">
+                                                    {{ getSelectedAttributeValues(group.id).length }}/{{ group.values.length }}
+                                                </span>
+                                            </div>
+
+                                            <div class="flex flex-wrap gap-2">
+                                                @for (value of group.values; track value.id) {
+                                                    <button
+                                                        type="button"
+                                                        class="px-3 py-1.5 text-sm rounded-full border transition-all"
+                                                        [ngClass]="{
+                                                            'border-primary-500 bg-primary-50 text-primary-700': value.selected,
+                                                            'border-surface-200 dark:border-surface-700 hover:border-surface-300': !value.selected
+                                                        }"
+                                                        (click)="toggleAttributeValue(group.id, value.id)"
+                                                    >
+                                                        <div class="flex items-center gap-1.5">
+                                                            <span>{{ value.name }}</span>
+                                                            @if (value.priceModifier) {
+                                                                <span class="text-xs" [ngClass]="value.priceModifier > 0 ? 'text-green-600' : 'text-red-600'">
+                                                                    {{ value.priceModifier > 0 ? '+' : '' }}{{ value.priceModifier | currency:'USD' }}
+                                                                </span>
+                                                            }
+                                                            <span class="text-xs text-surface-500">({{ value.count }})</span>
+                                                        </div>
+                                                    </button>
+                                                }
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                            }
+
+                            @if (attributeGroups.length > 0) {
+                                <p-divider styleClass="my-6"></p-divider>
+                            }
 
                             <!-- Availability (Mock) -->
                             <div>
@@ -98,113 +199,329 @@ interface SortOption {
                         </div>
 
                         <!-- Active Filters -->
-                        <div *ngIf="hasActiveFilters()" class="flex flex-wrap gap-2 mb-6">
-                            <p-tag *ngIf="searchTerm" [value]="'Search: ' + searchTerm" severity="secondary" [rounded]="true" (click)="clearSearch()" styleClass="cursor-pointer px-3 !bg-surface-200 !text-surface-700">
-                                <i class="pi pi-times ml-2 text-xs"></i>
-                            </p-tag>
+                        @if (hasActiveFilters()) {
+                            <div class="flex flex-wrap gap-2 mb-6">
+                                @if (searchTerm) {
+                                    <p-tag [value]="'Search: ' + searchTerm" severity="secondary" [rounded]="true" (click)="clearSearch()" styleClass="cursor-pointer px-3 !bg-surface-200 !text-surface-700">
+                                        <i class="pi pi-times ml-2 text-xs"></i>
+                                    </p-tag>
+                                }
 
-                            <p-tag *ngIf="inStockOnly" value="In Stock Only" severity="secondary" [rounded]="true" (click)="inStockOnly = false; onFilterChange()" styleClass="cursor-pointer px-3 !bg-surface-200 !text-surface-700">
-                                <i class="pi pi-times ml-2 text-xs"></i>
-                            </p-tag>
-                        </div>
+                                @if (inStockOnly) {
+                                    <p-tag value="In Stock Only" severity="secondary" [rounded]="true" (click)="inStockOnly = false; onFilterChange()" styleClass="cursor-pointer px-3 !bg-surface-200 !text-surface-700">
+                                        <i class="pi pi-times ml-2 text-xs"></i>
+                                    </p-tag>
+                                }
+
+                                <!-- Attribute Filters Chips -->
+                                @for (group of attributeGroups; track group.id) {
+                                    @for (value of group.values; track value.id) {
+                                        @if (value.selected) {
+                                            <p-tag
+                                                [value]="group.name + ': ' + value.name"
+                                                [rounded]="true"
+                                                (click)="toggleAttributeValue(group.id, value.id)"
+                                                class="cursor-pointer px-3"
+                                            >
+                                                <i class="pi pi-times ml-2 text-xs"></i>
+                                            </p-tag>
+                                        }
+                                    }
+                                }
+                            </div>
+                        }
 
                         <!-- Loading -->
-                        <div *ngIf="loading" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-8 gap-y-16">
-                            <div *ngFor="let i of [1, 2, 3, 4, 5, 6, 7, 8]" class="flex flex-col h-full">
-                                <!-- Image Skeleton Container -->
-                                <div class="relative aspect-[3/4] rounded-xl overflow-hidden mb-6">
-                                    <p-skeleton width="100%" height="100%"></p-skeleton>
-                                </div>
+                        @if (loading) {
+                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-8 gap-y-16">
+                                @for (i of [1, 2, 3, 4, 5, 6, 7, 8]; track i) {
+                                    <div class="flex flex-col h-full">
+                                        <!-- Image Skeleton Container -->
+                                        <div class="relative aspect-[3/4] rounded-xl overflow-hidden mb-6">
+                                            <p-skeleton width="100%" height="100%"></p-skeleton>
+                                        </div>
 
-                                <!-- Content Skeleton -->
-                                <div class="flex flex-col flex-1 px-1">
-                                    <!-- Header -->
-                                    <div class="flex justify-between items-start gap-4 mb-2">
-                                        <p-skeleton width="60%" height="1.75rem"></p-skeleton>
-                                        <p-skeleton width="25%" height="1.75rem"></p-skeleton>
-                                    </div>
+                                        <!-- Content Skeleton -->
+                                        <div class="flex flex-col flex-1 px-1">
+                                            <!-- Header -->
+                                            <div class="flex justify-between items-start gap-4 mb-2">
+                                                <p-skeleton width="60%" height="1.75rem"></p-skeleton>
+                                                <p-skeleton width="25%" height="1.75rem"></p-skeleton>
+                                            </div>
 
-                                    <!-- Description -->
-                                    <p-skeleton width="80%" height="1rem" styleClass="mb-8"></p-skeleton>
+                                            <!-- Description -->
+                                            <p-skeleton width="80%" height="1rem" styleClass="mb-8"></p-skeleton>
 
-                                    <!-- Button -->
-                                    <div class="mt-auto">
-                                        <p-skeleton width="100%" height="3.75rem" styleClass="rounded-xl"></p-skeleton>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Products -->
-                        <div *ngIf="!loading && filteredProducts.length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-8 gap-y-16">
-                            <div *ngFor="let product of filteredProducts" class="group flex flex-col h-full">
-                                <!-- Image Container -->
-                                <div class="relative aspect-[3/4] rounded-xl overflow-hidden bg-surface-100 dark:bg-surface-800 cursor-pointer mb-6 transition-all duration-500 hover:shadow-2xl">
-                                    <img
-                                        [src]="product.picture || product.secureUrl"
-                                        [alt]="product.name"
-                                        class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                                        onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MDAiIGhlaWdodD0iNDAwIiB2aWV3Qm94PSIwIDAgNDAwIDQwMCI+PHJlY3Qgd2lkdGg9IjQwMCIgaGVpZ2h0PSI0MDAiIGZpbGw9IiNmMmYyZjIiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjIwIiBmaWxsPSIjOTk5IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+Tm8gSW1hZ2U8L3RleHQ+PC9zdmc+'"
-                                    />
-
-                                    <!-- Sold Out Badge -->
-                                    <div class="absolute top-4 left-4" *ngIf="!product.isActive">
-                                        <span class="px-4 py-2 bg-black/60 backdrop-blur-md text-white text-xs font-bold tracking-wider uppercase rounded-full border border-white/10"> Sold Out </span>
-                                    </div>
-
-                                    <!-- Decorative Arrow (New Detail) -->
-                                    <div class="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-all duration-500 translate-y-4 group-hover:translate-y-0">
-                                        <div class="w-12 h-12 rounded-full bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center text-white shadow-xl hover:bg-white hover:text-surface-900 transition-colors">
-                                            <i class="pi pi-arrow-up-right text-lg"></i>
+                                            <!-- Button -->
+                                            <div class="mt-auto">
+                                                <p-skeleton width="100%" height="3.75rem" styleClass="rounded-xl"></p-skeleton>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-
-                                <!-- Content -->
-                                <div class="flex flex-col flex-1 px-1">
-                                    <!-- Header -->
-                                    <div class="flex justify-between items-start gap-4 mb-2">
-                                        <h3 class="font-serif text-xl font-medium text-surface-900 dark:text-surface-0 leading-tight cursor-pointer group-hover:text-primary-600 transition-colors" [title]="product.name">
-                                            {{ product.name }}
-                                        </h3>
-                                        <span class="font-serif text-xl text-surface-900 dark:text-surface-0 whitespace-nowrap"> \${{ product.basePrice.toFixed(2) }} </span>
-                                    </div>
-
-                                    <!-- Description -->
-                                    <p class="text-sm text-surface-500 dark:text-surface-400 line-clamp-1 mb-8 font-light tracking-wide">
-                                        {{ product.description || 'Premium quality corporate item' }}
-                                    </p>
-
-                                    <!-- Action Button -->
-                                    <div class="mt-auto">
-                                        <button
-                                            pButton
-                                            pRipple
-                                            label="Add to Cart"
-                                            icon="pi pi-shopping-bag"
-                                            class="w-full p-button-outlined p-button-lg !rounded-xl font-medium !border-surface-200 dark:!border-surface-700 !text-surface-900 dark:!text-surface-0 hover:!bg-primary-600 hover:!border-primary-600 hover:!text-white transition-all duration-300 py-4"
-                                            (click)="addToCart(product); $event.stopPropagation()"
-                                            [disabled]="!product.isActive"
-                                        ></button>
-                                    </div>
-                                </div>
+                                }
                             </div>
-                        </div>
+                        }
+
+                        <!-- Products -->
+                        @if (!loading && filteredProducts.length > 0) {
+                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-8 gap-y-16">
+                                @for (product of filteredProducts; track product.id) {
+                                    <div class="group flex flex-col h-full">
+                                        <!-- Image Container -->
+                                        <div class="relative aspect-[3/4] rounded-xl overflow-hidden bg-surface-100 dark:bg-surface-800 cursor-pointer mb-6 transition-all duration-500 hover:shadow-2xl">
+                                            <img
+                                                [src]="product.picture || product.secureUrl"
+                                                [alt]="product.name"
+                                                class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                                                onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MDAiIGhlaWdodD0iNDAwIiB2aWV3Qm94PSIwIDAgNDAwIDQwMCI+PHJlY3Qgd2lkdGg9IjQwMCIgaGVpZ2h0PSI0MDAiIGZpbGw9IiNmMmYyZjIiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjIwIiBmaWxsPSIjOTk5IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+Tm8gSW1hZ2U8L3RleHQ+PC9zdmc+'"
+                                            />
+
+                                            <!-- Sold Out Badge -->
+                                            @if (!product.isActive) {
+                                                <div class="absolute top-4 left-4">
+                                                    <span class="px-4 py-2 bg-black/60 backdrop-blur-md text-white text-xs font-bold tracking-wider uppercase rounded-full border border-white/10"> Sold Out </span>
+                                                </div>
+                                            }
+
+                                            <!-- Product Attributes Badges -->
+                                            <div class="absolute top-4 right-4 flex flex-col gap-2 items-end">
+                                                @for (attr of getProductAttributes(product) | slice:0:2; track $index) {
+                                                    <div class="px-3 py-1 bg-white/90 backdrop-blur-sm rounded-full shadow-sm text-xs font-medium">
+                                                        {{ attr.attribute.name }}: {{ attr.attributeValue?.value }}
+                                                    </div>
+                                                }
+                                                @if (getProductAttributes(product).length > 2) {
+                                                    <div class="px-3 py-1 bg-white/90 backdrop-blur-sm rounded-full shadow-sm text-xs font-medium">
+                                                        +{{ getProductAttributes(product).length - 2 }} more
+                                                    </div>
+                                                }
+                                            </div>
+
+                                            <!-- Decorative Arrow -->
+                                            <div class="absolute bottom-4 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-all duration-500 translate-y-4 group-hover:translate-y-0">
+                                                <div class="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center text-white shadow-xl hover:bg-white hover:text-surface-900 transition-colors">
+                                                    <i class="pi pi-eye text-sm"></i>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Content -->
+                                        <div class="flex flex-col flex-1 px-1">
+                                            <!-- Header -->
+                                            <div class="flex justify-between items-start gap-4 mb-2">
+                                                <h3 class="font-serif text-xl font-medium text-surface-900 dark:text-surface-0 leading-tight cursor-pointer group-hover:text-primary-600 transition-colors" [title]="product.name">
+                                                    {{ product.name }}
+                                                </h3>
+                                                <span class="font-serif text-xl text-surface-900 dark:text-surface-0 whitespace-nowrap"> \${{ product.basePrice.toFixed(2) }} </span>
+                                            </div>
+
+                                            <!-- Product Attributes Preview -->
+                                            @if (getProductAttributes(product).length > 0) {
+                                                <div class="mb-3">
+                                                    <div class="flex flex-wrap gap-1.5">
+                                                        @for (attr of getProductAttributes(product) | slice:0:3; track $index) {
+                                                            <span class="text-xs px-2 py-0.5 bg-surface-100 dark:bg-surface-800 rounded text-surface-600 dark:text-surface-400">
+                                                                {{ attr.attributeValue?.value }}
+                                                            </span>
+                                                        }
+                                                    </div>
+                                                </div>
+                                            }
+
+                                            <!-- Description -->
+                                            <p class="text-sm text-surface-500 dark:text-surface-400 line-clamp-1 mb-4 font-light tracking-wide">
+                                                {{ product.description || 'Premium quality corporate item' }}
+                                            </p>
+
+                                            <!-- Action Button -->
+                                            <div class="mt-auto">
+                                                <button
+                                                    pButton
+                                                    pRipple
+                                                    label="Add to Cart"
+                                                    icon="pi pi-shopping-bag"
+                                                    class="w-full p-button-outlined p-button-lg !rounded-xl font-medium !border-surface-200 dark:!border-surface-700 !text-surface-900 dark:!text-surface-0 hover:!bg-primary-600 hover:!border-primary-600 hover:!text-white transition-all duration-300 py-4"
+                                                    (click)="openAttributeDialog(product)"
+                                                    [disabled]="!product.isActive"
+                                                ></button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        }
 
                         <!-- Empty State -->
-                        <div *ngIf="!loading && filteredProducts.length === 0" class="py-20 text-center">
-                            <p class="text-xl text-surface-400 font-serif italic">No products match your refinement.</p>
-                            <button class="mt-4 text-primary-600 hover:underline" (click)="clearAllFilters()">Clear Filters</button>
-                        </div>
+                        @if (!loading && filteredProducts.length === 0) {
+                            <div class="py-20 text-center">
+                                <p class="text-xl text-surface-400 font-serif italic">No products match your refinement.</p>
+                                <button class="mt-4 text-primary-600 hover:underline" (click)="clearAllFilters()">Clear Filters</button>
+                            </div>
+                        }
 
                         <!-- Pagination -->
-                        <div *ngIf="!loading && totalRecords > 0" class="mt-16 flex justify-center">
-                            <p-paginator [rows]="pageSize" [totalRecords]="totalRecords" [first]="(currentPage - 1) * pageSize" (onPageChange)="onPageChange($event)" styleClass="!bg-transparent !border-none"></p-paginator>
-                        </div>
+                        @if (!loading && totalRecords > 0) {
+                            <div class="mt-16 flex justify-center">
+                                <p-paginator [rows]="pageSize" [totalRecords]="totalRecords" [first]="(currentPage - 1) * pageSize" (onPageChange)="onPageChange($event)" styleClass="!bg-transparent !border-none"></p-paginator>
+                            </div>
+                        }
                     </div>
                 </div>
             </div>
         </div>
+
+        <!-- Attribute Selection Dialog -->
+        <p-dialog
+            [(visible)]="showAttributeDialog"
+            [modal]="true"
+            [style]="{ width: '500px' }"
+            header="Select Options"
+            [closable]="true"
+            [closeOnEscape]="true"
+            (onHide)="onDialogHide()"
+        >
+            @if (selectedProduct) {
+                <div class="space-y-6">
+                    <!-- Product Info -->
+                    <div class="flex items-start gap-4">
+                        <img
+                            [src]="selectedProduct.picture || selectedProduct.secureUrl"
+                            [alt]="selectedProduct.name"
+                            class="w-20 h-20 object-cover rounded-lg"
+                        />
+                        <div>
+                            <h4 class="font-semibold text-lg text-surface-900 dark:text-surface-0">{{ selectedProduct.name }}</h4>
+                            <p class="text-surface-600 dark:text-surface-400 text-sm mt-1">{{ selectedProduct.description | slice:0:100 }}...</p>
+                            <div class="mt-2 text-xl font-bold text-surface-900 dark:text-surface-0">
+                                \${{ calculateFinalPrice() | number:'1.2-2' }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Attribute Selection con p-select -->
+                    @if (productAttributeGroups.length > 0) {
+                        <div class="space-y-6">
+                            @for (group of productAttributeGroups; track group.id) {
+                                <div class="space-y-3">
+                                    <div class="flex items-center justify-between">
+                                        <h5 class="text-sm font-semibold text-surface-700 dark:text-surface-300">{{ group.name }}</h5>
+                                        @if (selectedAttributeValuesForCart[group.id]) {
+                                            <span class="text-xs text-surface-500">
+                                                Selected
+                                            </span>
+                                        }
+                                    </div>
+
+                                    <!-- Select para cada grupo de atributos -->
+                                    <p-select
+                                        [options]="getSelectOptionsForGroup(group)"
+                                        [(ngModel)]="selectedAttributeValuesForCart[group.id]"
+                                        (ngModelChange)="onAttributeSelectChange(group.id)"
+                                        optionLabel="name"
+                                        optionValue="id"
+                                        placeholder="Select an option..."
+                                        styleClass="w-full"
+                                        [showClear]="true"
+                                        appendTo="body"
+                                    >
+                                        <ng-template let-option pTemplate="item">
+                                            <div class="flex items-center justify-between w-full">
+                                                <span>{{ option.name }}</span>
+                                                @if (option.priceModifier) {
+                                                    <span class="text-xs ml-2" [ngClass]="option.priceModifier > 0 ? 'text-green-600' : 'text-red-600'">
+                                                        {{ option.priceModifier > 0 ? '+' : '' }}{{ option.priceModifier | currency:'USD' }}
+                                                    </span>
+                                                }
+                                            </div>
+                                        </ng-template>
+                                    </p-select>
+
+                                    <!-- Información de precio adicional -->
+                                    @if (selectedAttributeValuesForCart[group.id]) {
+                                        <div class="text-xs text-surface-500 pl-1">
+                                            Selected: {{ getSelectedAttributeName(group.id) }}
+                                            @if (getSelectedAttributePriceModifier(group.id) !== 0) {
+                                                <span>
+                                                    ({{ getSelectedAttributePriceModifier(group.id) > 0 ? '+' : '' }}{{ getSelectedAttributePriceModifier(group.id) | currency:'USD' }})
+                                                </span>
+                                            }
+                                        </div>
+                                    }
+                                </div>
+                            }
+                        </div>
+                    }
+
+                    <!-- Message if no attributes -->
+                    @if (productAttributeGroups.length === 0) {
+                        <div class="text-center py-8 text-surface-500">
+                            <i class="pi pi-info-circle text-2xl mb-2"></i>
+                            <p>No additional options available for this product.</p>
+                        </div>
+                    }
+
+                    <!-- Resumen del precio -->
+                    <div class="bg-surface-50 dark:bg-surface-800 p-4 rounded-lg">
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm font-medium text-surface-700 dark:text-surface-300">Base Price:</span>
+                            <span class="font-medium text-surface-900 dark:text-surface-0">
+                                \${{ selectedProduct.basePrice | number:'1.2-2' }}
+                            </span>
+                        </div>
+
+                        @if (hasAttributeModifiers()) {
+                            <div class="mt-2 space-y-1">
+                                @for (group of productAttributeGroups; track group.id) {
+                                    @if (selectedAttributeValuesForCart[group.id]) {
+                                        <div class="flex justify-between items-center text-sm">
+                                            <span class="text-surface-600 dark:text-surface-400">
+                                                {{ group.name }}:
+                                            </span>
+                                            @if (getSelectedAttributePriceModifier(group.id) !== 0) {
+                                                <span [ngClass]="getSelectedAttributePriceModifier(group.id) > 0 ? 'text-green-600' : 'text-red-600'">
+                                                    {{ getSelectedAttributePriceModifier(group.id) > 0 ? '+' : '' }}{{ getSelectedAttributePriceModifier(group.id) | currency:'USD' }}
+                                                </span>
+                                            }
+                                        </div>
+                                    }
+                                }
+                            </div>
+                        }
+
+                        <div class="flex justify-between items-center mt-3 pt-3 border-t border-surface-200 dark:border-surface-700">
+                            <span class="font-bold text-surface-900 dark:text-surface-0">Total:</span>
+                            <span class="text-xl font-bold text-surface-900 dark:text-surface-0">
+                                \${{ calculateFinalPrice() | number:'1.2-2' }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            }
+
+            <ng-template pTemplate="footer">
+                <div class="flex justify-between items-center w-full">
+                    <div class="text-sm text-surface-600 dark:text-surface-400">
+                        {{ getSelectedAttributesCount() }} of {{ productAttributeGroups.length }} selected
+                    </div>
+                    <div class="flex gap-2">
+                        <button
+                            pButton
+                            label="Cancel"
+                            icon="pi pi-times"
+                            class="p-button-text"
+                            (click)="showAttributeDialog = false"
+                        ></button>
+                        <button
+                            pButton
+                            label="Add to Cart"
+                            icon="pi pi-shopping-bag"
+                            (click)="confirmAddToCart()"
+                            [disabled]="!canAddToCart()"
+                        ></button>
+                    </div>
+                </div>
+            </ng-template>
+        </p-dialog>
     `,
     providers: [ProductService]
 })
@@ -214,12 +531,12 @@ export class ShopWindget implements OnInit {
     productService = inject(ProductService);
 
     products: Product[] = [];
-    filteredProducts: Product[] = []; // For client-side filtering
+    filteredProducts: Product[] = [];
     loading: boolean = true;
 
     // Pagination
     currentPage: number = 1;
-    pageSize: number = 12; // Increased for grid alignment
+    pageSize: number = 12;
     totalRecords: number = 0;
 
     // Filters
@@ -229,6 +546,16 @@ export class ShopWindget implements OnInit {
     // Client-side Filters
     priceRange: number[] = [0, 1000];
     inStockOnly: boolean = false;
+
+    // Attribute Filters
+    attributeGroups: AttributeGroup[] = [];
+    selectedAttributeValues: Map<string, string[]> = new Map();
+
+    // Attribute Selection Dialog
+    showAttributeDialog: boolean = false;
+    selectedProduct: Product | null = null;
+    productAttributeGroups: ProductAttributeGroup[] = [];
+    selectedAttributeValuesForCart: { [key: string]: string } = {};
 
     // Debounce timer for search
     private searchDebounce: any;
@@ -252,7 +579,8 @@ export class ShopWindget implements OnInit {
         const filters: any = {
             page: this.currentPage,
             limit: this.pageSize,
-            isActive: true // Only show active products on landing page
+            isActive: true,
+            relations: ["pav", "attribute", "attributeValue"]
         };
 
         if (this.searchTerm && this.searchTerm.trim()) {
@@ -263,10 +591,11 @@ export class ShopWindget implements OnInit {
             filters.sort = this.selectedSort.value;
         }
 
-        this.productService.filterPublicProducts(filters).subscribe({
+        this.productService.filterProducts(filters).subscribe({
             next: (response) => {
                 this.products = response.data;
                 this.totalRecords = response.total;
+                this.processAttributes();
                 this.applyClientSideFilters();
                 this.loading = false;
             },
@@ -283,6 +612,230 @@ export class ShopWindget implements OnInit {
         });
     }
 
+    processAttributes() {
+        const attributeMap = new Map<string, Map<string, {name: string, count: number, priceModifier?: number}>>();
+
+        this.products.forEach(product => {
+            const attributes = product.productsAttributesValues || [];
+            attributes.forEach(attr => {
+                if (attr.attribute && attr.attributeValue) {
+                    const attributeId = attr.attribute.id!;
+                    const attributeName = attr.attribute.name;
+                    const valueId = attr.attributeValue.id!;
+                    const valueName = attr.attributeValue.value;
+                    const priceModifier = attr.attributeValue.priceModifier;
+
+                    if (!attributeMap.has(attributeId)) {
+                        attributeMap.set(attributeId, new Map());
+                    }
+
+                    const valueMap = attributeMap.get(attributeId)!;
+                    if (!valueMap.has(valueId)) {
+                        valueMap.set(valueId, { name: valueName, count: 0, priceModifier });
+                    }
+
+                    valueMap.get(valueId)!.count++;
+                }
+            });
+        });
+
+        this.attributeGroups = Array.from(attributeMap.entries()).map(([id, valueMap]) => ({
+            id,
+            name: this.products
+                .flatMap(p => p.productsAttributesValues || [])
+                .find(attr => attr.attribute?.id === id)?.attribute?.name || 'Unknown',
+            values: Array.from(valueMap.entries()).map(([valueId, data]) => ({
+                id: valueId,
+                name: data.name,
+                count: data.count,
+                priceModifier: data.priceModifier,
+                selected: this.isAttributeValueSelected(id, valueId)
+            })),
+            selected: this.getSelectedAttributeValues(id).length > 0
+        }));
+    }
+
+    openAttributeDialog(product: Product) {
+        if (!product.isActive) {
+            this.message.add({
+                severity: 'warn',
+                summary: 'Product unavailable',
+                detail: 'This product is currently unavailable',
+                life: 3000
+            });
+            return;
+        }
+
+        this.selectedProduct = product;
+        this.selectedAttributeValuesForCart = {};
+        this.prepareProductAttributeGroups(product);
+        this.showAttributeDialog = true;
+    }
+
+    prepareProductAttributeGroups(product: Product) {
+        const attributes = product.productsAttributesValues || [];
+        const attributeMap = new Map<string, ProductAttributeGroup>();
+
+        attributes.forEach(attr => {
+            if (attr.attribute && attr.attributeValue) {
+                const attributeId = attr.attribute.id!;
+                const attributeName = attr.attribute.name;
+                const valueId = attr.attributeValue.id!;
+                const valueName = attr.attributeValue.value;
+                const priceModifier = attr.attributeValue.priceModifier;
+
+                if (!attributeMap.has(attributeId)) {
+                    attributeMap.set(attributeId, {
+                        id: attributeId,
+                        name: attributeName,
+                        values: []
+                    });
+                }
+
+                const group = attributeMap.get(attributeId)!;
+
+                // Check if value already exists in group
+                const existingValue = group.values.find(v => v.id === valueId);
+                if (!existingValue) {
+                    group.values.push({
+                        id: valueId,
+                        name: valueName,
+                        priceModifier: priceModifier
+                    });
+                }
+            }
+        });
+
+        this.productAttributeGroups = Array.from(attributeMap.values());
+    }
+
+    getSelectOptionsForGroup(group: ProductAttributeGroup): any[] {
+        // Agrega una opción vacía al inicio para permitir deseleccionar
+        return [
+            { id: null, name: 'None', priceModifier: 0 },
+            ...group.values.map(value => ({
+                id: value.id,
+                name: value.name,
+                priceModifier: value.priceModifier || 0
+            }))
+        ];
+    }
+
+    onAttributeSelectChange(attributeId: string) {
+        // Cuando cambia la selección, actualizar el precio
+        // La actualización es automática porque calculateFinalPrice() se llama en la vista
+
+        // También puedes registrar el cambio si necesitas
+        console.log(`Attribute ${attributeId} selected:`, this.selectedAttributeValuesForCart[attributeId]);
+    }
+
+    getSelectedAttributeName(attributeId: string): string {
+        const valueId = this.selectedAttributeValuesForCart[attributeId];
+        if (!valueId) return '';
+
+        const group = this.productAttributeGroups.find(g => g.id === attributeId);
+        if (!group) return '';
+
+        const value = group.values.find(v => v.id === valueId);
+        return value?.name || '';
+    }
+
+    getSelectedAttributePriceModifier(attributeId: string): number {
+        const valueId = this.selectedAttributeValuesForCart[attributeId];
+        if (!valueId) return 0;
+
+        const group = this.productAttributeGroups.find(g => g.id === attributeId);
+        if (!group) return 0;
+
+        const value = group.values.find(v => v.id === valueId);
+        return value?.priceModifier || 0;
+    }
+
+    hasAttributeModifiers(): boolean {
+        return this.productAttributeGroups.some(group => {
+            const valueId = this.selectedAttributeValuesForCart[group.id];
+            if (!valueId) return false;
+
+            const value = group.values.find(v => v.id === valueId);
+            return value?.priceModifier !== undefined && value.priceModifier !== 0;
+        });
+    }
+
+    calculateFinalPrice(): number {
+        if (!this.selectedProduct) return 0;
+
+        let finalPrice = this.selectedProduct.basePrice;
+
+        // Add price modifiers from selected attributes
+        Object.values(this.selectedAttributeValuesForCart).forEach(valueId => {
+            if (!valueId) return; // Saltar valores nulos
+
+            this.productAttributeGroups.forEach(group => {
+                const value = group.values.find(v => v.id === valueId);
+                if (value?.priceModifier) {
+                    finalPrice += value.priceModifier;
+                }
+            });
+        });
+
+        return finalPrice;
+    }
+
+    getSelectedAttributesCount(): number {
+        return Object.values(this.selectedAttributeValuesForCart).filter(value => value !== null && value !== undefined).length;
+    }
+
+    confirmAddToCart() {
+        if (!this.selectedProduct) return;
+
+        // Preparar atributos seleccionados
+        const selectedAttributes: any[] = [];
+
+        Object.entries(this.selectedAttributeValuesForCart).forEach(([attributeId, valueId]) => {
+            if (!valueId) return; // Saltar valores nulos o vacíos
+
+            const group = this.productAttributeGroups.find(g => g.id === attributeId);
+
+            if (group) {
+                const value = group.values.find(v => v.id === valueId);
+                selectedAttributes.push({
+                    attributeId,
+                    attributeName: group.name,
+                    valueId,
+                    valueName: value?.name || '',
+                    priceModifier: value?.priceModifier || 0
+                });
+            }
+        });
+
+        // Agregar al carrito con atributos
+        this.cart.addToCart(this.selectedProduct, 1, selectedAttributes);
+
+        this.message.add({
+            severity: 'success',
+            summary: 'Added to cart',
+            detail: `${this.selectedProduct.name} has been added to cart`,
+            life: 3000
+        });
+
+        // Cerrar diálogo
+        this.showAttributeDialog = false;
+        this.selectedProduct = null;
+        this.selectedAttributeValuesForCart = {};
+    }
+
+    canAddToCart(): boolean {
+        // Permite agregar al carrito incluso si no se seleccionan todos los atributos
+        // Si quieres que todos los atributos sean requeridos, cambia a:
+        // return this.getSelectedAttributesCount() === this.productAttributeGroups.length;
+        return true;
+    }
+
+    onDialogHide() {
+        // Limpiar selecciones cuando se cierra el diálogo
+        this.selectedAttributeValuesForCart = {};
+    }
+
     // Client-side filtering logic
     applyClientSideFilters() {
         this.filteredProducts = this.products.filter((product) => {
@@ -292,13 +845,89 @@ export class ShopWindget implements OnInit {
                 return false;
             }
 
-            // In Stock (Mock logic - assuming isActive is stock for now, or just filtering active)
+            // In Stock
             if (this.inStockOnly && !product.isActive) {
                 return false;
             }
 
+            // Attribute Filters
+            if (this.selectedAttributeValues.size > 0) {
+                const productAttributes = product.productsAttributesValues || [];
+
+                // Check each selected attribute group
+                for (const [attributeId, selectedValueIds] of this.selectedAttributeValues.entries()) {
+                    if (selectedValueIds.length === 0) continue;
+
+                    const hasMatchingValue = productAttributes.some(attr =>
+                        attr.attributeId === attributeId &&
+                        selectedValueIds.includes(attr.attributeValueId)
+                    );
+
+                    if (!hasMatchingValue) {
+                        return false;
+                    }
+                }
+            }
+
             return true;
         });
+    }
+
+    getProductAttributes(product: Product): ProductAttributeValue[] {
+        return product.productsAttributesValues || [];
+    }
+
+    toggleAttributeValue(attributeId: string, valueId: string) {
+        if (!this.selectedAttributeValues.has(attributeId)) {
+            this.selectedAttributeValues.set(attributeId, []);
+        }
+
+        const values = this.selectedAttributeValues.get(attributeId)!;
+        const index = values.indexOf(valueId);
+
+        if (index === -1) {
+            values.push(valueId);
+        } else {
+            values.splice(index, 1);
+        }
+
+        // Update attribute groups UI
+        const group = this.attributeGroups.find(g => g.id === attributeId);
+        if (group) {
+            const value = group.values.find(v => v.id === valueId);
+            if (value) {
+                value.selected = !value.selected;
+            }
+            group.selected = values.length > 0;
+        }
+
+        this.applyClientSideFilters();
+    }
+
+    toggleAttributeGroup(attributeId: string) {
+        const group = this.attributeGroups.find(g => g.id === attributeId);
+        if (!group) return;
+
+        const isSelected = group.selected;
+
+        if (isSelected) {
+            // Deselect all values in this group
+            group.values.forEach(value => value.selected = false);
+            this.selectedAttributeValues.delete(attributeId);
+        } else {
+            // Just mark as selected but don't select all values
+            group.selected = true;
+        }
+
+        this.applyClientSideFilters();
+    }
+
+    isAttributeValueSelected(attributeId: string, valueId: string): boolean {
+        return this.selectedAttributeValues.get(attributeId)?.includes(valueId) || false;
+    }
+
+    getSelectedAttributeValues(attributeId: string): string[] {
+        return this.selectedAttributeValues.get(attributeId) || [];
     }
 
     onSearchChange() {
@@ -317,7 +946,6 @@ export class ShopWindget implements OnInit {
     }
 
     onPriceChange() {
-        // Just re-apply client filters, don't reload from server
         this.applyClientSideFilters();
     }
 
@@ -328,28 +956,8 @@ export class ShopWindget implements OnInit {
         document.getElementById('shop')?.scrollIntoView({ behavior: 'smooth' });
     }
 
-    addToCart(product: Product) {
-        if (!product.isActive) {
-            this.message.add({
-                severity: 'warn',
-                summary: 'Product unavailable',
-                detail: 'This product is currently unavailable',
-                life: 3000
-            });
-            return;
-        }
-
-        this.cart.addToCart(product, 1);
-        this.message.add({
-            severity: 'success',
-            summary: 'Added to cart',
-            detail: `${product.name} has been added to cart`,
-            life: 3000
-        });
-    }
-
     hasActiveFilters(): boolean {
-        return !!(this.searchTerm || this.inStockOnly);
+        return !!(this.searchTerm || this.inStockOnly || this.selectedAttributeValues.size > 0);
     }
 
     clearSearch() {
@@ -362,6 +970,14 @@ export class ShopWindget implements OnInit {
         this.selectedSort = null;
         this.priceRange = [0, 1000];
         this.inStockOnly = false;
+        this.selectedAttributeValues.clear();
+
+        // Reset attribute groups UI
+        this.attributeGroups.forEach(group => {
+            group.selected = false;
+            group.values.forEach(value => value.selected = false);
+        });
+
         this.onFilterChange();
     }
 }

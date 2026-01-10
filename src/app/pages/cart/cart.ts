@@ -13,13 +13,31 @@ import { TopbarWidget } from '../landing/components/topbarwidget';
 import { FooterWidget } from '../landing/components/footerwidget';
 import { DialogModule } from 'primeng/dialog';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
-
+import { TagModule } from 'primeng/tag';
+import { ChipModule } from 'primeng/chip';
 import { SeoService } from '@/core/services/seo.service';
+import { SelectModule } from 'primeng/select';
 
 @Component({
     selector: 'app-cart',
     standalone: true,
-    imports: [CommonModule, ButtonModule, InputNumberModule, FormsModule, TableModule, FileUploadModule, ToastModule, RouterModule, TopbarWidget, FooterWidget, DialogModule, ProgressSpinnerModule],
+    imports: [
+        CommonModule,
+        ButtonModule,
+        InputNumberModule,
+        FormsModule,
+        TableModule,
+        FileUploadModule,
+        ToastModule,
+        RouterModule,
+        TopbarWidget,
+        FooterWidget,
+        DialogModule,
+        ProgressSpinnerModule,
+        TagModule,
+        ChipModule,
+        SelectModule
+    ],
     providers: [MessageService],
     template: `
         <div class="bg-surface-0 dark:bg-surface-900 min-h-screen">
@@ -44,16 +62,61 @@ import { SeoService } from '@/core/services/seo.service';
                                     <button pButton label="Go Shopping" routerLink="/" icon="pi pi-arrow-left" class="p-button-rounded p-button-outlined"></button>
                                 </div>
 
-                                <div *ngFor="let item of cart.items()" class="flex flex-col sm:flex-row sm:items-center p-6 gap-6 bg-surface-0 dark:bg-surface-900 rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300">
-                                    <div class="w-32 h-32 flex-shrink-0 overflow-hidden rounded-lg bg-surface-100">
+                                <div *ngFor="let item of cart.items()" class="flex flex-col sm:flex-row sm:items-start p-6 gap-6 bg-surface-0 dark:bg-surface-900 rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 border border-surface-200 dark:border-surface-800">
+                                    <div class="w-32 h-32 shrink-0 overflow-hidden rounded-lg bg-surface-100">
                                         <img [src]="item.product.picture" [alt]="item.product.name" class="w-full h-full object-cover hover:scale-105 transition-transform duration-500" />
                                     </div>
-                                    <div class="flex-1 flex flex-col gap-3">
-                                        <span class="text-2xl font-bold text-surface-900 dark:text-surface-0">{{ item.product.name }}</span>
-                                        <span class="text-surface-600 dark:text-surface-300 line-clamp-2">{{ item.product.description }}</span>
+
+                                    <div class="flex-1 flex flex-col gap-4">
+                                        <div class="flex justify-between items-start">
+                                            <div class="flex-1">
+                                                <span class="text-2xl font-bold text-surface-900 dark:text-surface-0">{{ item.product.name }}</span>
+                                                <span class="text-surface-600 dark:text-surface-300 line-clamp-2 block mt-1">{{ item.product.description }}</span>
+                                            </div>
+                                            <div class="text-right">
+                                                <div class="text-2xl font-bold text-primary">
+                                                    \${{ getItemTotalPrice(item) | number:'1.2-2' }}
+                                                </div>
+                                                <div class="text-sm text-surface-500 mt-1">
+                                                    \${{ getItemUnitPrice(item) | number:'1.2-2' }} each
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Selected Attributes -->
+                                        <div *ngIf="item.selectedAttributes && item.selectedAttributes.length > 0" class="mt-2">
+                                            <div class="text-sm font-semibold text-surface-700 dark:text-surface-300 mb-2">Selected Options:</div>
+                                            <div class="flex flex-wrap gap-2">
+                                                <div *ngFor="let attr of item.selectedAttributes"
+                                                     class="flex items-center gap-2 px-3 py-1.5 bg-surface-50 dark:bg-surface-800 rounded-lg border border-surface-200 dark:border-surface-700">
+                                                    <span class="text-sm text-surface-600 dark:text-surface-400 font-medium">{{ attr.attributeName }}:</span>
+                                                    <span class="text-sm text-surface-900 dark:text-surface-0">{{ attr.valueName }}</span>
+                                                    <span *ngIf="attr.priceModifier && attr.priceModifier !== 0"
+                                                          class="text-xs px-1.5 py-0.5 rounded"
+                                                          [ngClass]="attr.priceModifier > 0 ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'">
+                                                        {{ attr.priceModifier > 0 ? '+' : '' }}{{ attr.priceModifier | currency:'USD' }}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Product Base Attributes Preview -->
+                                        <div *ngIf="item.product.productsAttributesValues && item.product.productsAttributesValues.length > 0" class="mt-2">
+                                            <div class="text-sm font-semibold text-surface-700 dark:text-surface-300 mb-2">Product Attributes:</div>
+                                            <div class="flex flex-wrap gap-1.5">
+                                                <span *ngFor="let attr of item.product.productsAttributesValues | slice:0:3"
+                                                      class="text-xs px-2 py-1 bg-surface-100 dark:bg-surface-800 rounded text-surface-600 dark:text-surface-400">
+                                                    {{ attr.attribute.name }}: {{ attr.attributeValue?.value }}
+                                                </span>
+                                                <span *ngIf="item.product.productsAttributesValues.length > 3"
+                                                      class="text-xs px-2 py-1 bg-surface-100 dark:bg-surface-800 rounded text-surface-500">
+                                                    +{{ item.product.productsAttributesValues.length - 3 }} more
+                                                </span>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div class="flex flex-col sm:flex-row items-center gap-6">
-                                        <span class="text-2xl font-bold text-primary">\${{ item.product.basePrice }}</span>
+
+                                    <div class="flex flex-col sm:flex-row items-center gap-4 mt-2">
                                         <p-inputNumber
                                             [ngModel]="item.quantity"
                                             (ngModelChange)="updateQuantity(item.product.id, $event)"
@@ -62,25 +125,63 @@ import { SeoService } from '@/core/services/seo.service';
                                             spinnerMode="horizontal"
                                             [min]="1"
                                             inputStyleClass="w-16 text-center font-bold"
-                                            decrementButtonClass="p-button-text text-surface-500"
-                                            incrementButtonClass="p-button-text text-surface-500"
-                                        >
-                                        </p-inputNumber>
-                                        <button pButton icon="pi pi-trash" class="p-button-text p-button-danger p-button-rounded hover:bg-red-50" (click)="removeItem(item.product.id)"></button>
+                                            decrementButtonClass="p-button-text text-surface-500 hover:bg-surface-100 dark:hover:bg-surface-800"
+                                            incrementButtonClass="p-button-text text-surface-500 hover:bg-surface-100 dark:hover:bg-surface-800"
+                                            styleClass="border border-surface-300 dark:border-surface-700 rounded-lg"
+                                        ></p-inputNumber>
+                                        <button pButton icon="pi pi-trash"
+                                          class="p-button-text p-button-danger p-button-rounded hover:bg-red-50 dark:hover:bg-red-900/20"
+                                          (click)="removeItem(item.product.id)"
+                                          pTooltip="Remove item"
+                                          tooltipPosition="top">
+                                        </button>
+                                        <button pButton icon="pi pi-pencil"
+                                          class="p-button-text p-button-secondary p-button-rounded hover:bg-surface-100 dark:hover:bg-surface-800"
+                                          (click)="editAttributes(item)"
+                                          pTooltip="Edit options"
+                                          tooltipPosition="top">
+                                        </button>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="w-full lg:w-[28rem] flex-shrink-0" *ngIf="cart.items().length > 0">
-                            <div class="surface-card p-8 rounded-xl sticky top-32 shadow-lg bg-surface-0 dark:bg-surface-900">
+                        <div class="w-full lg:w-[28rem] shrink-0" *ngIf="cart.items().length > 0">
+                            <div class="surface-card p-8 rounded-xl sticky top-32 shadow-lg bg-surface-0 dark:bg-surface-900 border border-surface-200 dark:border-surface-800">
                                 <div class="flex justify-between items-center mb-6">
                                     <span class="text-2xl font-bold text-surface-900 dark:text-surface-0">Order Summary</span>
+                                    <span class="text-sm text-surface-500">{{ cart.totalItems() }} items</span>
                                 </div>
 
-                                <div class="flex justify-between items-center mb-4">
-                                    <span class="text-surface-600 dark:text-surface-200 text-lg">Subtotal (Est.)</span>
-                                    <span class="text-2xl font-bold text-surface-900 dark:text-surface-0">\${{ cart.totalPrice() | number: '1.2-2' }}</span>
+                                <!-- Price Breakdown -->
+                                <div class="space-y-3 mb-6">
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-surface-600 dark:text-surface-200">Subtotal</span>
+                                        <span class="text-surface-900 dark:text-surface-0 font-medium">\${{ getSubtotal() | number:'1.2-2' }}</span>
+                                    </div>
+
+                                    <!-- Attribute Modifiers Summary -->
+                                    <div *ngIf="hasAttributeModifiers()" class="ml-4 border-l-2 border-surface-200 dark:border-surface-700 pl-3">
+                                        <div class="text-sm text-surface-500 mb-1">Attribute Modifiers:</div>
+                                        <div *ngFor="let item of cart.items()" class="text-xs">
+                                            <div *ngFor="let attr of item.selectedAttributes">
+                                                <div *ngIf="attr.priceModifier && attr.priceModifier !== 0"
+                                                     class="flex justify-between items-center mb-1">
+                                                    <span class="text-surface-600 dark:text-surface-400">
+                                                        {{ item.product.name }} ({{ attr.attributeName }}: {{ attr.valueName }})
+                                                    </span>
+                                                    <span [ngClass]="attr.priceModifier > 0 ? 'text-green-600' : 'text-red-600'">
+                                                        {{ attr.priceModifier > 0 ? '+' : '' }}{{ attr.priceModifier | currency:'USD' }}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="flex justify-between items-center pt-3 border-t border-surface-200 dark:border-surface-700">
+                                        <span class="text-lg font-semibold text-surface-900 dark:text-surface-0">Total</span>
+                                        <span class="text-2xl font-bold text-primary">\${{ cart.totalPrice() | number:'1.2-2' }}</span>
+                                    </div>
                                 </div>
 
                                 <div class="border-t surface-border my-6"></div>
@@ -107,13 +208,13 @@ import { SeoService } from '@/core/services/seo.service';
                                     >
                                         <ng-template pTemplate="content">
                                             <div *ngIf="cart.quoteFile()" class="flex flex-col gap-3">
-                                                <div class="flex items-center gap-3 p-3 border border-primary rounded bg-primary-50 text-primary">
+                                                <div class="flex items-center gap-3 p-3 border border-primary rounded bg-primary-50 text-primary dark:bg-primary-900 dark:border-primary-700">
                                                     <i class="pi pi-check-circle text-xl"></i>
                                                     <span class="font-medium truncate">{{ cart.quoteFile()?.name }}</span>
                                                     <i class="pi pi-times cursor-pointer ml-auto hover:text-red-600" (click)="clearFile()"></i>
                                                 </div>
 
-                                                <div class="w-full h-48 rounded-lg overflow-hidden bg-surface-50 flex items-center justify-center relative group">
+                                                <div class="w-full h-48 rounded-lg overflow-hidden bg-surface-50 dark:bg-surface-800 flex items-center justify-center relative group">
                                                     <img [src]="filePreviewUrl" alt="Preview" class="max-w-full max-h-full object-contain" *ngIf="filePreviewUrl" />
                                                     <div class="absolute inset-0 bg-black/50 hidden group-hover:flex items-center justify-center transition-all duration-300" *ngIf="filePreviewUrl">
                                                         <span class="text-white font-medium">Preview</span>
@@ -121,7 +222,7 @@ import { SeoService } from '@/core/services/seo.service';
                                                 </div>
                                             </div>
 
-                                            <div *ngIf="!cart.quoteFile()" class="flex flex-col items-center justify-center py-4 text-surface-500">
+                                            <div *ngIf="!cart.quoteFile()" class="flex flex-col items-center justify-center py-4 text-surface-500 dark:text-surface-400">
                                                 <i class="pi pi-image text-4xl mb-2"></i>
                                                 <span>Drag and drop or click to select</span>
                                             </div>
@@ -129,8 +230,15 @@ import { SeoService } from '@/core/services/seo.service';
                                     </p-fileUpload>
                                 </div>
 
-                                <button pButton label="Request Quote" class="w-full p-button-lg font-bold py-4" icon="pi pi-send" (click)="requestQuote()" [loading]="loading"></button>
-                                <p class="text-sm text-surface-500 mt-6 text-center leading-relaxed">By requesting a quote, our team will review your order and personalization requirements and get back to you shortly.</p>
+                                <button pButton label="Request Quote"
+                                        class="w-full p-button-lg font-bold py-4"
+                                        icon="pi pi-send"
+                                        (click)="requestQuote()"
+                                        [loading]="loading"
+                                        [disabled]="cart.items().length === 0"></button>
+                                <p class="text-sm text-surface-500 dark:text-surface-400 mt-6 text-center leading-relaxed">
+                                    By requesting a quote, our team will review your order and personalization requirements and get back to you shortly.
+                                </p>
                             </div>
                         </div>
                     </div>
@@ -185,12 +293,132 @@ import { SeoService } from '@/core/services/seo.service';
                     <button pButton label="Proceed Anyway" (click)="proceedWithoutFile()"></button>
                 </ng-template>
             </p-dialog>
+
+            <!-- Edit Attributes Dialog -->
+            <p-dialog [(visible)]="showEditAttributesDialog"
+                      header="Edit Options"
+                      [modal]="true"
+                      [style]="{ width: '500px' }"
+                      (onHide)="onEditDialogHide()">
+                <div class="space-y-6" *ngIf="itemToEdit">
+                    <!-- Product Info -->
+                    <div class="flex items-start gap-4">
+                        <img
+                            [src]="itemToEdit.product.picture"
+                            [alt]="itemToEdit.product.name"
+                            class="w-20 h-20 object-cover rounded-lg"
+                        />
+                        <div>
+                            <h4 class="font-semibold text-lg text-surface-900 dark:text-surface-0">{{ itemToEdit.product.name }}</h4>
+                            <p class="text-surface-600 dark:text-surface-400 text-sm mt-1">{{ itemToEdit.product.description | slice:0:100 }}...</p>
+                            <div class="mt-2 text-xl font-bold text-surface-900 dark:text-surface-0">
+                                \${{ getEditDialogPrice() | number:'1.2-2' }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Attribute Selection -->
+                    <div class="space-y-4" *ngIf="editAttributeGroups.length > 0">
+                        <div *ngFor="let group of editAttributeGroups" class="space-y-3">
+                            <div class="flex items-center justify-between">
+                                <h5 class="text-sm font-semibold text-surface-700 dark:text-surface-300">{{ group.name }}</h5>
+                                <span class="text-xs text-surface-500" *ngIf="editSelectedAttributes[group.id]">
+                                    Selected
+                                </span>
+                            </div>
+
+                            <!-- Select para cada grupo de atributos -->
+                            <p-select
+                                [options]="getEditSelectOptionsForGroup(group)"
+                                [showClear]="true"
+                                [(ngModel)]="editSelectedAttributes[group.id]"
+                                (ngModelChange)="onEditAttributeChange()"
+                                optionLabel="name"
+                                optionValue="id"
+                                placeholder="Select an option..."
+                                styleClass="w-full"
+                                appendTo="body"
+                            >
+                                <ng-template let-option pTemplate="item">
+                                    <div class="flex items-center justify-between w-full">
+                                        <span>{{ option.name }}</span>
+                                        @if (option.priceModifier) {
+                                            <span class="text-xs ml-2" [ngClass]="option.priceModifier > 0 ? 'text-green-600' : 'text-red-600'">
+                                                {{ option.priceModifier > 0 ? '+' : '' }}{{ option.priceModifier | currency:'USD' }}
+                                            </span>
+                                        }
+                                    </div>
+                                </ng-template>
+                            </p-select>
+                        </div>
+                    </div>
+
+                    <!-- Resumen del precio -->
+                    <div class="bg-surface-50 dark:bg-surface-800 p-4 rounded-lg">
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm font-medium text-surface-700 dark:text-surface-300">Base Price:</span>
+                            <span class="font-medium text-surface-900 dark:text-surface-0">
+                                \${{ itemToEdit.product.basePrice | number:'1.2-2' }}
+                            </span>
+                        </div>
+
+                        <div *ngIf="hasEditAttributeModifiers()" class="mt-2 space-y-1">
+                            <div *ngFor="let group of editAttributeGroups" class="flex justify-between items-center text-sm">
+                                <span class="text-surface-600 dark:text-surface-400" *ngIf="editSelectedAttributes[group.id]">
+                                    {{ group.name }}:
+                                </span>
+                                <span *ngIf="getEditAttributePriceModifier(group.id) !== 0"
+                                      [ngClass]="getEditAttributePriceModifier(group.id) > 0 ? 'text-green-600' : 'text-red-600'">
+                                    {{ getEditAttributePriceModifier(group.id) > 0 ? '+' : '' }}{{ getEditAttributePriceModifier(group.id) | currency:'USD' }}
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-between items-center mt-3 pt-3 border-t border-surface-200 dark:border-surface-700">
+                            <span class="font-bold text-surface-900 dark:text-surface-0">Unit Price:</span>
+                            <span class="text-xl font-bold text-surface-900 dark:text-surface-0">
+                                \${{ getEditDialogPrice() | number:'1.2-2' }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <ng-template pTemplate="footer">
+                    <div class="flex justify-between items-center w-full">
+                        <div class="text-sm text-surface-600 dark:text-surface-400">
+                            {{ getEditSelectedAttributesCount() }} of {{ editAttributeGroups.length }} selected
+                        </div>
+                        <div class="flex gap-2">
+                            <button
+                                pButton
+                                label="Cancel"
+                                icon="pi pi-times"
+                                class="p-button-text"
+                                (click)="showEditAttributesDialog = false"
+                            ></button>
+                            <button
+                                pButton
+                                label="Update"
+                                icon="pi pi-check"
+                                (click)="saveEditedAttributes()"
+                            ></button>
+                        </div>
+                    </div>
+                </ng-template>
+            </p-dialog>
         </div>
     `,
     styles: [
         `
             :host ::ng-deep .p-inputnumber-input {
                 width: 3rem;
+            }
+            .attribute-chip {
+                transition: all 0.2s ease;
+            }
+            .attribute-chip:hover {
+                transform: translateY(-1px);
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             }
         `
     ]
@@ -209,8 +437,34 @@ export class Cart implements OnInit {
 
     showSpecs = false;
     showFileWarning = false;
+    showEditAttributesDialog = false;
     loading = false;
     filePreviewUrl: string | null = null;
+
+    // Variables para editar atributos
+    itemToEdit: any = null;
+    editAttributeGroups: any[] = [];
+    editSelectedAttributes: { [key: string]: string } = {};
+
+    getItemUnitPrice(item: any): number {
+        return this.cart.getItemPrice(item);
+    }
+
+    getItemTotalPrice(item: any): number {
+        return this.cart.getItemPrice(item) * item.quantity;
+    }
+
+    getSubtotal(): number {
+        return this.cart.items().reduce((total, item) => {
+            return total + (item.product.basePrice * item.quantity);
+        }, 0);
+    }
+
+    hasAttributeModifiers(): boolean {
+        return this.cart.items().some(item =>
+            item.selectedAttributes?.some(attr => attr.priceModifier && attr.priceModifier !== 0)
+        );
+    }
 
     updateQuantity(productId: string | undefined, quantity: number) {
         if (!productId) return;
@@ -220,14 +474,179 @@ export class Cart implements OnInit {
     removeItem(productId: string | undefined) {
         if (!productId) return;
         this.cart.removeFromCart(productId);
-        this.messageService.add({ severity: 'info', summary: 'Removed', detail: 'Item removed from cart' });
+        this.messageService.add({
+            severity: 'info',
+            summary: 'Removed',
+            detail: 'Item removed from cart'
+        });
+    }
+
+    // Método para editar atributos
+    editAttributes(item: any) {
+        this.itemToEdit = item;
+
+        // Preparar grupos de atributos del producto
+        this.editAttributeGroups = this.prepareEditAttributeGroups(item.product);
+
+        // Preparar atributos seleccionados actuales
+        this.editSelectedAttributes = {};
+        if (item.selectedAttributes) {
+            item.selectedAttributes.forEach((attr: any) => {
+                this.editSelectedAttributes[attr.attributeId] = attr.valueId;
+            });
+        }
+
+        this.showEditAttributesDialog = true;
+    }
+
+    prepareEditAttributeGroups(product: any): any[] {
+        const attributes = product.productsAttributesValues || [];
+        const attributeMap = new Map<string, any>();
+
+        attributes.forEach((attr: any) => {
+            if (attr.attribute && attr.attributeValue) {
+                const attributeId = attr.attribute.id!;
+                const attributeName = attr.attribute.name;
+                const valueId = attr.attributeValue.id!;
+                const valueName = attr.attributeValue.value;
+                const priceModifier = attr.attributeValue.priceModifier;
+
+                if (!attributeMap.has(attributeId)) {
+                    attributeMap.set(attributeId, {
+                        id: attributeId,
+                        name: attributeName,
+                        values: []
+                    });
+                }
+
+                const group = attributeMap.get(attributeId)!;
+
+                // Check if value already exists in group
+                const existingValue = group.values.find((v: any) => v.id === valueId);
+                if (!existingValue) {
+                    group.values.push({
+                        id: valueId,
+                        name: valueName,
+                        priceModifier: priceModifier
+                    });
+                }
+            }
+        });
+
+        return Array.from(attributeMap.values());
+    }
+
+    getEditSelectOptionsForGroup(group: any): any[] {
+        return [
+            { id: null, name: 'None', priceModifier: 0 },
+            ...group.values.map((value: any) => ({
+                id: value.id,
+                name: value.name,
+                priceModifier: value.priceModifier || 0
+            }))
+        ];
+    }
+
+    onEditAttributeChange() {
+        // Actualizar el precio cuando cambian los atributos
+    }
+
+    getEditDialogPrice(): number {
+        if (!this.itemToEdit) return 0;
+
+        let price = this.itemToEdit.product.basePrice;
+
+        // Sumar modificadores de precio de atributos seleccionados
+        Object.values(this.editSelectedAttributes).forEach(valueId => {
+            if (!valueId) return;
+
+            this.editAttributeGroups.forEach(group => {
+                const value = group.values.find((v: any) => v.id === valueId);
+                if (value?.priceModifier) {
+                    price += value.priceModifier;
+                }
+            });
+        });
+
+        return price;
+    }
+
+    getEditSelectedAttributesCount(): number {
+        return Object.values(this.editSelectedAttributes).filter(value => value !== null && value !== undefined).length;
+    }
+
+    hasEditAttributeModifiers(): boolean {
+        return this.editAttributeGroups.some(group => {
+            const valueId = this.editSelectedAttributes[group.id];
+            if (!valueId) return false;
+
+            const value = group.values.find((v: any) => v.id === valueId);
+            return value?.priceModifier !== undefined && value.priceModifier !== 0;
+        });
+    }
+
+    getEditAttributePriceModifier(attributeId: string): number {
+        const valueId = this.editSelectedAttributes[attributeId];
+        if (!valueId) return 0;
+
+        const group = this.editAttributeGroups.find(g => g.id === attributeId);
+        if (!group) return 0;
+
+        const value = group.values.find((v: any) => v.id === valueId);
+        return value?.priceModifier || 0;
+    }
+
+    saveEditedAttributes() {
+        if (!this.itemToEdit) return;
+
+        // Preparar atributos seleccionados
+        const selectedAttributes: any[] = [];
+
+        Object.entries(this.editSelectedAttributes).forEach(([attributeId, valueId]) => {
+            if (!valueId) return;
+
+            const group = this.editAttributeGroups.find(g => g.id === attributeId);
+
+            if (group) {
+                const value = group.values.find((v: any) => v.id === valueId);
+                selectedAttributes.push({
+                    attributeId,
+                    attributeName: group.name,
+                    valueId,
+                    valueName: value?.name || '',
+                    priceModifier: value?.priceModifier || 0
+                });
+            }
+        });
+
+        // Actualizar el item en el carrito
+        this.cart.updateItemAttributes(this.itemToEdit.product.id!, selectedAttributes);
+
+        this.messageService.add({
+            severity: 'success',
+            summary: 'Updated',
+            detail: 'Item options have been updated',
+            life: 3000
+        });
+
+        this.showEditAttributesDialog = false;
+    }
+
+    onEditDialogHide() {
+        this.itemToEdit = null;
+        this.editAttributeGroups = [];
+        this.editSelectedAttributes = {};
     }
 
     onFileSelect(event: any) {
         if (event.files && event.files.length > 0) {
             const file = event.files[0];
             this.cart.setQuoteFile(file);
-            this.messageService.add({ severity: 'success', summary: 'File Uploaded', detail: file.name });
+            this.messageService.add({
+                severity: 'success',
+                summary: 'File Uploaded',
+                detail: file.name
+            });
 
             // Create preview URL
             const reader = new FileReader();
@@ -241,11 +660,20 @@ export class Cart implements OnInit {
     clearFile() {
         this.cart.setQuoteFile(null);
         this.filePreviewUrl = null;
+        this.messageService.add({
+            severity: 'info',
+            summary: 'File Removed',
+            detail: 'Personalization file has been removed'
+        });
     }
 
     requestQuote() {
         if (this.cart.items().length === 0) {
-            this.messageService.add({ severity: 'warn', summary: 'Empty Cart', detail: 'Add items to cart first' });
+            this.messageService.add({
+                severity: 'warn',
+                summary: 'Empty Cart',
+                detail: 'Add items to cart first'
+            });
             return;
         }
 
