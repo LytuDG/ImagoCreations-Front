@@ -40,47 +40,33 @@ import { SeoService } from '@/core/services/seo.service';
 
                             <div class="space-y-6">
                                 <div class="flex flex-col gap-2">
-                                    <label for="companyName" class="font-medium text-surface-900 dark:text-surface-0">
-                                        Company Name <span class="text-red-500">*</span>
-                                    </label>
-                                    <input pInputText id="companyName" [(ngModel)]="info.companyName"
-                                           placeholder="Your Company" class="w-full" />
+                                    <label for="companyName" class="font-medium text-surface-900 dark:text-surface-0"> Company Name <span class="text-red-500">*</span> </label>
+                                    <input pInputText id="companyName" [(ngModel)]="info.companyName" placeholder="Your Company" class="w-full" />
                                 </div>
 
                                 <div class="flex flex-col gap-2">
-                                    <label for="contactPerson" class="font-medium text-surface-900 dark:text-surface-0">
-                                        Contact Person <span class="text-red-500">*</span>
-                                    </label>
-                                    <input pInputText id="contactPerson" [(ngModel)]="info.contactPerson"
-                                           placeholder="Full Name" class="w-full" />
+                                    <label for="contactPerson" class="font-medium text-surface-900 dark:text-surface-0"> Contact Person <span class="text-red-500">*</span> </label>
+                                    <input pInputText id="contactPerson" [(ngModel)]="info.contactPerson" placeholder="Full Name" class="w-full" />
                                 </div>
 
                                 <div class="flex flex-col gap-2">
-                                    <label for="email" class="font-medium text-surface-900 dark:text-surface-0">
-                                        Email Address <span class="text-red-500">*</span>
-                                    </label>
-                                    <input pInputText id="email" type="email" [(ngModel)]="info.email"
-                                           placeholder="email@example.com" class="w-full" />
+                                    <label for="email" class="font-medium text-surface-900 dark:text-surface-0"> Email Address <span class="text-red-500">*</span> </label>
+                                    <input pInputText id="email" type="email" [(ngModel)]="info.email" placeholder="email@example.com" class="w-full" />
                                 </div>
 
                                 <div class="flex flex-col gap-2">
-                                    <label for="phone" class="font-medium text-surface-900 dark:text-surface-0">
-                                        Phone Number <span class="text-red-500">*</span>
-                                    </label>
-                                    <input pInputText id="phone" [(ngModel)]="info.phone"
-                                           placeholder="+1 (555) 000-0000" class="w-full" />
+                                    <label for="phone" class="font-medium text-surface-900 dark:text-surface-0"> Phone Number <span class="text-red-500">*</span> </label>
+                                    <input pInputText id="phone" [(ngModel)]="info.phone" placeholder="+1 (555) 000-0000" class="w-full" />
                                 </div>
 
                                 <div class="flex flex-col gap-2">
                                     <label for="address" class="font-medium text-surface-900 dark:text-surface-0">Address</label>
-                                    <input pInputText id="address" [(ngModel)]="info.address"
-                                           placeholder="Street Address, City, State, Zip" class="w-full" />
+                                    <input pInputText id="address" [(ngModel)]="info.address" placeholder="Street Address, City, State, Zip" class="w-full" />
                                 </div>
 
                                 <div class="flex flex-col gap-2">
                                     <label for="notes" class="font-medium text-surface-900 dark:text-surface-0">Additional Notes</label>
-                                    <textarea pInputTextarea id="notes" [(ngModel)]="info.notes" rows="4"
-                                              placeholder="Any specific requirements or questions?" class="w-full"></textarea>
+                                    <textarea pInputTextarea id="notes" [(ngModel)]="info.notes" rows="4" placeholder="Any specific requirements or questions?" class="w-full"></textarea>
                                 </div>
 
                                 <!-- File Upload Summary -->
@@ -98,17 +84,9 @@ import { SeoService } from '@/core/services/seo.service';
                                 }
 
                                 <div class="pt-4">
-                                    <button pButton label="Submit Quote Request"
-                                            icon="pi pi-check"
-                                            class="w-full p-button-lg font-bold"
-                                            (click)="finalizeQuote()"
-                                            [loading]="loading"
-                                            [disabled]="cart.items().length === 0">
-                                    </button>
+                                    <button pButton label="Submit Quote Request" icon="pi pi-check" class="w-full p-button-lg font-bold" (click)="finalizeQuote()" [loading]="loading" [disabled]="cart.items().length === 0"></button>
 
-                                    <p class="text-sm text-surface-500 dark:text-surface-400 mt-4 text-center">
-                                        By submitting, you agree to our terms and conditions. Our team will review your request and contact you within 24-48 hours.
-                                    </p>
+                                    <p class="text-sm text-surface-500 dark:text-surface-400 mt-4 text-center">By submitting, you agree to our terms and conditions. Our team will review your request and contact you within 24-48 hours.</p>
                                 </div>
                             </div>
                         </div>
@@ -204,15 +182,12 @@ export class QuoteCustomerInfo implements OnInit {
         this.loading = true;
 
         // Usar el nuevo método helper para crear la cotización
-        const quoteData = this.quoteService.createQuoteFromCart(
-            this.cart.items(),
-            this.info,
-            this.info.notes
-        );
+        const quoteData = this.quoteService.createQuoteFromCart(this.cart.items(), this.info, this.info.notes);
         this.loading = false;
         this.showSuccessModal = true;
+        this.cart.clearCart();
         // Enviar a la API
-/*         this.quoteService.createQuote(quoteData).subscribe({
+        /*         this.quoteService.createQuote(quoteData).subscribe({
             next: (response) => {
                 this.quoteResponse = response;
                 this.loading = false;
