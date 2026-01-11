@@ -1,13 +1,14 @@
-import { Route, Routes } from "@angular/router";
-import { Users } from "./users/users";
-import { ADMIN_ROUTES } from "@/core/constants/routes/routes";
-import { Agencies } from "./agencies/agencies";
-import { superAdminGuard } from "@/core/guards/super-admin.guard";
-import { Crud } from "../crud/crud";
-import { Dashboard } from "../dashboard/dashboard";
-import { Empty } from "../empty/empty";
-import { Products } from "./products/products";
-import { Attributes } from "./attributes/attribute.component";
+import { Route, Routes } from '@angular/router';
+import { Users } from './users/users';
+import { ADMIN_ROUTES } from '@/core/constants/routes/routes';
+import { Agencies } from './agencies/agencies';
+import { superAdminGuard } from '@/core/guards/super-admin.guard';
+import { Crud } from '../crud/crud';
+import { Dashboard } from '../dashboard/dashboard';
+import { Empty } from '../empty/empty';
+import { Products } from './products/products';
+import { Attributes } from './attributes/attribute.component';
+import { Quotes } from './quotes/quotes';
 
 export default [
     {
@@ -40,5 +41,8 @@ export default [
         path: ADMIN_ROUTES.ADMIN_ATTRIBUTES,
         component: Attributes
     },
-
-] as Routes
+    {
+        path: ADMIN_ROUTES.ADMIN_QUOTES,
+        component: Quotes
+    }
+] as Routes;

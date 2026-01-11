@@ -148,11 +148,11 @@ export class AppMenu {
                         icon: 'pi pi-fw pi-shop',
                         routerLink: [ADMIN_ROUTES.ADMIN_ORDERS]
                     },
-                    // {
-                    //     label: 'Quotes',
-                    //     icon: 'pi pi-fw pi-credit-card',
-                    //     routerLink: ['/pages/quotes']
-                    // },
+                    {
+                        label: 'Quotes',
+                        icon: 'pi pi-fw pi-credit-card',
+                        routerLink: [ADMIN_ROUTES.ADMIN_QUOTES]
+                    },
                     // {
                     //     label: 'Payments',
                     //     icon: 'pi pi-fw pi-dollar',

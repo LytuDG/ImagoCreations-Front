@@ -9,6 +9,7 @@ export enum ADMIN_ROUTES {
     ADMIN_ATTRIBUTES = 'attribute',
     ADMIN_DASHBOARD = 'dashboard',
     ADMIN_ORDERS = 'orders',
+    ADMIN_QUOTES = 'quotes',
     ADMIN_CONFIG = 'config'
 }
 
