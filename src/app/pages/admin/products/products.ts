@@ -122,12 +122,7 @@ interface ExportColumn {
                     <h5 class="m-0">Manage Products</h5>
                     <p-iconfield>
                         <p-inputicon styleClass="pi pi-search" />
-                        <input
-                            pInputText
-                            type="text"
-                            (keyup)="applyFilter($event, 'name')"
-                            placeholder="Search by name, SKU or type..."
-                        />
+                        <input pInputText type="text" (keyup)="applyFilter($event, 'name')" placeholder="Search by name, SKU or type..." />
                     </p-iconfield>
                 </div>
             </ng-template>
@@ -166,10 +161,7 @@ interface ExportColumn {
                 >
                     <td class="w-12 p-3" (click)="$event.stopPropagation()">
                         <div class="flex h-full items-center">
-                            <p-radioButton
-                                [value]="product"
-                                [(ngModel)]="selectedProduct"
-                            />
+                            <p-radioButton [value]="product" [(ngModel)]="selectedProduct" />
                         </div>
                     </td>
                     <td class="p-3" style="min-width: 12rem">{{ product.sku || 'N/A' }}</td>
@@ -184,19 +176,11 @@ interface ExportColumn {
                     <td class="p-3">
                         @if (product.productsAttributesValues?.length) {
                             <div class="flex flex-wrap gap-1">
-                                @for (attr of getProductAttributes(product) | slice:0:3; track attr.id) {
-                                    <p-tag
-                                        [value]="getAttributeDisplay(attr)"
-                                        severity="info"
-                                        class="text-xs"
-                                    />
+                                @for (attr of getProductAttributes(product) | slice: 0 : 3; track attr.id) {
+                                    <p-tag [value]="getAttributeDisplay(attr)" severity="info" class="text-xs" />
                                 }
                                 @if (product.productsAttributesValues.length > 3) {
-                                    <p-tag
-                                        [value]="'+' + (product.productsAttributesValues.length - 3)"
-                                        severity="contrast"
-                                        class="text-xs"
-                                    />
+                                    <p-tag [value]="'+' + (product.productsAttributesValues.length - 3)" severity="contrast" class="text-xs" />
                                 }
                             </div>
                         }
@@ -213,12 +197,13 @@ interface ExportColumn {
             <ng-template #emptymessage>
                 <tr>
                     <td colspan="8" class="text-center py-6">
-                        <div class="flex flex-column items-center gap-3">
-                            <i class="pi pi-box text-6xl text-color-secondary"></i>
-                            <span class="text-xl text-color-secondary font-medium">
-                                No products found
-                            </span>
-                            <p-button label="Refresh" icon="pi pi-refresh" (onClick)="loadProducts()" />
+                        <div class="flex flex-col items-center gap-3">
+                            <i class="pi pi-box text-6xl text-gray-400"></i>
+                            <span class="text-xl text-gray-500 font-medium"> No products found. Create your first product! </span>
+                            <div class="flex gap-2">
+                                <p-button label="Refresh" icon="pi pi-refresh" severity="secondary" outlined (onClick)="loadProducts()" />
+                                <p-button label="Create Product" icon="pi pi-plus" (onClick)="openNew()" />
+                            </div>
                         </div>
                     </td>
                 </tr>
@@ -288,20 +273,13 @@ interface ExportColumn {
                         }
                     </div>
 
-                    <!-- Base Price and Product Type -->
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label for="basePrice" class="block font-semibold mb-2 text-gray-700"> Base Price <span class="text-red-500">*</span> </label>
-                            <p-inputnumber id="basePrice" [(ngModel)]="newProduct.basePrice" mode="currency" currency="USD" locale="en-US" [disabled]="isUploading || isSaving" placeholder="0.00" [min]="0" class="w-full" fluid />
-                            @if (submitted && !newProduct.basePrice) {
-                                <small class="text-red-500">Base price is required.</small>
-                            }
-                        </div>
-
-                        <div>
-                            <label for="productType" class="block font-semibold mb-2 text-gray-700"> Product Type <span class="text-red-500">*</span> </label>
-                            <p-select id="productType" [(ngModel)]="newProduct.type" [options]="productTypes" optionLabel="label" optionValue="value" placeholder="Select type" [disabled]="isUploading || isSaving" class="w-full" fluid />
-                        </div>
+                    <!-- Base Price -->
+                    <div>
+                        <label for="basePrice" class="block font-semibold mb-2 text-gray-700"> Base Price <span class="text-red-500">*</span> </label>
+                        <p-inputnumber id="basePrice" [(ngModel)]="newProduct.basePrice" mode="currency" currency="USD" locale="en-US" [disabled]="isUploading || isSaving" placeholder="0.00" [min]="0" class="w-full" fluid />
+                        @if (submitted && !newProduct.basePrice) {
+                            <small class="text-red-500">Base price is required.</small>
+                        }
                     </div>
 
                     <!-- Sección de atributos (solo para edición) -->
@@ -309,15 +287,7 @@ interface ExportColumn {
                         <div class="border-t pt-4 mt-4">
                             <div class="flex items-center justify-between mb-3">
                                 <label class="block font-semibold text-gray-700">Product Attributes</label>
-                                <p-button
-                                    label="Manage Attributes"
-                                    icon="pi pi-tags"
-                                    severity="secondary"
-                                    [outlined]="true"
-                                    size="small"
-                                    (onClick)="openAttributesDialog()"
-                                    [disabled]="isUploading || isSaving"
-                                />
+                                <p-button label="Manage Attributes" icon="pi pi-tags" severity="secondary" [outlined]="true" size="small" (onClick)="openAttributesDialog()" [disabled]="isUploading || isSaving" />
                             </div>
 
                             @if (product.productsAttributesValues?.length) {
@@ -536,11 +506,7 @@ export class Products implements OnInit {
             accept: () => {
                 if (product.id) {
                     const productAttributes = product.productsAttributesValues || [];
-                    const deleteAttributeObservables = productAttributes
-                        .filter(attr => attr.id)
-                        .map(attr =>
-                            this.productAttributeValueService.deleteProductAttribute(attr.id!)
-                        );
+                    const deleteAttributeObservables = productAttributes.filter((attr) => attr.id).map((attr) => this.productAttributeValueService.deleteProductAttribute(attr.id!));
 
                     if (deleteAttributeObservables.length > 0) {
                         forkJoin(deleteAttributeObservables).subscribe({
@@ -608,10 +574,9 @@ export class Products implements OnInit {
 
         this.productService.filterProducts(filters).subscribe({
             next: (response: any) => {
-                const products = response.data;
+                const products = response.data || [];
                 this.products.set(products);
-                console.log(products[0].productsAttributesValues)
-                this.totalRecords = response.total;
+                this.totalRecords = response.total || 0;
                 this.loading.set(false);
             },
             error: (error: any) => {
@@ -669,7 +634,7 @@ export class Products implements OnInit {
     }
 
     onAttributesDeleted(): void {
-      this.loadProducts(this.currentPage, this.pageSize);
+        this.loadProducts(this.currentPage, this.pageSize);
     }
 
     getTypeSeverity(type: string): 'success' | 'secondary' | 'info' | 'warn' | 'danger' | 'contrast' | undefined | null {
@@ -748,6 +713,7 @@ export class Products implements OnInit {
                 basePrice: this.newProduct.basePrice,
                 type: this.newProduct.type || PRODUCT_TYPE.SIMPLE,
                 isActive: this.newProduct.isActive ?? true,
+                haveStock: false, // Default to true as per swagger requirement
                 publicId: publicId,
                 secureUrl: secureUrl
             };
@@ -787,7 +753,7 @@ export class Products implements OnInit {
 
                     if (!isUpdate && result.id) {
                         setTimeout(() => {
-                            const newProduct = this.products().find(p => p.id === result.id);
+                            const newProduct = this.products().find((p) => p.id === result.id);
                             if (newProduct) {
                                 this.selectedProduct = newProduct;
                             }
@@ -834,6 +800,14 @@ export class Products implements OnInit {
                         this.isSaving = false;
                         return;
                     }
+
+                    // Actualizar el producto con los datos de la imagen subida
+                    this.product.pictureProperties = {
+                        publicId: uploadResponse.public_id,
+                        secureId: uploadResponse.secure_url
+                    };
+                    this.product.picture = uploadResponse.secure_url;
+
                     saveFlow();
                 },
                 error: (error) => {

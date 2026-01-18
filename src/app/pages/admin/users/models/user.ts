@@ -4,6 +4,7 @@ export interface User {
     id?: string;
     email?: string;
     password?: string;
+    passwordConfirm?: string;
     lastName?: string;
     name?: string;
     role?: Role;
@@ -21,18 +22,19 @@ export interface CreateUserDTO {
     phone?: string;
     phoneCountryCode?: string;
     password: string;
+    passwordConfirm?: string;
 }
 
 export const DEFAULT_CREATE_USER: CreateUserDTO = {
     password: '',
+    passwordConfirm: '',
     email: '',
     lastName: '',
     name: '',
     phone: '',
     phoneCountryCode: '',
     roleName: ''
-}
-
+};
 
 export const DEFAULT_USER: User = {
     id: '',
