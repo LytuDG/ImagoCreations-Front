@@ -52,8 +52,7 @@ export class QuoteService {
      * Obtener todas las cotizaciones (con filtros)
      */
     getQuotes(filter?: QuoteFilter): Observable<{ data: QuoteResponse[]; total: number }> {
-        const params = this.buildFilterParams(filter);
-        return this.http.get<{ data: QuoteResponse[]; total: number }>(FILTER_QUOTE_ENDPOINT, { params });
+        return this.http.post<{ data: QuoteResponse[]; total: number }>(FILTER_QUOTE_ENDPOINT, filter || {});
     }
 
     /**
@@ -141,22 +140,6 @@ export class QuoteService {
             const itemPrice = item.price || 0;
             return total + itemPrice * item.quantity;
         }, 0);
-    }
-
-    /**
-     * Construir parámetros de filtro para la API
-     */
-    private buildFilterParams(filter?: QuoteFilter): any {
-        let params: any = {};
-
-        if (filter?.page) params.page = filter.page.toString();
-        if (filter?.limit) params.limit = filter.limit.toString();
-        if (filter?.search) params.search = filter.search;
-        if (filter?.status) params.status = filter.status;
-        if (filter?.customerEmail) params.customerEmail = filter.customerEmail;
-        if (filter?.sort) params.sort = filter.sort;
-
-        return params;
     }
 
     /**

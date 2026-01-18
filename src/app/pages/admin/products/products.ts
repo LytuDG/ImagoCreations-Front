@@ -295,7 +295,7 @@ interface ExportColumn {
                                     @for (attr of product.productsAttributesValues; track attr.id) {
                                         <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                                             <div>
-                                                <span class="font-medium">{{ attr.attribute?.name }}</span>
+                                                <span class="font-medium">{{ attr.attribute.name }}</span>
                                                 <span class="text-gray-600 ml-2">→ {{ attr.attributeValue?.value }}</span>
                                                 <div class="text-xs text-gray-500 mt-1">
                                                     <span class="mr-3">Required: {{ attr.required ? 'Yes' : 'No' }}</span>

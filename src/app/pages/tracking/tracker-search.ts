@@ -37,7 +37,7 @@ import { FooterWidget } from '../landing/components/footerwidget';
                                     <input pInputText id="token" [(ngModel)]="token" placeholder="e.g. 8f7d3a..." class="w-full p-inputtext-lg" (keyup.enter)="trackOrder()" />
                                 </div>
 
-                                <button pButton label="Track Order" icon="pi pi-arrow-right" class="w-full p-button-lg mt-2" (click)="trackOrder()" [disabled]="!token?.trim()"></button>
+                                <button pButton label="Track Order" icon="pi pi-arrow-right" class="w-full p-button-lg mt-2" (click)="trackOrder()" [disabled]="!token.trim()"></button>
                             </div>
 
                             <div class="mt-8 pt-6 border-t border-surface-100 dark:border-surface-800">

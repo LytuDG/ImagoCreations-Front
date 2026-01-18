@@ -44,5 +44,9 @@ export default [
     {
         path: ADMIN_ROUTES.ADMIN_QUOTES,
         component: Quotes
+    },
+    {
+        path: `${ADMIN_ROUTES.ADMIN_QUOTES}/:id`,
+        loadComponent: () => import('./quotes/quote-detail').then((m) => m.QuoteDetail)
     }
 ] as Routes;

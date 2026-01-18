@@ -8,10 +8,11 @@ import { TagModule } from 'primeng/tag';
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
 import { FormsModule } from '@angular/forms';
-import { QuoteResponse, QuoteFilter } from '@/core/models/quote/quote';
+import { QuoteResponse, QuoteFilter, QuoteStatusEnum } from '@/core/models/quote/quote';
 import { IconFieldModule } from 'primeng/iconfield';
 import { InputIconModule } from 'primeng/inputicon';
 import { SkeletonModule } from 'primeng/skeleton';
+import { Router } from '@angular/router';
 
 @Component({
     selector: 'app-admin-quotes',
@@ -72,15 +73,15 @@ import { SkeletonModule } from 'primeng/skeleton';
                                 </td>
                                 <td>
                                     <span class="p-column-title">Company</span>
-                                    {{ quote.customerInfo?.companyName || 'N/A' }}
+                                    {{ quote.companyName || quote.customerInfo?.companyName || 'N/A' }}
                                 </td>
                                 <td>
                                     <span class="p-column-title">Contact</span>
-                                    {{ quote.customerInfo?.contactPerson || 'N/A' }}
+                                    {{ quote.contactName || quote.customerInfo?.contactPerson || 'N/A' }}
                                 </td>
                                 <td>
                                     <span class="p-column-title">Email</span>
-                                    {{ quote.customerInfo?.email }}
+                                    {{ quote.email || quote.customerInfo?.email }}
                                 </td>
                                 <td>
                                     <span class="p-column-title">Date</span>
@@ -88,7 +89,7 @@ import { SkeletonModule } from 'primeng/skeleton';
                                 </td>
                                 <td>
                                     <span class="p-column-title">Total</span>
-                                    {{ quote.totalAmount | currency: 'USD' }}
+                                    {{ quote.totalAmount || quote.total | currency: 'USD' }}
                                 </td>
                                 <td>
                                     <span class="p-column-title">Status</span>
@@ -116,6 +117,7 @@ import { SkeletonModule } from 'primeng/skeleton';
 export class Quotes implements OnInit {
     quoteService = inject(QuoteService);
     messageService = inject(MessageService);
+    router = inject(Router);
 
     quotes: QuoteResponse[] = [];
     totalRecords: number = 0;
@@ -146,7 +148,7 @@ export class Quotes implements OnInit {
         this.quoteService.getQuotes(filter).subscribe({
             next: (response) => {
                 this.quotes = response.data;
-                this.totalRecords = response.total;
+                this.totalRecords = response.total; // Use total as totalRecords for pagination
                 this.loading = false;
             },
             error: (error) => {
@@ -173,25 +175,25 @@ export class Quotes implements OnInit {
     }
 
     getSeverity(status: string): 'success' | 'info' | 'warn' | 'danger' | 'secondary' | 'contrast' | undefined {
-        switch (status?.toUpperCase()) {
-            case 'APPROVED':
-            case 'COMPLETED':
+        // Map backend enums to severity
+        switch (status) {
+            case QuoteStatusEnum.APPROVED:
+            case QuoteStatusEnum.CONVERTED_TO_ORDER:
                 return 'success';
-            case 'PENDING':
-                return 'warn';
-            case 'REJECTED':
-            case 'CANCELLED':
-                return 'danger';
-            case 'PROCESSING':
-                return 'info';
-            default:
+            case QuoteStatusEnum.DRAFT:
                 return 'secondary';
+            case QuoteStatusEnum.SENT:
+                return 'info';
+            case QuoteStatusEnum.CHANGES_REQUESTED:
+                return 'warn';
+            case QuoteStatusEnum.REJECTED:
+                return 'danger';
+            default:
+                return 'info';
         }
     }
 
     viewQuote(quote: QuoteResponse) {
-        // Implementar navegación a detalles o abrir modal
-        this.messageService.add({ severity: 'info', summary: 'Info', detail: 'View details for ' + (quote.quoteNumber || quote.id) });
-        // this.router.navigate(['/admin/quotes', quote.id]);
+        this.router.navigate(['/admin/quotes', quote.id]);
     }
 }
