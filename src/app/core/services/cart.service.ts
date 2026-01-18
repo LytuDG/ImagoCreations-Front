@@ -11,6 +11,7 @@ export interface CartItemAttribute {
 }
 
 export interface CartItem {
+    itemId: string; // Unique identifier for the cart line item
     product: Product;
     quantity: number;
     selectedAttributes?: CartItemAttribute[];
@@ -128,6 +129,7 @@ export class CartService {
             this.items.set([
                 ...currentItems,
                 {
+                    itemId: this.generateItemId(),
                     product,
                     quantity,
                     selectedAttributes
@@ -136,10 +138,14 @@ export class CartService {
         }
     }
 
+    private generateItemId(): string {
+        return Date.now().toString(36) + Math.random().toString(36).substring(2);
+    }
+
     // Método para actualizar atributos de un item existente
-    public updateItemAttributes(productId: string, selectedAttributes: CartItemAttribute[]) {
+    public updateItemAttributes(itemId: string, selectedAttributes: CartItemAttribute[]) {
         const currentItems = this.items();
-        const itemIndex = currentItems.findIndex((item) => item.product.id === productId);
+        const itemIndex = currentItems.findIndex((item) => item.itemId === itemId);
 
         if (itemIndex > -1) {
             const updatedItems = [...currentItems];
@@ -164,18 +170,18 @@ export class CartService {
     }
 
     // Métodos existentes (sin cambios)
-    public removeFromCart(productId: string) {
-        this.items.set(this.items().filter((item) => item.product.id !== productId));
+    public removeFromCart(itemId: string) {
+        this.items.set(this.items().filter((item) => item.itemId !== itemId));
     }
 
-    public updateQuantity(productId: string, quantity: number) {
+    public updateQuantity(itemId: string, quantity: number) {
         if (quantity <= 0) {
-            this.removeFromCart(productId);
+            this.removeFromCart(itemId);
             return;
         }
 
         const currentItems = this.items();
-        const itemIndex = currentItems.findIndex((item) => item.product.id === productId);
+        const itemIndex = currentItems.findIndex((item) => item.itemId === itemId);
 
         if (itemIndex > -1) {
             const updatedItems = [...currentItems];

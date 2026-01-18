@@ -7,6 +7,7 @@ import { MessageService } from 'primeng/api';
 import { ButtonModule } from 'primeng/button';
 import { SkeletonModule } from 'primeng/skeleton';
 import { InputTextModule } from 'primeng/inputtext';
+import { InputNumberModule } from 'primeng/inputnumber';
 import { SelectModule } from 'primeng/select';
 import { PaginatorModule, PaginatorState } from 'primeng/paginator';
 import { TagModule } from 'primeng/tag';
@@ -18,14 +19,32 @@ import { ChipModule } from 'primeng/chip';
 import { BadgeModule } from 'primeng/badge';
 import { DialogModule } from 'primeng/dialog';
 import { RadioButtonModule } from 'primeng/radiobutton';
-import { ProductAttributeValue } from '@/pages/admin/products/models/product-atribute-value';
 import { ShopService } from '../services/shop.service';
 import { AttributeGroup, ProductAttributeGroup, SortOption, ShopFilterState } from '../models/shop.types';
+import { ProductAttributeValue } from '@/pages/admin/products/models/product-atribute-value';
 
 @Component({
     selector: 'shop-widget',
     standalone: true,
-    imports: [CommonModule, FormsModule, ButtonModule, SkeletonModule, InputTextModule, SelectModule, PaginatorModule, TagModule, SliderModule, CheckboxModule, AccordionModule, DividerModule, ChipModule, BadgeModule, DialogModule, RadioButtonModule],
+    imports: [
+        CommonModule,
+        FormsModule,
+        ButtonModule,
+        SkeletonModule,
+        InputTextModule,
+        InputNumberModule,
+        SelectModule,
+        PaginatorModule,
+        TagModule,
+        SliderModule,
+        CheckboxModule,
+        AccordionModule,
+        DividerModule,
+        ChipModule,
+        BadgeModule,
+        DialogModule,
+        RadioButtonModule
+    ],
     template: `
         <div id="shop" class="py-16 bg-surface-50 dark:bg-surface-950">
             <div class="w-full max-w-[1920px] mx-auto px-4 md:px-8 lg:px-12">
@@ -53,8 +72,8 @@ import { AttributeGroup, ProductAttributeGroup, SortOption, ShopFilterState } fr
                                 }
                             </div>
 
-                            <!-- Price Range (Client Side) -->
-                            <div class="mb-8">
+                            <!-- Price Range (Client Side) - Hidden for Quote Mode -->
+                            <div class="mb-8 hidden">
                                 <h4 class="text-sm font-bold text-surface-900 dark:text-surface-0 uppercase tracking-wider mb-4">Price Range</h4>
                                 <p-slider [(ngModel)]="priceRange" [range]="true" [min]="0" [max]="1000" (onChange)="onPriceChange()" styleClass="w-full mb-4"></p-slider>
                                 <div class="flex justify-between text-sm text-surface-600 dark:text-surface-400">
@@ -90,7 +109,7 @@ import { AttributeGroup, ProductAttributeGroup, SortOption, ShopFilterState } fr
                                                     >
                                                         <div class="flex items-center gap-1.5">
                                                             <span>{{ value.name }}</span>
-                                                            @if (value.priceModifier) {
+                                                            @if (false && value.priceModifier) {
                                                                 <span class="text-xs" [ngClass]="value.priceModifier > 0 ? 'text-green-600' : 'text-red-600'"> {{ value.priceModifier > 0 ? '+' : '' }}{{ value.priceModifier | currency: 'USD' }} </span>
                                                             }
                                                             <span class="text-xs text-surface-500">({{ value.count }})</span>
@@ -251,7 +270,7 @@ import { AttributeGroup, ProductAttributeGroup, SortOption, ShopFilterState } fr
                                                 <h3 class="font-serif text-xl font-medium text-surface-900 dark:text-surface-0 leading-tight cursor-pointer group-hover:text-primary-600 transition-colors" [title]="product.name">
                                                     {{ product.name }}
                                                 </h3>
-                                                <span class="font-serif text-xl text-surface-900 dark:text-surface-0 whitespace-nowrap"> \${{ product.basePrice.toFixed(2) }} </span>
+                                                <!-- <span class="font-serif text-xl text-surface-900 dark:text-surface-0 whitespace-nowrap"> \${{ product.basePrice.toFixed(2) }} </span> -->
                                             </div>
 
                                             <!-- Product Attributes Preview -->
@@ -319,7 +338,7 @@ import { AttributeGroup, ProductAttributeGroup, SortOption, ShopFilterState } fr
                         <div>
                             <h4 class="font-semibold text-lg text-surface-900 dark:text-surface-0">{{ selectedProduct.name }}</h4>
                             <p class="text-surface-600 dark:text-surface-400 text-sm mt-1">{{ selectedProduct.description | slice: 0 : 100 }}...</p>
-                            <div class="mt-2 text-xl font-bold text-surface-900 dark:text-surface-0">\${{ calculateFinalPrice() | number: '1.2-2' }}</div>
+                            <!-- <div class="mt-2 text-xl font-bold text-surface-900 dark:text-surface-0">\${{ calculateFinalPrice() | number: '1.2-2' }}</div> -->
                         </div>
                     </div>
 
@@ -350,7 +369,7 @@ import { AttributeGroup, ProductAttributeGroup, SortOption, ShopFilterState } fr
                                         <ng-template let-option pTemplate="item">
                                             <div class="flex items-center justify-between w-full">
                                                 <span>{{ option.name }}</span>
-                                                @if (option.priceModifier) {
+                                                @if (false && option.priceModifier) {
                                                     <span class="text-xs ml-2" [ngClass]="option.priceModifier > 0 ? 'text-green-600' : 'text-red-600'"> {{ option.priceModifier > 0 ? '+' : '' }}{{ option.priceModifier | currency: 'USD' }} </span>
                                                 }
                                             </div>
@@ -361,7 +380,7 @@ import { AttributeGroup, ProductAttributeGroup, SortOption, ShopFilterState } fr
                                     @if (selectedAttributeValuesForCart[group.id]) {
                                         <div class="text-xs text-surface-500 pl-1">
                                             Selected: {{ getSelectedAttributeName(group.id) }}
-                                            @if (getSelectedAttributePriceModifier(group.id) !== 0) {
+                                            @if (false && getSelectedAttributePriceModifier(group.id) !== 0) {
                                                 <span> ({{ getSelectedAttributePriceModifier(group.id) > 0 ? '+' : '' }}{{ getSelectedAttributePriceModifier(group.id) | currency: 'USD' }}) </span>
                                             }
                                         </div>
@@ -379,8 +398,50 @@ import { AttributeGroup, ProductAttributeGroup, SortOption, ShopFilterState } fr
                         </div>
                     }
 
-                    <!-- Resumen del precio -->
-                    <div class="bg-surface-50 dark:bg-surface-800 p-4 rounded-lg">
+                    <!-- Quantity and Add to List -->
+                    <div class="flex items-end gap-4 bg-surface-50 dark:bg-surface-800 p-4 rounded-lg mt-6">
+                        <div class="flex-1">
+                            <label class="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-2">Quantity</label>
+                            <p-inputNumber
+                                [(ngModel)]="currentQuantity"
+                                [showButtons]="true"
+                                buttonLayout="horizontal"
+                                spinnerMode="horizontal"
+                                [min]="1"
+                                inputStyleClass="w-16 text-center font-bold"
+                                decrementButtonClass="p-button-secondary"
+                                incrementButtonClass="p-button-secondary"
+                                styleClass="w-full"
+                            ></p-inputNumber>
+                        </div>
+                        <button pButton label="Add Variant" icon="pi pi-plus" class="p-button-outlined h-[42px]" (click)="addToAccumulated()" pTooltip="Add this configuration to the list below" tooltipPosition="top"></button>
+                    </div>
+
+                    <!-- Accumulated Variants List -->
+                    @if (accumulatedVariants.length > 0) {
+                        <div class="mt-6 border-t border-surface-200 dark:border-surface-700 pt-4">
+                            <h5 class="font-bold text-surface-900 dark:text-surface-0 mb-3 text-sm uppercase tracking-wide">Selected Variants for Cart</h5>
+                            <div class="space-y-2 max-h-48 overflow-y-auto pr-1 custom-scrollbar">
+                                @for (variant of accumulatedVariants; track variant.tempId) {
+                                    <div class="flex items-center justify-between p-3 bg-surface-0 dark:bg-surface-900 border border-surface-200 dark:border-surface-700 rounded-lg">
+                                        <div class="flex flex-col gap-1">
+                                            <div class="flex flex-wrap gap-2">
+                                                @for (attr of variant.selectedAttributes; track attr.attributeId) {
+                                                    <span class="text-xs px-2 py-1 bg-surface-100 dark:bg-surface-800 rounded font-medium"> {{ attr.attributeName }}: {{ attr.valueName }} </span>
+                                                }
+                                                @if (variant.selectedAttributes.length === 0) {
+                                                    <span class="text-xs text-surface-500">No options selected</span>
+                                                }
+                                            </div>
+                                            <span class="text-sm font-bold text-surface-900 dark:text-surface-0">Qty: {{ variant.quantity }}</span>
+                                        </div>
+                                        <button pButton icon="pi pi-trash" class="p-button-text p-button-danger p-button-sm p-button-rounded" (click)="removeAccumulated($index)"></button>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+                    <div class="bg-surface-50 dark:bg-surface-800 p-4 rounded-lg hidden">
                         <div class="flex justify-between items-center">
                             <span class="text-sm font-medium text-surface-700 dark:text-surface-300">Base Price:</span>
                             <span class="font-medium text-surface-900 dark:text-surface-0"> \${{ selectedProduct.basePrice | number: '1.2-2' }} </span>
@@ -413,10 +474,10 @@ import { AttributeGroup, ProductAttributeGroup, SortOption, ShopFilterState } fr
 
             <ng-template pTemplate="footer">
                 <div class="flex justify-between items-center w-full">
-                    <div class="text-sm text-surface-600 dark:text-surface-400">{{ getSelectedAttributesCount() }} of {{ productAttributeGroups.length }} selected</div>
+                    <div class="text-sm text-surface-600 dark:text-surface-400">{{ accumulatedVariants.length }} items pending</div>
                     <div class="flex gap-2">
                         <button pButton label="Cancel" icon="pi pi-times" class="p-button-text" (click)="showAttributeDialog = false"></button>
-                        <button pButton label="Add to Cart" icon="pi pi-shopping-bag" (click)="confirmAddToCart()" [disabled]="!canAddToCart()"></button>
+                        <button pButton label="Add All to Cart" icon="pi pi-shopping-bag" (click)="confirmAddToCart()" [disabled]="!canAddToCart()"></button>
                     </div>
                 </div>
             </ng-template>
@@ -454,6 +515,10 @@ export class ShopWidget implements OnInit {
     selectedProduct: Product | null = null;
     productAttributeGroups: ProductAttributeGroup[] = [];
     selectedAttributeValuesForCart: { [key: string]: string } = {};
+
+    // Multi-variant selection
+    currentQuantity: number = 1;
+    accumulatedVariants: any[] = [];
 
     // Debounce timer for search
     private searchDebounce: any;
@@ -526,6 +591,8 @@ export class ShopWidget implements OnInit {
         this.selectedProduct = product;
         this.selectedAttributeValuesForCart = {};
         this.productAttributeGroups = this.shopService.prepareProductAttributeGroups(product);
+        this.currentQuantity = 1;
+        this.accumulatedVariants = [];
         this.showAttributeDialog = true;
     }
 
@@ -574,7 +641,7 @@ export class ShopWidget implements OnInit {
         return Object.values(this.selectedAttributeValuesForCart).filter((value) => value !== null && value !== undefined).length;
     }
 
-    confirmAddToCart() {
+    addToAccumulated() {
         if (!this.selectedProduct) return;
 
         const selectedAttributes: any[] = [];
@@ -596,26 +663,68 @@ export class ShopWidget implements OnInit {
             }
         });
 
-        this.cart.addToCart(this.selectedProduct, 1, selectedAttributes);
+        this.accumulatedVariants.push({
+            selectedAttributes,
+            quantity: this.currentQuantity,
+            tempId: Date.now()
+        });
+
+        // Reset for next entry, but keep product open
+        this.selectedAttributeValuesForCart = {};
+        this.currentQuantity = 1;
+
+        this.message.add({
+            severity: 'info',
+            summary: 'Added to list',
+            detail: 'Variant added to pending list'
+        });
+    }
+
+    removeAccumulated(index: number) {
+        this.accumulatedVariants.splice(index, 1);
+    }
+
+    confirmAddToCart() {
+        if (!this.selectedProduct) return;
+
+        // If user has pending selection but didn't click "Add Variant", add it now if list is empty
+        // Or if list is not empty but they selected something else?
+        // Let's adopt this policy:
+        // 1. If accumulatedVariants > 0, just add those.
+        // 2. If accumulatedVariants == 0, add the current selection.
+
+        if (this.accumulatedVariants.length === 0) {
+            this.addToAccumulated(); // Add current selection to list first
+        }
+
+        this.accumulatedVariants.forEach((variant) => {
+            this.cart.addToCart(this.selectedProduct!, variant.quantity, variant.selectedAttributes);
+        });
 
         this.message.add({
             severity: 'success',
             summary: 'Added to cart',
-            detail: `${this.selectedProduct.name} has been added to cart`,
+            detail: `${this.accumulatedVariants.length} variants added to cart`,
             life: 3000
         });
 
         this.showAttributeDialog = false;
         this.selectedProduct = null;
         this.selectedAttributeValuesForCart = {};
+        this.accumulatedVariants = [];
+        this.currentQuantity = 1;
     }
 
     canAddToCart(): boolean {
+        // Can add if accumulated list has items OR current selection is valid
+        // Simple validation: just needs product
         return true;
     }
 
     onDialogHide() {
         this.selectedAttributeValuesForCart = {};
+        this.accumulatedVariants = [];
+        this.currentQuantity = 1;
     }
 
     applyClientSideFilters() {

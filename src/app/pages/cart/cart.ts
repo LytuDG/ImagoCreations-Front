@@ -63,8 +63,7 @@ import { ProductAttributeGroup } from '../landing/models/shop.types';
                                                 <span class="text-surface-600 dark:text-surface-300 line-clamp-2 block mt-1">{{ item.product.description }}</span>
                                             </div>
                                             <div class="text-right">
-                                                <div class="text-2xl font-bold text-primary">\${{ getItemTotalPrice(item) | number: '1.2-2' }}</div>
-                                                <div class="text-sm text-surface-500 mt-1">\${{ getItemUnitPrice(item) | number: '1.2-2' }} each</div>
+                                                <!-- Prices hidden for B2C quote mode -->
                                             </div>
                                         </div>
 
@@ -76,7 +75,7 @@ import { ProductAttributeGroup } from '../landing/models/shop.types';
                                                     <span class="text-sm text-surface-600 dark:text-surface-400 font-medium">{{ attr.attributeName }}:</span>
                                                     <span class="text-sm text-surface-900 dark:text-surface-0">{{ attr.valueName }}</span>
                                                     <span
-                                                        *ngIf="attr.priceModifier && attr.priceModifier !== 0"
+                                                        *ngIf="false && attr.priceModifier && attr.priceModifier !== 0"
                                                         class="text-xs px-1.5 py-0.5 rounded"
                                                         [ngClass]="attr.priceModifier > 0 ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'"
                                                     >
@@ -103,7 +102,7 @@ import { ProductAttributeGroup } from '../landing/models/shop.types';
                                     <div class="flex flex-col sm:flex-row items-center gap-4 mt-2">
                                         <p-inputNumber
                                             [ngModel]="item.quantity"
-                                            (ngModelChange)="updateQuantity(item.product.id, $event)"
+                                            (ngModelChange)="updateQuantity(item.itemId, $event)"
                                             [showButtons]="true"
                                             buttonLayout="horizontal"
                                             spinnerMode="horizontal"
@@ -117,7 +116,7 @@ import { ProductAttributeGroup } from '../landing/models/shop.types';
                                             pButton
                                             icon="pi pi-trash"
                                             class="p-button-text p-button-danger p-button-rounded hover:bg-red-50 dark:hover:bg-red-900/20"
-                                            (click)="removeItem(item.product.id)"
+                                            (click)="removeItem(item.itemId)"
                                             pTooltip="Remove item"
                                             tooltipPosition="top"
                                         ></button>
@@ -143,27 +142,30 @@ import { ProductAttributeGroup } from '../landing/models/shop.types';
 
                                 <!-- Price Breakdown -->
                                 <div class="space-y-3 mb-6">
-                                    <div class="flex justify-between items-center">
-                                        <span class="text-surface-600 dark:text-surface-200">Subtotal</span>
-                                        <span class="text-surface-900 dark:text-surface-0 font-medium">\${{ getSubtotal() | number: '1.2-2' }}</span>
-                                    </div>
+                                    <!-- Price Breakdown Hidden for Quote Mode -->
+                                    <div class="hidden">
+                                        <div class="flex justify-between items-center">
+                                            <span class="text-surface-600 dark:text-surface-200">Subtotal</span>
+                                            <span class="text-surface-900 dark:text-surface-0 font-medium">\${{ getSubtotal() | number: '1.2-2' }}</span>
+                                        </div>
 
-                                    <!-- Attribute Modifiers Summary -->
-                                    <div *ngIf="hasAttributeModifiers()" class="ml-4 border-l-2 border-surface-200 dark:border-surface-700 pl-3">
-                                        <div class="text-sm text-surface-500 mb-1">Attribute Modifiers:</div>
-                                        <div *ngFor="let item of cart.items()" class="text-xs">
-                                            <div *ngFor="let attr of item.selectedAttributes">
-                                                <div *ngIf="attr.priceModifier && attr.priceModifier !== 0" class="flex justify-between items-center mb-1">
-                                                    <span class="text-surface-600 dark:text-surface-400"> {{ item.product.name }} ({{ attr.attributeName }}: {{ attr.valueName }}) </span>
-                                                    <span [ngClass]="attr.priceModifier > 0 ? 'text-green-600' : 'text-red-600'"> {{ attr.priceModifier > 0 ? '+' : '' }}{{ attr.priceModifier | currency: 'USD' }} </span>
+                                        <!-- Attribute Modifiers Summary -->
+                                        <div *ngIf="hasAttributeModifiers()" class="ml-4 border-l-2 border-surface-200 dark:border-surface-700 pl-3">
+                                            <div class="text-sm text-surface-500 mb-1">Attribute Modifiers:</div>
+                                            <div *ngFor="let item of cart.items()" class="text-xs">
+                                                <div *ngFor="let attr of item.selectedAttributes">
+                                                    <div *ngIf="attr.priceModifier && attr.priceModifier !== 0" class="flex justify-between items-center mb-1">
+                                                        <span class="text-surface-600 dark:text-surface-400"> {{ item.product.name }} ({{ attr.attributeName }}: {{ attr.valueName }}) </span>
+                                                        <span [ngClass]="attr.priceModifier > 0 ? 'text-green-600' : 'text-red-600'"> {{ attr.priceModifier > 0 ? '+' : '' }}{{ attr.priceModifier | currency: 'USD' }} </span>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
 
-                                    <div class="flex justify-between items-center pt-3 border-t border-surface-200 dark:border-surface-700">
-                                        <span class="text-lg font-semibold text-surface-900 dark:text-surface-0">Total</span>
-                                        <span class="text-2xl font-bold text-primary">\${{ cart.totalPrice() | number: '1.2-2' }}</span>
+                                        <div class="flex justify-between items-center pt-3 border-t border-surface-200 dark:border-surface-700">
+                                            <span class="text-lg font-semibold text-surface-900 dark:text-surface-0">Total</span>
+                                            <span class="text-2xl font-bold text-primary">\${{ cart.totalPrice() | number: '1.2-2' }}</span>
+                                        </div>
                                     </div>
                                 </div>
 
@@ -279,7 +281,7 @@ import { ProductAttributeGroup } from '../landing/models/shop.types';
                         <div>
                             <h4 class="font-semibold text-lg text-surface-900 dark:text-surface-0">{{ itemToEdit.product.name }}</h4>
                             <p class="text-surface-600 dark:text-surface-400 text-sm mt-1">{{ itemToEdit.product.description | slice: 0 : 100 }}...</p>
-                            <div class="mt-2 text-xl font-bold text-surface-900 dark:text-surface-0">\${{ getEditDialogPrice() | number: '1.2-2' }}</div>
+                            <div class="mt-2 text-xl font-bold text-surface-900 dark:text-surface-0 hidden">\${{ getEditDialogPrice() | number: '1.2-2' }}</div>
                         </div>
                     </div>
 
@@ -306,7 +308,7 @@ import { ProductAttributeGroup } from '../landing/models/shop.types';
                                 <ng-template let-option pTemplate="item">
                                     <div class="flex items-center justify-between w-full">
                                         <span>{{ option.name }}</span>
-                                        @if (option.priceModifier) {
+                                        @if (false && option.priceModifier) {
                                             <span class="text-xs ml-2" [ngClass]="option.priceModifier > 0 ? 'text-green-600' : 'text-red-600'"> {{ option.priceModifier > 0 ? '+' : '' }}{{ option.priceModifier | currency: 'USD' }} </span>
                                         }
                                     </div>
@@ -315,8 +317,8 @@ import { ProductAttributeGroup } from '../landing/models/shop.types';
                         </div>
                     </div>
 
-                    <!-- Resumen del precio -->
-                    <div class="bg-surface-50 dark:bg-surface-800 p-4 rounded-lg">
+                    <!-- Resumen del precio (Hidden) -->
+                    <div class="bg-surface-50 dark:bg-surface-800 p-4 rounded-lg hidden">
                         <div class="flex justify-between items-center">
                             <span class="text-sm font-medium text-surface-700 dark:text-surface-300">Base Price:</span>
                             <span class="font-medium text-surface-900 dark:text-surface-0"> \${{ itemToEdit.product.basePrice | number: '1.2-2' }} </span>
@@ -407,14 +409,14 @@ export class Cart implements OnInit {
         return this.cart.items().some((item) => item.selectedAttributes?.some((attr) => attr.priceModifier && attr.priceModifier !== 0));
     }
 
-    updateQuantity(productId: string | undefined, quantity: number) {
-        if (!productId) return;
-        this.cart.updateQuantity(productId, quantity);
+    updateQuantity(itemId: string | undefined, quantity: number) {
+        if (!itemId) return;
+        this.cart.updateQuantity(itemId, quantity);
     }
 
-    removeItem(productId: string | undefined) {
-        if (!productId) return;
-        this.cart.removeFromCart(productId);
+    removeItem(itemId: string | undefined) {
+        if (!itemId) return;
+        this.cart.removeFromCart(itemId);
         this.messageService.add({
             severity: 'info',
             summary: 'Removed',
@@ -496,8 +498,8 @@ export class Cart implements OnInit {
             }
         });
 
-        // Actualizar el item en el carrito
-        this.cart.updateItemAttributes(this.itemToEdit.product.id!, selectedAttributes);
+        // Actualizar el item en el carrito usando itemId
+        this.cart.updateItemAttributes(this.itemToEdit.itemId, selectedAttributes);
 
         this.messageService.add({
             severity: 'success',
