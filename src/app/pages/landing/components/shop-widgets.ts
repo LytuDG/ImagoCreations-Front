@@ -1,5 +1,5 @@
 import { CartService } from '@/core/services/cart.service';
-import { Product, ProductService } from '@/core/services/product.service';
+import { Product } from '@/core/models/product/product';
 import { CommonModule } from '@angular/common';
 import { Component, inject, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -19,34 +19,8 @@ import { BadgeModule } from 'primeng/badge';
 import { DialogModule } from 'primeng/dialog';
 import { RadioButtonModule } from 'primeng/radiobutton';
 import { ProductAttributeValue } from '@/pages/admin/products/models/product-atribute-value';
-
-interface SortOption {
-    label: string;
-    value: string[];
-}
-
-interface AttributeGroup {
-    id: string;
-    name: string;
-    values: Array<{
-        id: string;
-        name: string;
-        count: number;
-        selected: boolean;
-        priceModifier?: number;
-    }>;
-    selected: boolean;
-}
-
-interface ProductAttributeGroup {
-    id: string;
-    name: string;
-    values: Array<{
-        id: string;
-        name: string;
-        priceModifier?: number;
-    }>;
-}
+import { ShopService } from '../services/shop.service';
+import { AttributeGroup, ProductAttributeGroup, SortOption, ShopFilterState } from '../models/shop.types';
 
 @Component({
     selector: 'shop-widget',
@@ -447,13 +421,12 @@ interface ProductAttributeGroup {
                 </div>
             </ng-template>
         </p-dialog>
-    `,
-    providers: [ProductService]
+    `
 })
-export class ShopWindget implements OnInit {
+export class ShopWidget implements OnInit {
     cart = inject(CartService);
     message = inject(MessageService);
-    productService = inject(ProductService);
+    shopService = inject(ShopService);
 
     products: Product[] = [];
     filteredProducts: Product[] = [];
@@ -516,12 +489,14 @@ export class ShopWindget implements OnInit {
             filters.sort = this.selectedSort.value;
         }
 
-        this.productService.filterPublicProducts(filters).subscribe({
+        this.shopService.getProducts(filters).subscribe({
             next: (response) => {
                 this.products = response.data;
                 this.totalRecords = response.total;
-                this.processAttributes();
+
+                this.attributeGroups = this.shopService.processAttributes(this.products, this.selectedAttributeValues);
                 this.applyClientSideFilters();
+
                 this.loading = false;
             },
             error: (error) => {
@@ -537,47 +512,6 @@ export class ShopWindget implements OnInit {
         });
     }
 
-    processAttributes() {
-        const attributeMap = new Map<string, Map<string, { name: string; count: number; priceModifier?: number }>>();
-
-        this.products.forEach((product) => {
-            const attributes = product.productsAttributesValues || [];
-            attributes.forEach((attr) => {
-                if (attr.attribute && attr.attributeValue) {
-                    const attributeId = attr.attribute.id!;
-                    const attributeName = attr.attribute.name;
-                    const valueId = attr.attributeValue.id!;
-                    const valueName = attr.attributeValue.value;
-                    const priceModifier = attr.attributeValue.priceModifier;
-
-                    if (!attributeMap.has(attributeId)) {
-                        attributeMap.set(attributeId, new Map());
-                    }
-
-                    const valueMap = attributeMap.get(attributeId)!;
-                    if (!valueMap.has(valueId)) {
-                        valueMap.set(valueId, { name: valueName, count: 0, priceModifier });
-                    }
-
-                    valueMap.get(valueId)!.count++;
-                }
-            });
-        });
-
-        this.attributeGroups = Array.from(attributeMap.entries()).map(([id, valueMap]) => ({
-            id,
-            name: this.products.flatMap((p) => p.productsAttributesValues || []).find((attr) => attr.attribute?.id === id)?.attribute?.name || 'Unknown',
-            values: Array.from(valueMap.entries()).map(([valueId, data]) => ({
-                id: valueId,
-                name: data.name,
-                count: data.count,
-                priceModifier: data.priceModifier,
-                selected: this.isAttributeValueSelected(id, valueId)
-            })),
-            selected: this.getSelectedAttributeValues(id).length > 0
-        }));
-    }
-
     openAttributeDialog(product: Product) {
         if (!product.isActive) {
             this.message.add({
@@ -591,47 +525,8 @@ export class ShopWindget implements OnInit {
 
         this.selectedProduct = product;
         this.selectedAttributeValuesForCart = {};
-        this.prepareProductAttributeGroups(product);
+        this.productAttributeGroups = this.shopService.prepareProductAttributeGroups(product);
         this.showAttributeDialog = true;
-    }
-
-    prepareProductAttributeGroups(product: Product) {
-        const attributes = product.productsAttributesValues || [];
-        const attributeMap = new Map<string, ProductAttributeGroup>();
-
-        attributes.forEach((attr) => {
-            if (attr.attribute && attr.attributeValue) {
-                const attributeId = attr.attribute.id!;
-                const attributeName = attr.attribute.name;
-                // Use the Link ID (ProductAttributeValue ID) instead of the generic Value ID
-                // to correctly link the specific product-attribute relation in quotes
-                const valueId = attr.id!;
-                const valueName = attr.attributeValue.value;
-                const priceModifier = attr.attributeValue.priceModifier;
-
-                if (!attributeMap.has(attributeId)) {
-                    attributeMap.set(attributeId, {
-                        id: attributeId,
-                        name: attributeName,
-                        values: []
-                    });
-                }
-
-                const group = attributeMap.get(attributeId)!;
-
-                // Check if value already exists in group
-                const existingValue = group.values.find((v) => v.id === valueId);
-                if (!existingValue) {
-                    group.values.push({
-                        id: valueId,
-                        name: valueName,
-                        priceModifier: priceModifier
-                    });
-                }
-            }
-        });
-
-        this.productAttributeGroups = Array.from(attributeMap.values());
     }
 
     getSelectOptionsForGroup(group: ProductAttributeGroup): any[] {
@@ -647,10 +542,6 @@ export class ShopWindget implements OnInit {
     }
 
     onAttributeSelectChange(attributeId: string) {
-        // Cuando cambia la selección, actualizar el precio
-        // La actualización es automática porque calculateFinalPrice() se llama en la vista
-
-        // También puedes registrar el cambio si necesitas
         console.log(`Attribute ${attributeId} selected:`, this.selectedAttributeValuesForCart[attributeId]);
     }
 
@@ -691,9 +582,8 @@ export class ShopWindget implements OnInit {
 
         let finalPrice = this.selectedProduct.basePrice;
 
-        // Add price modifiers from selected attributes
         Object.values(this.selectedAttributeValuesForCart).forEach((valueId) => {
-            if (!valueId) return; // Saltar valores nulos
+            if (!valueId) return;
 
             this.productAttributeGroups.forEach((group) => {
                 const value = group.values.find((v) => v.id === valueId);
@@ -713,11 +603,10 @@ export class ShopWindget implements OnInit {
     confirmAddToCart() {
         if (!this.selectedProduct) return;
 
-        // Preparar atributos seleccionados
         const selectedAttributes: any[] = [];
 
         Object.entries(this.selectedAttributeValuesForCart).forEach(([attributeId, valueId]) => {
-            if (!valueId) return; // Saltar valores nulos o vacíos
+            if (!valueId) return;
 
             const group = this.productAttributeGroups.find((g) => g.id === attributeId);
 
@@ -733,7 +622,6 @@ export class ShopWindget implements OnInit {
             }
         });
 
-        // Agregar al carrito con atributos
         this.cart.addToCart(this.selectedProduct, 1, selectedAttributes);
 
         this.message.add({
@@ -743,56 +631,28 @@ export class ShopWindget implements OnInit {
             life: 3000
         });
 
-        // Cerrar diálogo
         this.showAttributeDialog = false;
         this.selectedProduct = null;
         this.selectedAttributeValuesForCart = {};
     }
 
     canAddToCart(): boolean {
-        // Permite agregar al carrito incluso si no se seleccionan todos los atributos
-        // Si quieres que todos los atributos sean requeridos, cambia a:
-        // return this.getSelectedAttributesCount() === this.productAttributeGroups.length;
         return true;
     }
 
     onDialogHide() {
-        // Limpiar selecciones cuando se cierra el diálogo
         this.selectedAttributeValuesForCart = {};
     }
 
-    // Client-side filtering logic
     applyClientSideFilters() {
-        this.filteredProducts = this.products.filter((product) => {
-            // Price Range
-            const price = product.basePrice;
-            if (price < this.priceRange[0] || price > this.priceRange[1]) {
-                return false;
-            }
-
-            // In Stock
-            if (this.inStockOnly && !product.isActive) {
-                return false;
-            }
-
-            // Attribute Filters
-            if (this.selectedAttributeValues.size > 0) {
-                const productAttributes = product.productsAttributesValues || [];
-
-                // Check each selected attribute group
-                for (const [attributeId, selectedValueIds] of this.selectedAttributeValues.entries()) {
-                    if (selectedValueIds.length === 0) continue;
-
-                    const hasMatchingValue = productAttributes.some((attr) => attr.attributeId === attributeId && selectedValueIds.includes(attr.attributeValueId));
-
-                    if (!hasMatchingValue) {
-                        return false;
-                    }
-                }
-            }
-
-            return true;
-        });
+        const state: ShopFilterState = {
+            searchTerm: this.searchTerm,
+            priceRange: this.priceRange,
+            inStockOnly: this.inStockOnly,
+            selectedSort: this.selectedSort,
+            selectedAttributeValues: this.selectedAttributeValues
+        };
+        this.filteredProducts = this.shopService.filterProducts(this.products, state);
     }
 
     getProductAttributes(product: Product): ProductAttributeValue[] {
@@ -813,7 +673,6 @@ export class ShopWindget implements OnInit {
             values.splice(index, 1);
         }
 
-        // Update attribute groups UI
         const group = this.attributeGroups.find((g) => g.id === attributeId);
         if (group) {
             const value = group.values.find((v) => v.id === valueId);
@@ -833,11 +692,9 @@ export class ShopWindget implements OnInit {
         const isSelected = group.selected;
 
         if (isSelected) {
-            // Deselect all values in this group
             group.values.forEach((value) => (value.selected = false));
             this.selectedAttributeValues.delete(attributeId);
         } else {
-            // Just mark as selected but don't select all values
             group.selected = true;
         }
 
@@ -894,7 +751,6 @@ export class ShopWindget implements OnInit {
         this.inStockOnly = false;
         this.selectedAttributeValues.clear();
 
-        // Reset attribute groups UI
         this.attributeGroups.forEach((group) => {
             group.selected = false;
             group.values.forEach((value) => (value.selected = false));

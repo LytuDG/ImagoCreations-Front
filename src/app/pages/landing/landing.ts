@@ -9,7 +9,7 @@ import { MessageService } from 'primeng/api';
 import { TopbarWidget } from './components/topbarwidget';
 import { HeroWidget } from './components/herowidget';
 import { FooterWidget } from './components/footerwidget';
-import { ShopWindget } from './components/shop-widgets';
+import { ShopWidget } from './components/shop-widgets';
 
 import { SeoService } from '@/core/services/seo.service';
 import { inject, OnInit } from '@angular/core';
@@ -17,7 +17,7 @@ import { inject, OnInit } from '@angular/core';
 @Component({
     selector: 'app-landing',
     standalone: true,
-    imports: [RouterModule, TopbarWidget, HeroWidget, FooterWidget, RippleModule, StyleClassModule, ButtonModule, DividerModule, ShopWindget, ToastModule],
+    imports: [RouterModule, TopbarWidget, HeroWidget, FooterWidget, RippleModule, StyleClassModule, ButtonModule, DividerModule, ShopWidget, ToastModule],
     providers: [MessageService],
     template: `
         <div class="bg-surface-0 dark:bg-surface-900">
