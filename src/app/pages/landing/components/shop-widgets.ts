@@ -603,7 +603,9 @@ export class ShopWindget implements OnInit {
             if (attr.attribute && attr.attributeValue) {
                 const attributeId = attr.attribute.id!;
                 const attributeName = attr.attribute.name;
-                const valueId = attr.attributeValue.id!;
+                // Use the Link ID (ProductAttributeValue ID) instead of the generic Value ID
+                // to correctly link the specific product-attribute relation in quotes
+                const valueId = attr.id!;
                 const valueName = attr.attributeValue.value;
                 const priceModifier = attr.attributeValue.priceModifier;
 
