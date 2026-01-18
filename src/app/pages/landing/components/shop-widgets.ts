@@ -51,24 +51,7 @@ interface ProductAttributeGroup {
 @Component({
     selector: 'shop-widget',
     standalone: true,
-    imports: [
-        CommonModule,
-        FormsModule,
-        ButtonModule,
-        SkeletonModule,
-        InputTextModule,
-        SelectModule,
-        PaginatorModule,
-        TagModule,
-        SliderModule,
-        CheckboxModule,
-        AccordionModule,
-        DividerModule,
-        ChipModule,
-        BadgeModule,
-        DialogModule,
-        RadioButtonModule
-    ],
+    imports: [CommonModule, FormsModule, ButtonModule, SkeletonModule, InputTextModule, SelectModule, PaginatorModule, TagModule, SliderModule, CheckboxModule, AccordionModule, DividerModule, ChipModule, BadgeModule, DialogModule, RadioButtonModule],
     template: `
         <div id="shop" class="py-16 bg-surface-50 dark:bg-surface-950">
             <div class="w-full max-w-[1920px] mx-auto px-4 md:px-8 lg:px-12">
@@ -92,12 +75,7 @@ interface ProductAttributeGroup {
                             <div class="flex justify-between items-center mb-6">
                                 <h3 class="text-xl font-serif font-medium text-surface-900 dark:text-surface-0">Filters</h3>
                                 @if (hasActiveFilters()) {
-                                    <button
-                                        class="text-sm text-primary-600 hover:text-primary-700 font-medium"
-                                        (click)="clearAllFilters()"
-                                    >
-                                        Clear all
-                                    </button>
+                                    <button class="text-sm text-primary-600 hover:text-primary-700 font-medium" (click)="clearAllFilters()">Clear all</button>
                                 }
                             </div>
 
@@ -122,9 +100,7 @@ interface ProductAttributeGroup {
                                         <div class="space-y-3">
                                             <div class="flex items-center justify-between">
                                                 <h5 class="text-sm font-semibold text-surface-700 dark:text-surface-300">{{ group.name }}</h5>
-                                                <span class="text-xs text-surface-500">
-                                                    {{ getSelectedAttributeValues(group.id).length }}/{{ group.values.length }}
-                                                </span>
+                                                <span class="text-xs text-surface-500"> {{ getSelectedAttributeValues(group.id).length }}/{{ group.values.length }} </span>
                                             </div>
 
                                             <div class="flex flex-wrap gap-2">
@@ -141,9 +117,7 @@ interface ProductAttributeGroup {
                                                         <div class="flex items-center gap-1.5">
                                                             <span>{{ value.name }}</span>
                                                             @if (value.priceModifier) {
-                                                                <span class="text-xs" [ngClass]="value.priceModifier > 0 ? 'text-green-600' : 'text-red-600'">
-                                                                    {{ value.priceModifier > 0 ? '+' : '' }}{{ value.priceModifier | currency:'USD' }}
-                                                                </span>
+                                                                <span class="text-xs" [ngClass]="value.priceModifier > 0 ? 'text-green-600' : 'text-red-600'"> {{ value.priceModifier > 0 ? '+' : '' }}{{ value.priceModifier | currency: 'USD' }} </span>
                                                             }
                                                             <span class="text-xs text-surface-500">({{ value.count }})</span>
                                                         </div>
@@ -217,12 +191,7 @@ interface ProductAttributeGroup {
                                 @for (group of attributeGroups; track group.id) {
                                     @for (value of group.values; track value.id) {
                                         @if (value.selected) {
-                                            <p-tag
-                                                [value]="group.name + ': ' + value.name"
-                                                [rounded]="true"
-                                                (click)="toggleAttributeValue(group.id, value.id)"
-                                                class="cursor-pointer px-3"
-                                            >
+                                            <p-tag [value]="group.name + ': ' + value.name" [rounded]="true" (click)="toggleAttributeValue(group.id, value.id)" class="cursor-pointer px-3">
                                                 <i class="pi pi-times ml-2 text-xs"></i>
                                             </p-tag>
                                         }
@@ -285,15 +254,11 @@ interface ProductAttributeGroup {
 
                                             <!-- Product Attributes Badges -->
                                             <div class="absolute top-4 right-4 flex flex-col gap-2 items-end">
-                                                @for (attr of getProductAttributes(product) | slice:0:2; track $index) {
-                                                    <div class="px-3 py-1 bg-white/90 backdrop-blur-sm rounded-full shadow-sm text-xs font-medium">
-                                                        {{ attr.attribute.name }}: {{ attr.attributeValue?.value }}
-                                                    </div>
+                                                @for (attr of getProductAttributes(product) | slice: 0 : 2; track $index) {
+                                                    <div class="px-3 py-1 bg-white/90 backdrop-blur-sm rounded-full shadow-sm text-xs font-medium">{{ attr.attribute.name }}: {{ attr.attributeValue?.value }}</div>
                                                 }
                                                 @if (getProductAttributes(product).length > 2) {
-                                                    <div class="px-3 py-1 bg-white/90 backdrop-blur-sm rounded-full shadow-sm text-xs font-medium">
-                                                        +{{ getProductAttributes(product).length - 2 }} more
-                                                    </div>
+                                                    <div class="px-3 py-1 bg-white/90 backdrop-blur-sm rounded-full shadow-sm text-xs font-medium">+{{ getProductAttributes(product).length - 2 }} more</div>
                                                 }
                                             </div>
 
@@ -319,7 +284,7 @@ interface ProductAttributeGroup {
                                             @if (getProductAttributes(product).length > 0) {
                                                 <div class="mb-3">
                                                     <div class="flex flex-wrap gap-1.5">
-                                                        @for (attr of getProductAttributes(product) | slice:0:3; track $index) {
+                                                        @for (attr of getProductAttributes(product) | slice: 0 : 3; track $index) {
                                                             <span class="text-xs px-2 py-0.5 bg-surface-100 dark:bg-surface-800 rounded text-surface-600 dark:text-surface-400">
                                                                 {{ attr.attributeValue?.value }}
                                                             </span>
@@ -371,30 +336,16 @@ interface ProductAttributeGroup {
         </div>
 
         <!-- Attribute Selection Dialog -->
-        <p-dialog
-            [(visible)]="showAttributeDialog"
-            [modal]="true"
-            [style]="{ width: '500px' }"
-            header="Select Options"
-            [closable]="true"
-            [closeOnEscape]="true"
-            (onHide)="onDialogHide()"
-        >
+        <p-dialog [(visible)]="showAttributeDialog" [modal]="true" [style]="{ width: '500px' }" header="Select Options" [closable]="true" [closeOnEscape]="true" (onHide)="onDialogHide()">
             @if (selectedProduct) {
                 <div class="space-y-6">
                     <!-- Product Info -->
                     <div class="flex items-start gap-4">
-                        <img
-                            [src]="selectedProduct.picture || selectedProduct.secureUrl"
-                            [alt]="selectedProduct.name"
-                            class="w-20 h-20 object-cover rounded-lg"
-                        />
+                        <img [src]="selectedProduct.picture || selectedProduct.secureUrl" [alt]="selectedProduct.name" class="w-20 h-20 object-cover rounded-lg" />
                         <div>
                             <h4 class="font-semibold text-lg text-surface-900 dark:text-surface-0">{{ selectedProduct.name }}</h4>
-                            <p class="text-surface-600 dark:text-surface-400 text-sm mt-1">{{ selectedProduct.description | slice:0:100 }}...</p>
-                            <div class="mt-2 text-xl font-bold text-surface-900 dark:text-surface-0">
-                                \${{ calculateFinalPrice() | number:'1.2-2' }}
-                            </div>
+                            <p class="text-surface-600 dark:text-surface-400 text-sm mt-1">{{ selectedProduct.description | slice: 0 : 100 }}...</p>
+                            <div class="mt-2 text-xl font-bold text-surface-900 dark:text-surface-0">\${{ calculateFinalPrice() | number: '1.2-2' }}</div>
                         </div>
                     </div>
 
@@ -406,9 +357,7 @@ interface ProductAttributeGroup {
                                     <div class="flex items-center justify-between">
                                         <h5 class="text-sm font-semibold text-surface-700 dark:text-surface-300">{{ group.name }}</h5>
                                         @if (selectedAttributeValuesForCart[group.id]) {
-                                            <span class="text-xs text-surface-500">
-                                                Selected
-                                            </span>
+                                            <span class="text-xs text-surface-500"> Selected </span>
                                         }
                                     </div>
 
@@ -428,9 +377,7 @@ interface ProductAttributeGroup {
                                             <div class="flex items-center justify-between w-full">
                                                 <span>{{ option.name }}</span>
                                                 @if (option.priceModifier) {
-                                                    <span class="text-xs ml-2" [ngClass]="option.priceModifier > 0 ? 'text-green-600' : 'text-red-600'">
-                                                        {{ option.priceModifier > 0 ? '+' : '' }}{{ option.priceModifier | currency:'USD' }}
-                                                    </span>
+                                                    <span class="text-xs ml-2" [ngClass]="option.priceModifier > 0 ? 'text-green-600' : 'text-red-600'"> {{ option.priceModifier > 0 ? '+' : '' }}{{ option.priceModifier | currency: 'USD' }} </span>
                                                 }
                                             </div>
                                         </ng-template>
@@ -441,9 +388,7 @@ interface ProductAttributeGroup {
                                         <div class="text-xs text-surface-500 pl-1">
                                             Selected: {{ getSelectedAttributeName(group.id) }}
                                             @if (getSelectedAttributePriceModifier(group.id) !== 0) {
-                                                <span>
-                                                    ({{ getSelectedAttributePriceModifier(group.id) > 0 ? '+' : '' }}{{ getSelectedAttributePriceModifier(group.id) | currency:'USD' }})
-                                                </span>
+                                                <span> ({{ getSelectedAttributePriceModifier(group.id) > 0 ? '+' : '' }}{{ getSelectedAttributePriceModifier(group.id) | currency: 'USD' }}) </span>
                                             }
                                         </div>
                                     }
@@ -464,9 +409,7 @@ interface ProductAttributeGroup {
                     <div class="bg-surface-50 dark:bg-surface-800 p-4 rounded-lg">
                         <div class="flex justify-between items-center">
                             <span class="text-sm font-medium text-surface-700 dark:text-surface-300">Base Price:</span>
-                            <span class="font-medium text-surface-900 dark:text-surface-0">
-                                \${{ selectedProduct.basePrice | number:'1.2-2' }}
-                            </span>
+                            <span class="font-medium text-surface-900 dark:text-surface-0"> \${{ selectedProduct.basePrice | number: '1.2-2' }} </span>
                         </div>
 
                         @if (hasAttributeModifiers()) {
@@ -474,12 +417,10 @@ interface ProductAttributeGroup {
                                 @for (group of productAttributeGroups; track group.id) {
                                     @if (selectedAttributeValuesForCart[group.id]) {
                                         <div class="flex justify-between items-center text-sm">
-                                            <span class="text-surface-600 dark:text-surface-400">
-                                                {{ group.name }}:
-                                            </span>
+                                            <span class="text-surface-600 dark:text-surface-400"> {{ group.name }}: </span>
                                             @if (getSelectedAttributePriceModifier(group.id) !== 0) {
                                                 <span [ngClass]="getSelectedAttributePriceModifier(group.id) > 0 ? 'text-green-600' : 'text-red-600'">
-                                                    {{ getSelectedAttributePriceModifier(group.id) > 0 ? '+' : '' }}{{ getSelectedAttributePriceModifier(group.id) | currency:'USD' }}
+                                                    {{ getSelectedAttributePriceModifier(group.id) > 0 ? '+' : '' }}{{ getSelectedAttributePriceModifier(group.id) | currency: 'USD' }}
                                                 </span>
                                             }
                                         </div>
@@ -490,9 +431,7 @@ interface ProductAttributeGroup {
 
                         <div class="flex justify-between items-center mt-3 pt-3 border-t border-surface-200 dark:border-surface-700">
                             <span class="font-bold text-surface-900 dark:text-surface-0">Total:</span>
-                            <span class="text-xl font-bold text-surface-900 dark:text-surface-0">
-                                \${{ calculateFinalPrice() | number:'1.2-2' }}
-                            </span>
+                            <span class="text-xl font-bold text-surface-900 dark:text-surface-0"> \${{ calculateFinalPrice() | number: '1.2-2' }} </span>
                         </div>
                     </div>
                 </div>
@@ -500,24 +439,10 @@ interface ProductAttributeGroup {
 
             <ng-template pTemplate="footer">
                 <div class="flex justify-between items-center w-full">
-                    <div class="text-sm text-surface-600 dark:text-surface-400">
-                        {{ getSelectedAttributesCount() }} of {{ productAttributeGroups.length }} selected
-                    </div>
+                    <div class="text-sm text-surface-600 dark:text-surface-400">{{ getSelectedAttributesCount() }} of {{ productAttributeGroups.length }} selected</div>
                     <div class="flex gap-2">
-                        <button
-                            pButton
-                            label="Cancel"
-                            icon="pi pi-times"
-                            class="p-button-text"
-                            (click)="showAttributeDialog = false"
-                        ></button>
-                        <button
-                            pButton
-                            label="Add to Cart"
-                            icon="pi pi-shopping-bag"
-                            (click)="confirmAddToCart()"
-                            [disabled]="!canAddToCart()"
-                        ></button>
+                        <button pButton label="Cancel" icon="pi pi-times" class="p-button-text" (click)="showAttributeDialog = false"></button>
+                        <button pButton label="Add to Cart" icon="pi pi-shopping-bag" (click)="confirmAddToCart()" [disabled]="!canAddToCart()"></button>
                     </div>
                 </div>
             </ng-template>
@@ -580,7 +505,7 @@ export class ShopWindget implements OnInit {
             page: this.currentPage,
             limit: this.pageSize,
             isActive: true,
-            relations: ["pav", "attribute", "attributeValue"]
+            relations: ['pav', 'attribute', 'attributeValue']
         };
 
         if (this.searchTerm && this.searchTerm.trim()) {
@@ -591,7 +516,7 @@ export class ShopWindget implements OnInit {
             filters.sort = this.selectedSort.value;
         }
 
-        this.productService.filterProducts(filters).subscribe({
+        this.productService.filterPublicProducts(filters).subscribe({
             next: (response) => {
                 this.products = response.data;
                 this.totalRecords = response.total;
@@ -613,11 +538,11 @@ export class ShopWindget implements OnInit {
     }
 
     processAttributes() {
-        const attributeMap = new Map<string, Map<string, {name: string, count: number, priceModifier?: number}>>();
+        const attributeMap = new Map<string, Map<string, { name: string; count: number; priceModifier?: number }>>();
 
-        this.products.forEach(product => {
+        this.products.forEach((product) => {
             const attributes = product.productsAttributesValues || [];
-            attributes.forEach(attr => {
+            attributes.forEach((attr) => {
                 if (attr.attribute && attr.attributeValue) {
                     const attributeId = attr.attribute.id!;
                     const attributeName = attr.attribute.name;
@@ -641,9 +566,7 @@ export class ShopWindget implements OnInit {
 
         this.attributeGroups = Array.from(attributeMap.entries()).map(([id, valueMap]) => ({
             id,
-            name: this.products
-                .flatMap(p => p.productsAttributesValues || [])
-                .find(attr => attr.attribute?.id === id)?.attribute?.name || 'Unknown',
+            name: this.products.flatMap((p) => p.productsAttributesValues || []).find((attr) => attr.attribute?.id === id)?.attribute?.name || 'Unknown',
             values: Array.from(valueMap.entries()).map(([valueId, data]) => ({
                 id: valueId,
                 name: data.name,
@@ -676,7 +599,7 @@ export class ShopWindget implements OnInit {
         const attributes = product.productsAttributesValues || [];
         const attributeMap = new Map<string, ProductAttributeGroup>();
 
-        attributes.forEach(attr => {
+        attributes.forEach((attr) => {
             if (attr.attribute && attr.attributeValue) {
                 const attributeId = attr.attribute.id!;
                 const attributeName = attr.attribute.name;
@@ -695,7 +618,7 @@ export class ShopWindget implements OnInit {
                 const group = attributeMap.get(attributeId)!;
 
                 // Check if value already exists in group
-                const existingValue = group.values.find(v => v.id === valueId);
+                const existingValue = group.values.find((v) => v.id === valueId);
                 if (!existingValue) {
                     group.values.push({
                         id: valueId,
@@ -713,7 +636,7 @@ export class ShopWindget implements OnInit {
         // Agrega una opción vacía al inicio para permitir deseleccionar
         return [
             { id: null, name: 'None', priceModifier: 0 },
-            ...group.values.map(value => ({
+            ...group.values.map((value) => ({
                 id: value.id,
                 name: value.name,
                 priceModifier: value.priceModifier || 0
@@ -733,10 +656,10 @@ export class ShopWindget implements OnInit {
         const valueId = this.selectedAttributeValuesForCart[attributeId];
         if (!valueId) return '';
 
-        const group = this.productAttributeGroups.find(g => g.id === attributeId);
+        const group = this.productAttributeGroups.find((g) => g.id === attributeId);
         if (!group) return '';
 
-        const value = group.values.find(v => v.id === valueId);
+        const value = group.values.find((v) => v.id === valueId);
         return value?.name || '';
     }
 
@@ -744,19 +667,19 @@ export class ShopWindget implements OnInit {
         const valueId = this.selectedAttributeValuesForCart[attributeId];
         if (!valueId) return 0;
 
-        const group = this.productAttributeGroups.find(g => g.id === attributeId);
+        const group = this.productAttributeGroups.find((g) => g.id === attributeId);
         if (!group) return 0;
 
-        const value = group.values.find(v => v.id === valueId);
+        const value = group.values.find((v) => v.id === valueId);
         return value?.priceModifier || 0;
     }
 
     hasAttributeModifiers(): boolean {
-        return this.productAttributeGroups.some(group => {
+        return this.productAttributeGroups.some((group) => {
             const valueId = this.selectedAttributeValuesForCart[group.id];
             if (!valueId) return false;
 
-            const value = group.values.find(v => v.id === valueId);
+            const value = group.values.find((v) => v.id === valueId);
             return value?.priceModifier !== undefined && value.priceModifier !== 0;
         });
     }
@@ -767,11 +690,11 @@ export class ShopWindget implements OnInit {
         let finalPrice = this.selectedProduct.basePrice;
 
         // Add price modifiers from selected attributes
-        Object.values(this.selectedAttributeValuesForCart).forEach(valueId => {
+        Object.values(this.selectedAttributeValuesForCart).forEach((valueId) => {
             if (!valueId) return; // Saltar valores nulos
 
-            this.productAttributeGroups.forEach(group => {
-                const value = group.values.find(v => v.id === valueId);
+            this.productAttributeGroups.forEach((group) => {
+                const value = group.values.find((v) => v.id === valueId);
                 if (value?.priceModifier) {
                     finalPrice += value.priceModifier;
                 }
@@ -782,7 +705,7 @@ export class ShopWindget implements OnInit {
     }
 
     getSelectedAttributesCount(): number {
-        return Object.values(this.selectedAttributeValuesForCart).filter(value => value !== null && value !== undefined).length;
+        return Object.values(this.selectedAttributeValuesForCart).filter((value) => value !== null && value !== undefined).length;
     }
 
     confirmAddToCart() {
@@ -794,10 +717,10 @@ export class ShopWindget implements OnInit {
         Object.entries(this.selectedAttributeValuesForCart).forEach(([attributeId, valueId]) => {
             if (!valueId) return; // Saltar valores nulos o vacíos
 
-            const group = this.productAttributeGroups.find(g => g.id === attributeId);
+            const group = this.productAttributeGroups.find((g) => g.id === attributeId);
 
             if (group) {
-                const value = group.values.find(v => v.id === valueId);
+                const value = group.values.find((v) => v.id === valueId);
                 selectedAttributes.push({
                     attributeId,
                     attributeName: group.name,
@@ -858,10 +781,7 @@ export class ShopWindget implements OnInit {
                 for (const [attributeId, selectedValueIds] of this.selectedAttributeValues.entries()) {
                     if (selectedValueIds.length === 0) continue;
 
-                    const hasMatchingValue = productAttributes.some(attr =>
-                        attr.attributeId === attributeId &&
-                        selectedValueIds.includes(attr.attributeValueId)
-                    );
+                    const hasMatchingValue = productAttributes.some((attr) => attr.attributeId === attributeId && selectedValueIds.includes(attr.attributeValueId));
 
                     if (!hasMatchingValue) {
                         return false;
@@ -892,9 +812,9 @@ export class ShopWindget implements OnInit {
         }
 
         // Update attribute groups UI
-        const group = this.attributeGroups.find(g => g.id === attributeId);
+        const group = this.attributeGroups.find((g) => g.id === attributeId);
         if (group) {
-            const value = group.values.find(v => v.id === valueId);
+            const value = group.values.find((v) => v.id === valueId);
             if (value) {
                 value.selected = !value.selected;
             }
@@ -905,14 +825,14 @@ export class ShopWindget implements OnInit {
     }
 
     toggleAttributeGroup(attributeId: string) {
-        const group = this.attributeGroups.find(g => g.id === attributeId);
+        const group = this.attributeGroups.find((g) => g.id === attributeId);
         if (!group) return;
 
         const isSelected = group.selected;
 
         if (isSelected) {
             // Deselect all values in this group
-            group.values.forEach(value => value.selected = false);
+            group.values.forEach((value) => (value.selected = false));
             this.selectedAttributeValues.delete(attributeId);
         } else {
             // Just mark as selected but don't select all values
@@ -973,9 +893,9 @@ export class ShopWindget implements OnInit {
         this.selectedAttributeValues.clear();
 
         // Reset attribute groups UI
-        this.attributeGroups.forEach(group => {
+        this.attributeGroups.forEach((group) => {
             group.selected = false;
-            group.values.forEach(value => value.selected = false);
+            group.values.forEach((value) => (value.selected = false));
         });
 
         this.onFilterChange();

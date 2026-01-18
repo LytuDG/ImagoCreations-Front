@@ -180,14 +180,35 @@ export class QuoteCustomerInfo implements OnInit {
         }
 
         this.loading = true;
+        const file = this.cart.quoteFile();
 
-        // Usar el nuevo método helper para crear la cotización
-        const quoteData = this.quoteService.createQuoteFromCart(this.cart.items(), this.info, this.info.notes);
-        this.loading = false;
-        this.showSuccessModal = true;
-        this.cart.clearCart();
+        if (file) {
+            this.quoteService.uploadFile(file).subscribe({
+                next: (res) => {
+                    this.submitQuote(res.secure_url);
+                },
+                error: (error) => {
+                    console.error('Error uploading file:', error);
+                    this.loading = false;
+                    this.messageService.add({
+                        severity: 'error',
+                        summary: 'Upload Failed',
+                        detail: 'Failed to upload personalization file. Please try again.',
+                        life: 5000
+                    });
+                }
+            });
+        } else {
+            this.submitQuote();
+        }
+    }
+
+    submitQuote(fileUrl?: string) {
+        // Usar el nuevo método helper para crear la cotización con la URL del archivo
+        const quoteData = this.quoteService.createQuoteFromCart(this.cart.items(), this.info, this.info.notes, fileUrl);
+
         // Enviar a la API
-        /*         this.quoteService.createQuote(quoteData).subscribe({
+        this.quoteService.createQuote(quoteData).subscribe({
             next: (response) => {
                 this.quoteResponse = response;
                 this.loading = false;
@@ -212,7 +233,7 @@ export class QuoteCustomerInfo implements OnInit {
 
                 let errorMessage = 'Failed to submit quote request';
                 if (error.error?.message) {
-                    errorMessage = error.error.message;
+                    errorMessage = Array.isArray(error.error.message) ? error.error.message.join(', ') : error.error.message;
                 }
 
                 this.messageService.add({
@@ -222,7 +243,7 @@ export class QuoteCustomerInfo implements OnInit {
                     life: 5000
                 });
             }
-        }); */
+        });
     }
 
     validateForm(): boolean {

@@ -1,4 +1,5 @@
-import { Injectable, computed, signal } from '@angular/core';
+import { Injectable, computed, signal, PLATFORM_ID, Inject, effect } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { Product } from './product.service';
 
 export interface CartItemAttribute {
@@ -21,6 +22,56 @@ export interface CartItem {
 export class CartService {
     public items = signal<CartItem[]>([]);
     public quoteFile = signal<File | null>(null);
+    public customerInfo = signal<CustomerInfo | null>(null);
+
+    private readonly CART_STORAGE_KEY = 'cart_items';
+    private readonly CUSTOMER_INFO_KEY = 'customer_info';
+    private isBrowser: boolean;
+
+    constructor(@Inject(PLATFORM_ID) platformId: Object) {
+        this.isBrowser = isPlatformBrowser(platformId);
+
+        // Cargar datos del localStorage al iniciar
+        if (this.isBrowser) {
+            const savedItems = localStorage.getItem(this.CART_STORAGE_KEY);
+            if (savedItems) {
+                try {
+                    this.items.set(JSON.parse(savedItems));
+                } catch (e) {
+                    console.error('Error parsing cart items', e);
+                }
+            }
+
+            const savedCustomerInfo = localStorage.getItem(this.CUSTOMER_INFO_KEY);
+            if (savedCustomerInfo) {
+                try {
+                    this.customerInfo.set(JSON.parse(savedCustomerInfo));
+                } catch (e) {
+                    console.error('Error parsing customer info', e);
+                }
+            }
+        }
+
+        // Efecto para guardar cambios en items
+        effect(() => {
+            const items = this.items();
+            if (this.isBrowser) {
+                localStorage.setItem(this.CART_STORAGE_KEY, JSON.stringify(items));
+            }
+        });
+
+        // Efecto para guardar cambios en customerInfo
+        effect(() => {
+            const info = this.customerInfo();
+            if (this.isBrowser) {
+                if (info) {
+                    localStorage.setItem(this.CUSTOMER_INFO_KEY, JSON.stringify(info));
+                } else {
+                    localStorage.removeItem(this.CUSTOMER_INFO_KEY);
+                }
+            }
+        });
+    }
 
     // Computed con atributos
     public totalItems = computed(() => this.items().reduce((acc, item) => acc + item.quantity, 0));
@@ -31,14 +82,14 @@ export class CartService {
 
             // Sumar modificadores de precio de atributos
             if (item.selectedAttributes?.length) {
-                item.selectedAttributes.forEach(attr => {
+                item.selectedAttributes.forEach((attr) => {
                     if (attr.priceModifier) {
                         itemPrice += attr.priceModifier;
                     }
                 });
             }
 
-            return acc + (itemPrice * item.quantity);
+            return acc + itemPrice * item.quantity;
         }, 0);
     });
 
@@ -61,12 +112,7 @@ export class CartService {
                 if (item.selectedAttributes.length !== selectedAttributes.length) return false;
 
                 // Verificar que todos los atributos sean iguales
-                return item.selectedAttributes.every(attr1 =>
-                    selectedAttributes.some(attr2 =>
-                        attr1.attributeId === attr2.attributeId &&
-                        attr1.valueId === attr2.valueId
-                    )
-                );
+                return item.selectedAttributes.every((attr1) => selectedAttributes.some((attr2) => attr1.attributeId === attr2.attributeId && attr1.valueId === attr2.valueId));
             });
         };
 
@@ -79,18 +125,21 @@ export class CartService {
             this.items.set(updatedItems);
         } else {
             // Si es nuevo o tiene atributos diferentes, agregar como nuevo item
-            this.items.set([...currentItems, {
-                product,
-                quantity,
-                selectedAttributes
-            }]);
+            this.items.set([
+                ...currentItems,
+                {
+                    product,
+                    quantity,
+                    selectedAttributes
+                }
+            ]);
         }
     }
 
     // Método para actualizar atributos de un item existente
     public updateItemAttributes(productId: string, selectedAttributes: CartItemAttribute[]) {
         const currentItems = this.items();
-        const itemIndex = currentItems.findIndex(item => item.product.id === productId);
+        const itemIndex = currentItems.findIndex((item) => item.product.id === productId);
 
         if (itemIndex > -1) {
             const updatedItems = [...currentItems];
@@ -104,7 +153,7 @@ export class CartService {
         let price = item.product.basePrice;
 
         if (item.selectedAttributes?.length) {
-            item.selectedAttributes.forEach(attr => {
+            item.selectedAttributes.forEach((attr) => {
                 if (attr.priceModifier) {
                     price += attr.priceModifier;
                 }
@@ -138,13 +187,14 @@ export class CartService {
     public clearCart() {
         this.items.set([]);
         this.quoteFile.set(null);
+        if (this.isBrowser) {
+            localStorage.removeItem(this.CART_STORAGE_KEY);
+        }
     }
 
     public setQuoteFile(file: File | null) {
         this.quoteFile.set(file);
     }
-
-    public customerInfo = signal<CustomerInfo | null>(null);
 
     public setCustomerInfo(info: CustomerInfo) {
         this.customerInfo.set(info);

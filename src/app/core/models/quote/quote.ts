@@ -1,6 +1,6 @@
 // src/app/core/models/quote.model.ts
 
-import { CustomerInfo } from "@/core/services/cart.service";
+import { CustomerInfo } from '@/core/services/cart.service';
 
 export interface QuoteItem {
     productId: string;
@@ -17,6 +17,12 @@ export interface Quote {
     createQuotesItemsDtos: QuoteItem[];
     notes?: string;
     customerInfo?: CustomerInfo; // Usar el CustomerInfo del cart.service
+    companyName?: string;
+    contactName?: string;
+    email?: string;
+    phone?: string;
+    address?: string;
+    personalizationFileUrl?: string; // URL del archivo subido
     status?: QuoteStatus;
     totalAmount?: number;
     createdAt?: Date;

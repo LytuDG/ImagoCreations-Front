@@ -17,14 +17,10 @@ export class ImageUploadService {
      * @param path - Optional path parameter (currently unused by API)
      * @returns Observable of Cloudinary upload response
      */
-    uploadImage(file: File, subfolder: string = 'product', path: string = ''): Observable<CloudinaryUploadResponse> {
+    uploadImage(file: File, subfolder: string = 'product'): Observable<CloudinaryUploadResponse> {
         const formData = new FormData();
         formData.append('file', file);
         formData.append('subfolder', subfolder);
-
-        if (path) {
-            formData.append('path', path);
-        }
 
         return this.http.post<CloudinaryUploadResponse>(SAVE_IMAGE_ENDPOINT, formData);
     }
