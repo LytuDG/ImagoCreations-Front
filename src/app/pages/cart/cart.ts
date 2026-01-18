@@ -17,27 +17,13 @@ import { TagModule } from 'primeng/tag';
 import { ChipModule } from 'primeng/chip';
 import { SeoService } from '@/core/services/seo.service';
 import { SelectModule } from 'primeng/select';
+import { ShopService } from '../landing/services/shop.service';
+import { ProductAttributeGroup } from '../landing/models/shop.types';
 
 @Component({
     selector: 'app-cart',
     standalone: true,
-    imports: [
-        CommonModule,
-        ButtonModule,
-        InputNumberModule,
-        FormsModule,
-        TableModule,
-        FileUploadModule,
-        ToastModule,
-        RouterModule,
-        TopbarWidget,
-        FooterWidget,
-        DialogModule,
-        ProgressSpinnerModule,
-        TagModule,
-        ChipModule,
-        SelectModule
-    ],
+    imports: [CommonModule, ButtonModule, InputNumberModule, FormsModule, TableModule, FileUploadModule, ToastModule, RouterModule, TopbarWidget, FooterWidget, DialogModule, ProgressSpinnerModule, TagModule, ChipModule, SelectModule],
     providers: [MessageService],
     template: `
         <div class="bg-surface-0 dark:bg-surface-900 min-h-screen">
@@ -62,7 +48,10 @@ import { SelectModule } from 'primeng/select';
                                     <button pButton label="Go Shopping" routerLink="/" icon="pi pi-arrow-left" class="p-button-rounded p-button-outlined"></button>
                                 </div>
 
-                                <div *ngFor="let item of cart.items()" class="flex flex-col sm:flex-row sm:items-start p-6 gap-6 bg-surface-0 dark:bg-surface-900 rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 border border-surface-200 dark:border-surface-800">
+                                <div
+                                    *ngFor="let item of cart.items()"
+                                    class="flex flex-col sm:flex-row sm:items-start p-6 gap-6 bg-surface-0 dark:bg-surface-900 rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 border border-surface-200 dark:border-surface-800"
+                                >
                                     <div class="w-32 h-32 shrink-0 overflow-hidden rounded-lg bg-surface-100">
                                         <img [src]="item.product.picture" [alt]="item.product.name" class="w-full h-full object-cover hover:scale-105 transition-transform duration-500" />
                                     </div>
@@ -74,12 +63,8 @@ import { SelectModule } from 'primeng/select';
                                                 <span class="text-surface-600 dark:text-surface-300 line-clamp-2 block mt-1">{{ item.product.description }}</span>
                                             </div>
                                             <div class="text-right">
-                                                <div class="text-2xl font-bold text-primary">
-                                                    \${{ getItemTotalPrice(item) | number:'1.2-2' }}
-                                                </div>
-                                                <div class="text-sm text-surface-500 mt-1">
-                                                    \${{ getItemUnitPrice(item) | number:'1.2-2' }} each
-                                                </div>
+                                                <div class="text-2xl font-bold text-primary">\${{ getItemTotalPrice(item) | number: '1.2-2' }}</div>
+                                                <div class="text-sm text-surface-500 mt-1">\${{ getItemUnitPrice(item) | number: '1.2-2' }} each</div>
                                             </div>
                                         </div>
 
@@ -87,14 +72,15 @@ import { SelectModule } from 'primeng/select';
                                         <div *ngIf="item.selectedAttributes && item.selectedAttributes.length > 0" class="mt-2">
                                             <div class="text-sm font-semibold text-surface-700 dark:text-surface-300 mb-2">Selected Options:</div>
                                             <div class="flex flex-wrap gap-2">
-                                                <div *ngFor="let attr of item.selectedAttributes"
-                                                     class="flex items-center gap-2 px-3 py-1.5 bg-surface-50 dark:bg-surface-800 rounded-lg border border-surface-200 dark:border-surface-700">
+                                                <div *ngFor="let attr of item.selectedAttributes" class="flex items-center gap-2 px-3 py-1.5 bg-surface-50 dark:bg-surface-800 rounded-lg border border-surface-200 dark:border-surface-700">
                                                     <span class="text-sm text-surface-600 dark:text-surface-400 font-medium">{{ attr.attributeName }}:</span>
                                                     <span class="text-sm text-surface-900 dark:text-surface-0">{{ attr.valueName }}</span>
-                                                    <span *ngIf="attr.priceModifier && attr.priceModifier !== 0"
-                                                          class="text-xs px-1.5 py-0.5 rounded"
-                                                          [ngClass]="attr.priceModifier > 0 ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'">
-                                                        {{ attr.priceModifier > 0 ? '+' : '' }}{{ attr.priceModifier | currency:'USD' }}
+                                                    <span
+                                                        *ngIf="attr.priceModifier && attr.priceModifier !== 0"
+                                                        class="text-xs px-1.5 py-0.5 rounded"
+                                                        [ngClass]="attr.priceModifier > 0 ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'"
+                                                    >
+                                                        {{ attr.priceModifier > 0 ? '+' : '' }}{{ attr.priceModifier | currency: 'USD' }}
                                                     </span>
                                                 </div>
                                             </div>
@@ -104,12 +90,10 @@ import { SelectModule } from 'primeng/select';
                                         <div *ngIf="item.product.productsAttributesValues && item.product.productsAttributesValues.length > 0" class="mt-2">
                                             <div class="text-sm font-semibold text-surface-700 dark:text-surface-300 mb-2">Product Attributes:</div>
                                             <div class="flex flex-wrap gap-1.5">
-                                                <span *ngFor="let attr of item.product.productsAttributesValues | slice:0:3"
-                                                      class="text-xs px-2 py-1 bg-surface-100 dark:bg-surface-800 rounded text-surface-600 dark:text-surface-400">
+                                                <span *ngFor="let attr of item.product.productsAttributesValues | slice: 0 : 3" class="text-xs px-2 py-1 bg-surface-100 dark:bg-surface-800 rounded text-surface-600 dark:text-surface-400">
                                                     {{ attr.attribute.name }}: {{ attr.attributeValue?.value }}
                                                 </span>
-                                                <span *ngIf="item.product.productsAttributesValues.length > 3"
-                                                      class="text-xs px-2 py-1 bg-surface-100 dark:bg-surface-800 rounded text-surface-500">
+                                                <span *ngIf="item.product.productsAttributesValues.length > 3" class="text-xs px-2 py-1 bg-surface-100 dark:bg-surface-800 rounded text-surface-500">
                                                     +{{ item.product.productsAttributesValues.length - 3 }} more
                                                 </span>
                                             </div>
@@ -129,18 +113,22 @@ import { SelectModule } from 'primeng/select';
                                             incrementButtonClass="p-button-text text-surface-500 hover:bg-surface-100 dark:hover:bg-surface-800"
                                             styleClass="border border-surface-300 dark:border-surface-700 rounded-lg"
                                         ></p-inputNumber>
-                                        <button pButton icon="pi pi-trash"
-                                          class="p-button-text p-button-danger p-button-rounded hover:bg-red-50 dark:hover:bg-red-900/20"
-                                          (click)="removeItem(item.product.id)"
-                                          pTooltip="Remove item"
-                                          tooltipPosition="top">
-                                        </button>
-                                        <button pButton icon="pi pi-pencil"
-                                          class="p-button-text p-button-secondary p-button-rounded hover:bg-surface-100 dark:hover:bg-surface-800"
-                                          (click)="editAttributes(item)"
-                                          pTooltip="Edit options"
-                                          tooltipPosition="top">
-                                        </button>
+                                        <button
+                                            pButton
+                                            icon="pi pi-trash"
+                                            class="p-button-text p-button-danger p-button-rounded hover:bg-red-50 dark:hover:bg-red-900/20"
+                                            (click)="removeItem(item.product.id)"
+                                            pTooltip="Remove item"
+                                            tooltipPosition="top"
+                                        ></button>
+                                        <button
+                                            pButton
+                                            icon="pi pi-pencil"
+                                            class="p-button-text p-button-secondary p-button-rounded hover:bg-surface-100 dark:hover:bg-surface-800"
+                                            (click)="editAttributes(item)"
+                                            pTooltip="Edit options"
+                                            tooltipPosition="top"
+                                        ></button>
                                     </div>
                                 </div>
                             </div>
@@ -157,7 +145,7 @@ import { SelectModule } from 'primeng/select';
                                 <div class="space-y-3 mb-6">
                                     <div class="flex justify-between items-center">
                                         <span class="text-surface-600 dark:text-surface-200">Subtotal</span>
-                                        <span class="text-surface-900 dark:text-surface-0 font-medium">\${{ getSubtotal() | number:'1.2-2' }}</span>
+                                        <span class="text-surface-900 dark:text-surface-0 font-medium">\${{ getSubtotal() | number: '1.2-2' }}</span>
                                     </div>
 
                                     <!-- Attribute Modifiers Summary -->
@@ -165,14 +153,9 @@ import { SelectModule } from 'primeng/select';
                                         <div class="text-sm text-surface-500 mb-1">Attribute Modifiers:</div>
                                         <div *ngFor="let item of cart.items()" class="text-xs">
                                             <div *ngFor="let attr of item.selectedAttributes">
-                                                <div *ngIf="attr.priceModifier && attr.priceModifier !== 0"
-                                                     class="flex justify-between items-center mb-1">
-                                                    <span class="text-surface-600 dark:text-surface-400">
-                                                        {{ item.product.name }} ({{ attr.attributeName }}: {{ attr.valueName }})
-                                                    </span>
-                                                    <span [ngClass]="attr.priceModifier > 0 ? 'text-green-600' : 'text-red-600'">
-                                                        {{ attr.priceModifier > 0 ? '+' : '' }}{{ attr.priceModifier | currency:'USD' }}
-                                                    </span>
+                                                <div *ngIf="attr.priceModifier && attr.priceModifier !== 0" class="flex justify-between items-center mb-1">
+                                                    <span class="text-surface-600 dark:text-surface-400"> {{ item.product.name }} ({{ attr.attributeName }}: {{ attr.valueName }}) </span>
+                                                    <span [ngClass]="attr.priceModifier > 0 ? 'text-green-600' : 'text-red-600'"> {{ attr.priceModifier > 0 ? '+' : '' }}{{ attr.priceModifier | currency: 'USD' }} </span>
                                                 </div>
                                             </div>
                                         </div>
@@ -180,7 +163,7 @@ import { SelectModule } from 'primeng/select';
 
                                     <div class="flex justify-between items-center pt-3 border-t border-surface-200 dark:border-surface-700">
                                         <span class="text-lg font-semibold text-surface-900 dark:text-surface-0">Total</span>
-                                        <span class="text-2xl font-bold text-primary">\${{ cart.totalPrice() | number:'1.2-2' }}</span>
+                                        <span class="text-2xl font-bold text-primary">\${{ cart.totalPrice() | number: '1.2-2' }}</span>
                                     </div>
                                 </div>
 
@@ -230,15 +213,8 @@ import { SelectModule } from 'primeng/select';
                                     </p-fileUpload>
                                 </div>
 
-                                <button pButton label="Request Quote"
-                                        class="w-full p-button-lg font-bold py-4"
-                                        icon="pi pi-send"
-                                        (click)="requestQuote()"
-                                        [loading]="loading"
-                                        [disabled]="cart.items().length === 0"></button>
-                                <p class="text-sm text-surface-500 dark:text-surface-400 mt-6 text-center leading-relaxed">
-                                    By requesting a quote, our team will review your order and personalization requirements and get back to you shortly.
-                                </p>
+                                <button pButton label="Request Quote" class="w-full p-button-lg font-bold py-4" icon="pi pi-send" (click)="requestQuote()" [loading]="loading" [disabled]="cart.items().length === 0"></button>
+                                <p class="text-sm text-surface-500 dark:text-surface-400 mt-6 text-center leading-relaxed">By requesting a quote, our team will review your order and personalization requirements and get back to you shortly.</p>
                             </div>
                         </div>
                     </div>
@@ -295,25 +271,15 @@ import { SelectModule } from 'primeng/select';
             </p-dialog>
 
             <!-- Edit Attributes Dialog -->
-            <p-dialog [(visible)]="showEditAttributesDialog"
-                      header="Edit Options"
-                      [modal]="true"
-                      [style]="{ width: '500px' }"
-                      (onHide)="onEditDialogHide()">
+            <p-dialog [(visible)]="showEditAttributesDialog" header="Edit Options" [modal]="true" [style]="{ width: '500px' }" (onHide)="onEditDialogHide()">
                 <div class="space-y-6" *ngIf="itemToEdit">
                     <!-- Product Info -->
                     <div class="flex items-start gap-4">
-                        <img
-                            [src]="itemToEdit.product.picture"
-                            [alt]="itemToEdit.product.name"
-                            class="w-20 h-20 object-cover rounded-lg"
-                        />
+                        <img [src]="itemToEdit.product.picture" [alt]="itemToEdit.product.name" class="w-20 h-20 object-cover rounded-lg" />
                         <div>
                             <h4 class="font-semibold text-lg text-surface-900 dark:text-surface-0">{{ itemToEdit.product.name }}</h4>
-                            <p class="text-surface-600 dark:text-surface-400 text-sm mt-1">{{ itemToEdit.product.description | slice:0:100 }}...</p>
-                            <div class="mt-2 text-xl font-bold text-surface-900 dark:text-surface-0">
-                                \${{ getEditDialogPrice() | number:'1.2-2' }}
-                            </div>
+                            <p class="text-surface-600 dark:text-surface-400 text-sm mt-1">{{ itemToEdit.product.description | slice: 0 : 100 }}...</p>
+                            <div class="mt-2 text-xl font-bold text-surface-900 dark:text-surface-0">\${{ getEditDialogPrice() | number: '1.2-2' }}</div>
                         </div>
                     </div>
 
@@ -322,9 +288,7 @@ import { SelectModule } from 'primeng/select';
                         <div *ngFor="let group of editAttributeGroups" class="space-y-3">
                             <div class="flex items-center justify-between">
                                 <h5 class="text-sm font-semibold text-surface-700 dark:text-surface-300">{{ group.name }}</h5>
-                                <span class="text-xs text-surface-500" *ngIf="editSelectedAttributes[group.id]">
-                                    Selected
-                                </span>
+                                <span class="text-xs text-surface-500" *ngIf="editSelectedAttributes[group.id]"> Selected </span>
                             </div>
 
                             <!-- Select para cada grupo de atributos -->
@@ -343,9 +307,7 @@ import { SelectModule } from 'primeng/select';
                                     <div class="flex items-center justify-between w-full">
                                         <span>{{ option.name }}</span>
                                         @if (option.priceModifier) {
-                                            <span class="text-xs ml-2" [ngClass]="option.priceModifier > 0 ? 'text-green-600' : 'text-red-600'">
-                                                {{ option.priceModifier > 0 ? '+' : '' }}{{ option.priceModifier | currency:'USD' }}
-                                            </span>
+                                            <span class="text-xs ml-2" [ngClass]="option.priceModifier > 0 ? 'text-green-600' : 'text-red-600'"> {{ option.priceModifier > 0 ? '+' : '' }}{{ option.priceModifier | currency: 'USD' }} </span>
                                         }
                                     </div>
                                 </ng-template>
@@ -357,51 +319,31 @@ import { SelectModule } from 'primeng/select';
                     <div class="bg-surface-50 dark:bg-surface-800 p-4 rounded-lg">
                         <div class="flex justify-between items-center">
                             <span class="text-sm font-medium text-surface-700 dark:text-surface-300">Base Price:</span>
-                            <span class="font-medium text-surface-900 dark:text-surface-0">
-                                \${{ itemToEdit.product.basePrice | number:'1.2-2' }}
-                            </span>
+                            <span class="font-medium text-surface-900 dark:text-surface-0"> \${{ itemToEdit.product.basePrice | number: '1.2-2' }} </span>
                         </div>
 
                         <div *ngIf="hasEditAttributeModifiers()" class="mt-2 space-y-1">
                             <div *ngFor="let group of editAttributeGroups" class="flex justify-between items-center text-sm">
-                                <span class="text-surface-600 dark:text-surface-400" *ngIf="editSelectedAttributes[group.id]">
-                                    {{ group.name }}:
-                                </span>
-                                <span *ngIf="getEditAttributePriceModifier(group.id) !== 0"
-                                      [ngClass]="getEditAttributePriceModifier(group.id) > 0 ? 'text-green-600' : 'text-red-600'">
-                                    {{ getEditAttributePriceModifier(group.id) > 0 ? '+' : '' }}{{ getEditAttributePriceModifier(group.id) | currency:'USD' }}
+                                <span class="text-surface-600 dark:text-surface-400" *ngIf="editSelectedAttributes[group.id]"> {{ group.name }}: </span>
+                                <span *ngIf="getEditAttributePriceModifier(group.id) !== 0" [ngClass]="getEditAttributePriceModifier(group.id) > 0 ? 'text-green-600' : 'text-red-600'">
+                                    {{ getEditAttributePriceModifier(group.id) > 0 ? '+' : '' }}{{ getEditAttributePriceModifier(group.id) | currency: 'USD' }}
                                 </span>
                             </div>
                         </div>
 
                         <div class="flex justify-between items-center mt-3 pt-3 border-t border-surface-200 dark:border-surface-700">
                             <span class="font-bold text-surface-900 dark:text-surface-0">Unit Price:</span>
-                            <span class="text-xl font-bold text-surface-900 dark:text-surface-0">
-                                \${{ getEditDialogPrice() | number:'1.2-2' }}
-                            </span>
+                            <span class="text-xl font-bold text-surface-900 dark:text-surface-0"> \${{ getEditDialogPrice() | number: '1.2-2' }} </span>
                         </div>
                     </div>
                 </div>
 
                 <ng-template pTemplate="footer">
                     <div class="flex justify-between items-center w-full">
-                        <div class="text-sm text-surface-600 dark:text-surface-400">
-                            {{ getEditSelectedAttributesCount() }} of {{ editAttributeGroups.length }} selected
-                        </div>
+                        <div class="text-sm text-surface-600 dark:text-surface-400">{{ getEditSelectedAttributesCount() }} of {{ editAttributeGroups.length }} selected</div>
                         <div class="flex gap-2">
-                            <button
-                                pButton
-                                label="Cancel"
-                                icon="pi pi-times"
-                                class="p-button-text"
-                                (click)="showEditAttributesDialog = false"
-                            ></button>
-                            <button
-                                pButton
-                                label="Update"
-                                icon="pi pi-check"
-                                (click)="saveEditedAttributes()"
-                            ></button>
+                            <button pButton label="Cancel" icon="pi pi-times" class="p-button-text" (click)="showEditAttributesDialog = false"></button>
+                            <button pButton label="Update" icon="pi pi-check" (click)="saveEditedAttributes()"></button>
                         </div>
                     </div>
                 </ng-template>
@@ -418,7 +360,7 @@ import { SelectModule } from 'primeng/select';
             }
             .attribute-chip:hover {
                 transform: translateY(-1px);
-                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
             }
         `
     ]
@@ -428,6 +370,7 @@ export class Cart implements OnInit {
     messageService = inject(MessageService);
     router = inject(Router);
     seoService = inject(SeoService);
+    shopService = inject(ShopService);
 
     ngOnInit() {
         this.seoService.updateTitle('Shopping Cart - Imago Creations');
@@ -443,7 +386,7 @@ export class Cart implements OnInit {
 
     // Variables para editar atributos
     itemToEdit: any = null;
-    editAttributeGroups: any[] = [];
+    editAttributeGroups: ProductAttributeGroup[] = [];
     editSelectedAttributes: { [key: string]: string } = {};
 
     getItemUnitPrice(item: any): number {
@@ -456,14 +399,12 @@ export class Cart implements OnInit {
 
     getSubtotal(): number {
         return this.cart.items().reduce((total, item) => {
-            return total + (item.product.basePrice * item.quantity);
+            return total + item.product.basePrice * item.quantity;
         }, 0);
     }
 
     hasAttributeModifiers(): boolean {
-        return this.cart.items().some(item =>
-            item.selectedAttributes?.some(attr => attr.priceModifier && attr.priceModifier !== 0)
-        );
+        return this.cart.items().some((item) => item.selectedAttributes?.some((attr) => attr.priceModifier && attr.priceModifier !== 0));
     }
 
     updateQuantity(productId: string | undefined, quantity: number) {
@@ -486,7 +427,7 @@ export class Cart implements OnInit {
         this.itemToEdit = item;
 
         // Preparar grupos de atributos del producto
-        this.editAttributeGroups = this.prepareEditAttributeGroups(item.product);
+        this.editAttributeGroups = this.shopService.prepareProductAttributeGroups(item.product);
 
         // Preparar atributos seleccionados actuales
         this.editSelectedAttributes = {};
@@ -497,43 +438,6 @@ export class Cart implements OnInit {
         }
 
         this.showEditAttributesDialog = true;
-    }
-
-    prepareEditAttributeGroups(product: any): any[] {
-        const attributes = product.productsAttributesValues || [];
-        const attributeMap = new Map<string, any>();
-
-        attributes.forEach((attr: any) => {
-            if (attr.attribute && attr.attributeValue) {
-                const attributeId = attr.attribute.id!;
-                const attributeName = attr.attribute.name;
-                const valueId = attr.attributeValue.id!;
-                const valueName = attr.attributeValue.value;
-                const priceModifier = attr.attributeValue.priceModifier;
-
-                if (!attributeMap.has(attributeId)) {
-                    attributeMap.set(attributeId, {
-                        id: attributeId,
-                        name: attributeName,
-                        values: []
-                    });
-                }
-
-                const group = attributeMap.get(attributeId)!;
-
-                // Check if value already exists in group
-                const existingValue = group.values.find((v: any) => v.id === valueId);
-                if (!existingValue) {
-                    group.values.push({
-                        id: valueId,
-                        name: valueName,
-                        priceModifier: priceModifier
-                    });
-                }
-            }
-        });
-
-        return Array.from(attributeMap.values());
     }
 
     getEditSelectOptionsForGroup(group: any): any[] {
@@ -553,47 +457,20 @@ export class Cart implements OnInit {
 
     getEditDialogPrice(): number {
         if (!this.itemToEdit) return 0;
-
-        let price = this.itemToEdit.product.basePrice;
-
-        // Sumar modificadores de precio de atributos seleccionados
-        Object.values(this.editSelectedAttributes).forEach(valueId => {
-            if (!valueId) return;
-
-            this.editAttributeGroups.forEach(group => {
-                const value = group.values.find((v: any) => v.id === valueId);
-                if (value?.priceModifier) {
-                    price += value.priceModifier;
-                }
-            });
-        });
-
-        return price;
+        return this.shopService.calculatePrice(this.itemToEdit.product.basePrice, this.editSelectedAttributes, this.editAttributeGroups);
     }
 
     getEditSelectedAttributesCount(): number {
-        return Object.values(this.editSelectedAttributes).filter(value => value !== null && value !== undefined).length;
+        return Object.values(this.editSelectedAttributes).filter((value) => value !== null && value !== undefined).length;
     }
 
     hasEditAttributeModifiers(): boolean {
-        return this.editAttributeGroups.some(group => {
-            const valueId = this.editSelectedAttributes[group.id];
-            if (!valueId) return false;
-
-            const value = group.values.find((v: any) => v.id === valueId);
-            return value?.priceModifier !== undefined && value.priceModifier !== 0;
-        });
+        return this.shopService.hasAttributeModifiers(this.editSelectedAttributes, this.editAttributeGroups);
     }
 
     getEditAttributePriceModifier(attributeId: string): number {
         const valueId = this.editSelectedAttributes[attributeId];
-        if (!valueId) return 0;
-
-        const group = this.editAttributeGroups.find(g => g.id === attributeId);
-        if (!group) return 0;
-
-        const value = group.values.find((v: any) => v.id === valueId);
-        return value?.priceModifier || 0;
+        return this.shopService.getAttributePriceModifier(attributeId, valueId, this.editAttributeGroups);
     }
 
     saveEditedAttributes() {
@@ -605,7 +482,7 @@ export class Cart implements OnInit {
         Object.entries(this.editSelectedAttributes).forEach(([attributeId, valueId]) => {
             if (!valueId) return;
 
-            const group = this.editAttributeGroups.find(g => g.id === attributeId);
+            const group = this.editAttributeGroups.find((g) => g.id === attributeId);
 
             if (group) {
                 const value = group.values.find((v: any) => v.id === valueId);

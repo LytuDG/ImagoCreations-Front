@@ -558,42 +558,16 @@ export class ShopWidget implements OnInit {
 
     getSelectedAttributePriceModifier(attributeId: string): number {
         const valueId = this.selectedAttributeValuesForCart[attributeId];
-        if (!valueId) return 0;
-
-        const group = this.productAttributeGroups.find((g) => g.id === attributeId);
-        if (!group) return 0;
-
-        const value = group.values.find((v) => v.id === valueId);
-        return value?.priceModifier || 0;
+        return this.shopService.getAttributePriceModifier(attributeId, valueId, this.productAttributeGroups);
     }
 
     hasAttributeModifiers(): boolean {
-        return this.productAttributeGroups.some((group) => {
-            const valueId = this.selectedAttributeValuesForCart[group.id];
-            if (!valueId) return false;
-
-            const value = group.values.find((v) => v.id === valueId);
-            return value?.priceModifier !== undefined && value.priceModifier !== 0;
-        });
+        return this.shopService.hasAttributeModifiers(this.selectedAttributeValuesForCart, this.productAttributeGroups);
     }
 
     calculateFinalPrice(): number {
         if (!this.selectedProduct) return 0;
-
-        let finalPrice = this.selectedProduct.basePrice;
-
-        Object.values(this.selectedAttributeValuesForCart).forEach((valueId) => {
-            if (!valueId) return;
-
-            this.productAttributeGroups.forEach((group) => {
-                const value = group.values.find((v) => v.id === valueId);
-                if (value?.priceModifier) {
-                    finalPrice += value.priceModifier;
-                }
-            });
-        });
-
-        return finalPrice;
+        return this.shopService.calculatePrice(this.selectedProduct.basePrice, this.selectedAttributeValuesForCart, this.productAttributeGroups);
     }
 
     getSelectedAttributesCount(): number {

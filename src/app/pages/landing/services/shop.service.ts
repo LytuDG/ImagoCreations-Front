@@ -125,4 +125,38 @@ export class ShopService {
 
         return Array.from(attributeMap.values());
     }
+    calculatePrice(basePrice: number, selectedAttributes: { [key: string]: string }, groups: ProductAttributeGroup[]): number {
+        let finalPrice = basePrice;
+        Object.values(selectedAttributes).forEach((valueId) => {
+            if (!valueId) return;
+            const modifier = this.getAttributePriceModifierFromGroups(valueId, groups);
+            finalPrice += modifier;
+        });
+        return finalPrice;
+    }
+
+    getAttributePriceModifierFromGroups(valueId: string, groups: ProductAttributeGroup[]): number {
+        for (const group of groups) {
+            const value = group.values.find((v) => v.id === valueId);
+            if (value) {
+                return value.priceModifier || 0;
+            }
+        }
+        return 0;
+    }
+
+    getAttributePriceModifier(attributeId: string, valueId: string, groups: ProductAttributeGroup[]): number {
+        if (!valueId) return 0;
+        const group = groups.find((g) => g.id === attributeId);
+        if (!group) return 0;
+        const value = group.values.find((v) => v.id === valueId);
+        return value?.priceModifier || 0;
+    }
+
+    hasAttributeModifiers(selectedAttributes: { [key: string]: string }, groups: ProductAttributeGroup[]): boolean {
+        return Object.entries(selectedAttributes).some(([attributeId, valueId]) => {
+            if (!valueId) return false;
+            return this.getAttributePriceModifier(attributeId, valueId, groups) !== 0;
+        });
+    }
 }
