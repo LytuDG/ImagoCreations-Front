@@ -11,6 +11,7 @@ import { Attribute } from './models/attribute';
 import { AgencyService } from '../agencies/agency.service';
 import { Agency } from '../agencies/models/agency';
 import { AttributeInputType, ATTRIBUTE_TYPE_OPTIONS, ATTRIBUTE_TYPE_CONFIG, requiresValues } from './constants/attribute-types';
+import { AuthService } from '@/core/services/auth.service';
 
 @Component({
     selector: 'app-attribute-form',
@@ -51,32 +52,11 @@ import { AttributeInputType, ATTRIBUTE_TYPE_OPTIONS, ATTRIBUTE_TYPE_CONFIG, requ
                         }
                     </div>
 
-                    <!-- Campo Agency con Select y Filtro -->
-                    <div class="field">
+                    <!-- Campo Agency (Oculto) -->
+                    <!-- <div class="field">
                         <label for="agencyId" class="block font-bold mb-2">Agencia</label>
-                        <p-select
-                            [options]="filteredAgencies"
-                            optionLabel="name"
-                            optionValue="id"
-                            [(ngModel)]="localAttribute.agencyId"
-                            placeholder="Selecciona una agencia"
-                            [filter]="true"
-                            filterBy="name"
-                            [showClear]="true"
-                            [filterPlaceholder]="'Buscar agencia...'"
-                            class="w-full"
-                            [disabled]="saving || loadingAgencies"
-                        >
-                            <ng-template #empty>
-                                <div class="p-2 text-center">
-                                    {{ loadingAgencies ? 'Cargando agencias...' : 'No se encontraron agencias' }}
-                                </div>
-                            </ng-template>
-                        </p-select>
-                        @if (loadingAgencies) {
-                            <small class="text-color-secondary">Cargando lista de agencias...</small>
-                        }
-                    </div>
+                        ...
+                    </div> -->
 
                     <!-- Campos Booleanos - Alineados a la izquierda -->
                     <div class="justify-start">
@@ -138,6 +118,7 @@ import { AttributeInputType, ATTRIBUTE_TYPE_OPTIONS, ATTRIBUTE_TYPE_CONFIG, requ
 })
 export class AttributeFormComponent implements OnInit, OnChanges {
     private agencyService = inject(AgencyService);
+    private authService = inject(AuthService);
 
     @Input() visible: boolean = false;
     @Input() isEditMode: boolean = false;
@@ -156,6 +137,7 @@ export class AttributeFormComponent implements OnInit, OnChanges {
     allAgencies: Agency[] = [];
     filteredAgencies: Agency[] = [];
     loadingAgencies: boolean = false;
+    userAgencyId: string = '';
 
     // Opciones para el dropdown/select usando las constantes
     inputTypeOptions = ATTRIBUTE_TYPE_OPTIONS;
@@ -167,6 +149,18 @@ export class AttributeFormComponent implements OnInit, OnChanges {
     showValuesSection: boolean = false;
 
     ngOnInit() {
+        this.authService.getCurrentUser().subscribe({
+            next: (user) => {
+                if (user.agencyId) {
+                    this.userAgencyId = user.agencyId;
+                    // Si estamos creando y aún no tiene agencia, asignarla
+                    if (!this.attribute?.id && !this.localAttribute.agencyId) {
+                        this.localAttribute.agencyId = user.agencyId;
+                    }
+                }
+            }
+        });
+
         this.resetForm();
         this.loadAgencies();
     }
@@ -180,12 +174,7 @@ export class AttributeFormComponent implements OnInit, OnChanges {
     // Cargar todas las agencias
     loadAgencies() {
         this.loadingAgencies = true;
-
-        const params = {
-            page: 1,
-            pageSize: 100
-        };
-
+        const params = { page: 1, pageSize: 100 };
         this.agencyService.getAgencies(params).subscribe({
             next: (response) => {
                 this.allAgencies = response.data || [];
@@ -206,6 +195,10 @@ export class AttributeFormComponent implements OnInit, OnChanges {
             this.localAttribute = { ...this.attribute };
         } else {
             this.localAttribute = this.getDefaultAttribute();
+            // Asignar agencia del usuario si ya la tenemos cargada
+            if (this.userAgencyId) {
+                this.localAttribute.agencyId = this.userAgencyId;
+            }
         }
 
         // Actualizar configuración del tipo seleccionado
