@@ -5,17 +5,23 @@ import { QuoteService } from '@/core/services/quote.service';
 import { Quote } from '@/core/models/quote/quote';
 import { TagModule } from 'primeng/tag';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
+import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { ToastModule } from 'primeng/toast';
+import { ConfirmationService } from 'primeng/api';
+import { MessageService } from 'primeng/api';
 import { CardModule } from 'primeng/card';
 import { ButtonModule } from 'primeng/button';
 import { SeoService } from '@/core/services/seo.service';
 import { TopbarWidget } from '../landing/components/topbarwidget';
 import { FooterWidget } from '../landing/components/footerwidget';
 import { TimelineModule } from 'primeng/timeline';
+import { QuoteResponse, QuoteStatusEnum } from '@/core/models/quote/quote';
 
 @Component({
     selector: 'app-tracking',
     standalone: true,
-    imports: [CommonModule, RouterModule, TagModule, ProgressSpinnerModule, CardModule, ButtonModule, TimelineModule, TopbarWidget, FooterWidget],
+    imports: [CommonModule, RouterModule, TagModule, ProgressSpinnerModule, CardModule, ButtonModule, TimelineModule, TopbarWidget, FooterWidget, ConfirmDialogModule, ToastModule],
+    providers: [ConfirmationService, MessageService],
     template: `
         <div class="bg-surface-0 dark:bg-surface-900 min-h-screen">
             <div id="tracking" class="landing-wrapper overflow-hidden">
@@ -53,21 +59,99 @@ import { TimelineModule } from 'primeng/timeline';
                                     <div class="surface-card p-6 rounded-xl bg-surface-0 dark:bg-surface-900 shadow-sm border border-surface-200 dark:border-surface-800">
                                         <h3 class="text-xl font-semibold mb-4 text-surface-900 dark:text-surface-0">Items</h3>
                                         <div class="space-y-4">
-                                            <div *ngFor="let item of quoteQuoteItems" class="flex items-center gap-4 py-3 border-b border-surface-100 dark:border-surface-800 last:border-0">
-                                                <div class="flex-1">
-                                                    <h4 class="font-medium text-surface-900 dark:text-surface-0">{{ item.productName || 'Product Title' }}</h4>
-                                                    <div class="flex gap-2 text-sm text-surface-500 mt-1">
-                                                        <span>Qty: {{ item.quantity }}</span>
-                                                        <span *ngIf="item.price">• \${{ item.price | number: '1.2-2' }}</span>
+                                            <div *ngFor="let item of quoteItemsFormatted" class="flex flex-col sm:flex-row gap-4 py-4 border-b border-surface-100 dark:border-surface-800 last:border-0">
+                                                <!-- Image mock or placeholder if available in product -->
+                                                <div class="w-20 h-20 rounded-lg bg-surface-100 dark:bg-surface-800 flex-shrink-0 overflow-hidden">
+                                                    <img *ngIf="item.product?.picture" [src]="item.product.picture" class="w-full h-full object-cover" />
+                                                    <div *ngIf="!item.product?.picture" class="w-full h-full flex items-center justify-center text-surface-400">
+                                                        <i class="pi pi-image text-2xl"></i>
                                                     </div>
                                                 </div>
-                                                <div class="font-bold text-surface-900 dark:text-surface-0" *ngIf="item.price">\${{ item.price * item.quantity | number: '1.2-2' }}</div>
+
+                                                <div class="flex-1">
+                                                    <div class="flex justify-between items-start">
+                                                        <div>
+                                                            <h4 class="font-medium text-lg text-surface-900 dark:text-surface-0">{{ item.productName }}</h4>
+                                                            <p class="text-sm text-surface-500 mb-2">{{ item.productDescription }}</p>
+                                                        </div>
+                                                        <div class="text-right">
+                                                            <div class="font-bold text-lg text-surface-900 dark:text-surface-0" *ngIf="item.totalPrice">\${{ item.totalPrice | number: '1.2-2' }}</div>
+                                                            <div class="text-sm text-surface-500" *ngIf="item.unitPrice">\${{ item.unitPrice | number: '1.2-2' }} / unit</div>
+                                                        </div>
+                                                    </div>
+
+                                                    <!-- Variants / Attributes -->
+                                                    <div class="flex flex-wrap gap-2 mt-2">
+                                                        <div *ngFor="let attr of item.attributes" class="text-xs px-2 py-1 bg-surface-100 dark:bg-surface-800 rounded text-surface-600 dark:text-surface-300">
+                                                            <span class="font-semibold">{{ attr.name }}:</span> {{ attr.value }}
+                                                        </div>
+                                                        <div class="text-xs px-2 py-1 bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300 rounded font-semibold">Qty: {{ item.quantity }}</div>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
 
-                                        <div class="flex justify-between items-center mt-4 pt-4 border-t border-surface-100 dark:border-surface-800">
-                                            <span class="font-bold text-lg text-surface-900 dark:text-surface-0">Total Estimated</span>
-                                            <span class="font-bold text-xl text-primary">\${{ quote.totalAmount | number: '1.2-2' }}</span>
+                                        <div class="flex justify-between items-center mt-6 pt-6 border-t border-surface-100 dark:border-surface-800">
+                                            <span class="font-bold text-lg text-surface-900 dark:text-surface-0">Total Amount</span>
+                                            <span class="font-bold text-2xl text-primary">\${{ quote.totalAmount || 0 | number: '1.2-2' }}</span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Action Buttons for SENT/TO_PAY status -->
+                                    <div *ngIf="canTakeAction()" class="surface-card p-6 rounded-xl bg-surface-0 dark:bg-surface-900 shadow-sm border border-surface-200 dark:border-surface-800 slide-in-bottom">
+                                        <h3 class="text-xl font-semibold mb-4 text-surface-900 dark:text-surface-0">Actions</h3>
+                                        <p class="text-surface-600 dark:text-surface-400 mb-6">Please review the quote details above. You can approve to proceed to payment or reject if it doesn't meet your needs.</p>
+
+                                        <div class="flex flex-col sm:flex-row gap-4">
+                                            <button pButton label="Approve Quote" icon="pi pi-check" class="flex-1 p-button-success" (click)="confirmAction('approve')"></button>
+                                            <button pButton label="Request Changes" icon="pi pi-pencil" class="flex-1 p-button-warning p-button-outlined" (click)="confirmAction('changes')"></button>
+                                            <button pButton label="Reject Quote" icon="pi pi-times" class="flex-1 p-button-danger p-button-outlined" (click)="confirmAction('reject')"></button>
+                                        </div>
+                                    </div>
+
+                                    <!-- Approved Message -->
+                                    <div *ngIf="quote.status === 'approved'" class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl p-6 text-center">
+                                        <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-100 dark:bg-green-900 text-green-600 dark:text-green-400 mb-4">
+                                            <i class="pi pi-check text-2xl"></i>
+                                        </div>
+                                        <h3 class="text-xl font-bold text-green-800 dark:text-green-200 mb-2">Quote Approved!</h3>
+                                        <p class="text-green-700 dark:text-green-300 max-w-lg mx-auto">Thank you for approving this quote. Our team will proceed with the next steps shortly. You will receive an update via email.</p>
+                                    </div>
+
+                                    <!-- Rejected Message -->
+                                    <div *ngIf="quote.status === 'rejected'" class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-6 text-center">
+                                        <i class="pi pi-times-circle text-4xl text-red-500 mb-2"></i>
+                                        <h3 class="text-xl font-bold text-red-800 dark:text-red-200">Quote Rejected</h3>
+                                    </div>
+                                </div>
+
+                                <!-- Sidebar (Right) -->
+                                <div class="space-y-6">
+                                    <!-- Customer Info -->
+                                    <div class="surface-card p-6 rounded-xl bg-surface-0 dark:bg-surface-900 shadow-sm border border-surface-200 dark:border-surface-800">
+                                        <h3 class="text-lg font-semibold mb-4 text-surface-900 dark:text-surface-0">Customer Details</h3>
+                                        <div class="space-y-3 text-sm">
+                                            <div>
+                                                <span class="block text-surface-500">Contact</span>
+                                                <span class="font-medium text-surface-900 dark:text-surface-0">{{ quote.contactName }}</span>
+                                                <span class="block text-xs text-surface-500" *ngIf="quote.companyName">{{ quote.companyName }}</span>
+                                            </div>
+                                            <div>
+                                                <span class="block text-surface-500">Email</span>
+                                                <span class="font-medium text-surface-900 dark:text-surface-0">{{ quote.email }}</span>
+                                            </div>
+                                            <div>
+                                                <span class="block text-surface-500">Phone</span>
+                                                <span class="font-medium text-surface-900 dark:text-surface-0">{{ quote.phone }}</span>
+                                            </div>
+                                            <div *ngIf="quote.address">
+                                                <span class="block text-surface-500">Shipping Address</span>
+                                                <span class="font-medium text-surface-900 dark:text-surface-0">{{ quote.address }}</span>
+                                            </div>
+                                            <div *ngIf="quote.notes" class="pt-2 border-t border-surface-100 dark:border-surface-800 mt-2">
+                                                <span class="block text-surface-500">Notes</span>
+                                                <p class="text-surface-900 dark:text-surface-0 italic">{{ quote.notes }}</p>
+                                            </div>
                                         </div>
                                     </div>
 
@@ -77,7 +161,7 @@ import { TimelineModule } from 'primeng/timeline';
                                         <p-timeline [value]="events" align="left">
                                             <ng-template pTemplate="content" let-event>
                                                 <div class="flex flex-col">
-                                                    <span class="font-medium" [ngClass]="{ 'text-primary': event.status === quote.status }">{{ event.status }}</span>
+                                                    <span class="font-medium" [ngClass]="{ 'text-primary': isCurrentStatus(event.status) }">{{ event.label }}</span>
                                                     <span class="text-xs text-surface-500">{{ event.description }}</span>
                                                 </div>
                                             </ng-template>
@@ -94,32 +178,6 @@ import { TimelineModule } from 'primeng/timeline';
                                             </ng-template>
                                         </p-timeline>
                                     </div>
-                                </div>
-
-                                <!-- Sidebar (Right) -->
-                                <div class="space-y-6">
-                                    <!-- Customer Info -->
-                                    <div class="surface-card p-6 rounded-xl bg-surface-0 dark:bg-surface-900 shadow-sm border border-surface-200 dark:border-surface-800">
-                                        <h3 class="text-lg font-semibold mb-4 text-surface-900 dark:text-surface-0">Customer Details</h3>
-                                        <div class="space-y-3 text-sm">
-                                            <div>
-                                                <span class="block text-surface-500">Contact</span>
-                                                <span class="font-medium text-surface-900 dark:text-surface-0">{{ quote.contactName }} ({{ quote.companyName }})</span>
-                                            </div>
-                                            <div>
-                                                <span class="block text-surface-500">Email</span>
-                                                <span class="font-medium text-surface-900 dark:text-surface-0">{{ quote.email }}</span>
-                                            </div>
-                                            <div>
-                                                <span class="block text-surface-500">Phone</span>
-                                                <span class="font-medium text-surface-900 dark:text-surface-0">{{ quote.phone }}</span>
-                                            </div>
-                                            <div *ngIf="quote.address">
-                                                <span class="block text-surface-500">Shipping Address</span>
-                                                <span class="font-medium text-surface-900 dark:text-surface-0">{{ quote.address }}</span>
-                                            </div>
-                                        </div>
-                                    </div>
 
                                     <!-- Actions -->
                                     <div class="surface-card p-6 rounded-xl bg-surface-0 dark:bg-surface-900 shadow-sm border border-surface-200 dark:border-surface-800">
@@ -134,6 +192,8 @@ import { TimelineModule } from 'primeng/timeline';
                 </div>
                 <footer-widget />
             </div>
+            <p-toast></p-toast>
+            <p-confirmDialog header="Confirmation" icon="pi pi-exclamation-triangle"></p-confirmDialog>
         </div>
     `
 })
@@ -141,17 +201,21 @@ export class Tracking implements OnInit {
     quoteService = inject(QuoteService);
     route = inject(ActivatedRoute);
     seoService = inject(SeoService);
+    confirmationService = inject(ConfirmationService);
+    messageService = inject(MessageService);
 
     loading = true;
     error = false;
-    quote: Quote | null = null;
-    quoteQuoteItems: any[] = [];
+    quote: QuoteResponse | null = null;
+    quoteItemsFormatted: any[] = [];
 
+    // Define timeline events explicitly
     events = [
-        { status: 'PENDING', icon: 'pi pi-file', description: 'Request received' },
-        { status: 'PROCESSING', icon: 'pi pi-cog', description: 'Under review' },
-        { status: 'APPROVED', icon: 'pi pi-check', description: 'Quote approved' }
-        // { status: 'COMPLETED', icon: 'pi pi-check-circle', description: 'Order completed' }
+        { status: QuoteStatusEnum.DRAFT, label: 'Draft', icon: 'pi pi-file', description: 'Quote created' },
+        { status: QuoteStatusEnum.SENT, label: 'Sent', icon: 'pi pi-send', description: 'Available for approval' },
+        { status: QuoteStatusEnum.APPROVED, label: 'Approved', icon: 'pi pi-check', description: 'Approved by client' },
+        { status: QuoteStatusEnum.TO_PAY, label: 'Payment', icon: 'pi pi-wallet', description: 'Payment pending' },
+        { status: QuoteStatusEnum.PAID, label: 'Paid', icon: 'pi pi-verified', description: 'Process complete' }
     ];
 
     ngOnInit() {
@@ -172,9 +236,7 @@ export class Tracking implements OnInit {
         this.quoteService.getQuoteByToken(token).subscribe({
             next: (data) => {
                 this.quote = data;
-                // Map the API response items to a display friendly format if needed
-                // The API returns createQuotesItemsDtos or quoteItems usually
-                this.quoteQuoteItems = (data as any).quoteItems || data.createQuotesItemsDtos || [];
+                this.formatQuoteItems(data);
                 this.loading = false;
             },
             error: (err) => {
@@ -185,30 +247,126 @@ export class Tracking implements OnInit {
         });
     }
 
+    /**
+     * Format Items for Display
+     * Groups: Product Name + Attributes + Quantity + Price
+     */
+    formatQuoteItems(quote: QuoteResponse) {
+        this.quoteItemsFormatted = (quote.quoteItems || []).map((item) => {
+            const attributes = (item.quoteItemAttributeValue || [])
+                .map((qiav) => ({
+                    name: qiav.productAttributeValue?.attribute?.name,
+                    value: qiav.productAttributeValue?.attributeValue?.value
+                }))
+                .filter((a) => a.name && a.value);
+
+            return {
+                id: item.id,
+                productName: item.product?.name || 'Item',
+                productDescription: item.product?.description,
+                quantity: item.quantity,
+                unitPrice: item.unitPrice,
+                totalPrice: item.unitPrice * item.quantity,
+                attributes: attributes, // List of {name, value}
+                product: item.product
+            };
+        });
+    }
+
+    canTakeAction(): boolean {
+        // Allow action only if status is SENT or TO_PAY, or draft if testing public logic?
+        // Usually, client approves when status is SENT.
+        if (!this.quote) return false;
+        return [QuoteStatusEnum.SENT, QuoteStatusEnum.TO_PAY].includes(this.quote.status as QuoteStatusEnum);
+    }
+
+    confirmAction(action: 'approve' | 'reject' | 'changes') {
+        const title = action === 'approve' ? 'Approve Quote' : action === 'reject' ? 'Reject Quote' : 'Request Changes';
+        const message =
+            action === 'approve'
+                ? 'Are you sure you want to approve this quote? This will proceed to the next step.'
+                : action === 'reject'
+                  ? 'Are you sure you want to reject this quote?'
+                  : 'Would you like to request changes? Our team will contact you.';
+
+        this.confirmationService.confirm({
+            message: message,
+            header: title,
+            icon: 'pi pi-exclamation-triangle',
+            accept: () => {
+                this.executeStatusChange(action);
+            }
+        });
+    }
+
+    executeStatusChange(action: 'approve' | 'reject' | 'changes') {
+        if (!this.quote) return;
+
+        let newStatus: QuoteStatusEnum;
+        switch (action) {
+            case 'approve':
+                newStatus = QuoteStatusEnum.APPROVED;
+                break;
+            case 'reject':
+                newStatus = QuoteStatusEnum.REJECTED;
+                break;
+            case 'changes':
+                newStatus = QuoteStatusEnum.CHANGES_REQUESTED;
+                break;
+        }
+
+        this.quoteService.updatePublicQuoteStatus(this.quote.publicToken, newStatus).subscribe({
+            next: () => {
+                this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Quote status updated successfully' });
+                // Optimistic update or reload
+                if (this.quote) this.quote.status = newStatus;
+            },
+            error: (err) => {
+                this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Could not update status' });
+                console.error(err);
+            }
+        });
+    }
+
     getSeverity(status?: string): 'success' | 'info' | 'warn' | 'danger' | 'secondary' | 'contrast' | undefined {
+        // Map backend statuses to PrimeNG severities
         switch (status) {
-            case 'APPROVED':
+            case QuoteStatusEnum.APPROVED:
+            case QuoteStatusEnum.PAID:
                 return 'success';
-            case 'PROCESSING':
+            case QuoteStatusEnum.SENT:
+            case QuoteStatusEnum.TO_PAY:
                 return 'info';
-            case 'PENDING':
+            case QuoteStatusEnum.DRAFT:
+                return 'secondary';
+            case QuoteStatusEnum.REJECTED:
+                return 'danger';
+            case QuoteStatusEnum.CHANGES_REQUESTED:
                 return 'warn';
-            case 'REJECTED':
-                return 'danger';
-            case 'EXPIRED':
-                return 'danger';
             default:
                 return 'secondary';
         }
     }
 
     isStepCompleted(stepStatus: string): boolean {
+        // Simple logic: define an order and check index
         if (!this.quote?.status) return false;
+        const statusOrder = [QuoteStatusEnum.DRAFT, QuoteStatusEnum.SENT, QuoteStatusEnum.APPROVED, QuoteStatusEnum.TO_PAY, QuoteStatusEnum.PAID];
 
-        const statusOrder = ['PENDING', 'PROCESSING', 'APPROVED'];
-        const currentIdx = statusOrder.indexOf(this.quote.status);
-        const stepIdx = statusOrder.indexOf(stepStatus);
+        // Handle negative cases like Rejected separately or treat as end of line
+        if (this.quote.status === QuoteStatusEnum.REJECTED || this.quote.status === QuoteStatusEnum.CHANGES_REQUESTED) {
+            // Visualize differently maybe? For now let's just show progress up to SENT
+            if (this.quote.status === QuoteStatusEnum.REJECTED && stepStatus === QuoteStatusEnum.SENT) return true;
+        }
 
+        const currentIdx = statusOrder.indexOf(this.quote.status as QuoteStatusEnum);
+        const stepIdx = statusOrder.indexOf(stepStatus as QuoteStatusEnum);
+
+        if (currentIdx === -1) return false; // Unknown status
         return currentIdx >= stepIdx;
+    }
+
+    isCurrentStatus(stepStatus: string): boolean {
+        return this.quote?.status === stepStatus;
     }
 }

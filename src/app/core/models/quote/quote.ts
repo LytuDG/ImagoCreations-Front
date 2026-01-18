@@ -10,7 +10,9 @@ export enum QuoteStatusEnum {
     CHANGES_REQUESTED = 'changes_requested',
     APPROVED = 'approved',
     CONVERTED_TO_ORDER = 'converted_to_order',
-    REJECTED = 'rejected'
+    REJECTED = 'rejected',
+    TO_PAY = 'to_pay',
+    PAID = 'paid'
 }
 
 export type QuoteStatus = QuoteStatusEnum | string;
