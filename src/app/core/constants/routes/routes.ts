@@ -22,7 +22,9 @@ export enum PUBLIC_ROUTES {
     AUTH = 'auth',
     CART = 'cart',
     QUOTE_INFO = 'quote-info',
-    SERVICES = 'services'
+    SERVICES = 'services',
+    TRACKING = 'track/:token',
+    TRACKING_SEARCH = 'track'
 }
 
 export enum PUBLIC_BASE_ROUTES {

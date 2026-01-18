@@ -109,7 +109,7 @@ import { SeoService } from '@/core/services/seo.service';
 
                     <div class="w-full p-4 bg-surface-50 dark:bg-surface-800 rounded-lg mb-6">
                         <p class="text-sm text-surface-500 mb-1">Track your quote status:</p>
-                        <a href="#" class="text-primary font-medium hover:underline break-all">https://imagocreations.com/track/Q-{{ generatedQuoteId }}</a>
+                        <a [routerLink]="['/track', quoteResponse?.publicToken]" class="text-primary font-medium hover:underline break-all" target="_blank"> https://imagocreations.com/track/{{ quoteResponse?.publicToken }} </a>
                     </div>
 
                     <div class="flex flex-col gap-3 w-full">

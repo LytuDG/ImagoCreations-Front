@@ -40,6 +40,7 @@ export interface QuoteResponse {
     createdAt: string;
     customerEmail: string;
     customerCompany: string;
+    publicToken: string;
 }
 
 // Para filtrar cotizaciones

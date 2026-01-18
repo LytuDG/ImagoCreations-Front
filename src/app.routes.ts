@@ -34,6 +34,10 @@ export const appRoutes: Routes = [
         path: PUBLIC_ROUTES.SERVICES,
         loadComponent: () => import('./app/pages/services/services').then((m) => m.ServicesComponent)
     },
+    {
+        path: PUBLIC_ROUTES.TRACKING,
+        loadComponent: () => import('./app/pages/tracking/tracking').then((m) => m.Tracking)
+    },
     { path: PUBLIC_ROUTES.NOTFOUND, component: Notfound },
     { path: '**', redirectTo: PUBLIC_ROUTES.NOTFOUND }
 ];

@@ -2,7 +2,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
-import { CREATE_QUOTE_ENDPOINT, QUOTE_BY_ID_ENDPOINT, FILTER_QUOTE_ENDPOINT, QUOTE_ENDPOINT, UPLOAD_FILE_ENDPOINT } from '../constants/endpoints/quote/quote';
+import { CREATE_QUOTE_ENDPOINT, QUOTE_BY_ID_ENDPOINT, FILTER_QUOTE_ENDPOINT, QUOTE_ENDPOINT, UPLOAD_FILE_ENDPOINT, QUOTE_BY_TOKEN_ENDPOINT } from '../constants/endpoints/quote/quote';
 import { Quote, QuoteResponse, QuoteFilter, QuoteItem } from '../models/quote/quote';
 import { CartItem, CustomerInfo } from './cart.service';
 import { environment } from '../../../environments/environment';
@@ -39,6 +39,13 @@ export class QuoteService {
      */
     getQuoteById(id: string): Observable<Quote> {
         return this.http.get<Quote>(QUOTE_BY_ID_ENDPOINT(id));
+    }
+
+    /**
+     * Obtener una cotización por Token Público
+     */
+    getQuoteByToken(token: string): Observable<Quote> {
+        return this.http.get<Quote>(QUOTE_BY_TOKEN_ENDPOINT(token));
     }
 
     /**
