@@ -75,8 +75,8 @@ import { QuoteResponse, QuoteStatusEnum } from '@/core/models/quote/quote';
                                                             <p class="text-sm text-surface-500 mb-2">{{ item.productDescription }}</p>
                                                         </div>
                                                         <div class="text-right">
-                                                            <div class="font-bold text-lg text-surface-900 dark:text-surface-0" *ngIf="item.totalPrice">\${{ item.totalPrice | number: '1.2-2' }}</div>
-                                                            <div class="text-sm text-surface-500" *ngIf="item.unitPrice">\${{ item.unitPrice | number: '1.2-2' }} / unit</div>
+                                                            <div class="font-bold text-lg text-surface-900 dark:text-surface-0" *ngIf="showPrices()">\${{ item.totalPrice | number: '1.2-2' }}</div>
+                                                            <div class="text-sm text-surface-500" *ngIf="showPrices()">\${{ item.unitPrice | number: '1.2-2' }} / unit</div>
                                                         </div>
                                                     </div>
 
@@ -91,7 +91,7 @@ import { QuoteResponse, QuoteStatusEnum } from '@/core/models/quote/quote';
                                             </div>
                                         </div>
 
-                                        <div class="flex justify-between items-center mt-6 pt-6 border-t border-surface-100 dark:border-surface-800">
+                                        <div class="flex justify-between items-center mt-6 pt-6 border-t border-surface-100 dark:border-surface-800" *ngIf="showPrices()">
                                             <span class="font-bold text-lg text-surface-900 dark:text-surface-0">Total Amount</span>
                                             <span class="font-bold text-2xl text-primary">\${{ quote.totalAmount || 0 | number: '1.2-2' }}</span>
                                         </div>
@@ -368,5 +368,11 @@ export class Tracking implements OnInit {
 
     isCurrentStatus(stepStatus: string): boolean {
         return this.quote?.status === stepStatus;
+    }
+
+    showPrices(): boolean {
+        if (!this.quote?.status) return false;
+        const visibleStatuses = [QuoteStatusEnum.SENT, QuoteStatusEnum.APPROVED, QuoteStatusEnum.TO_PAY, QuoteStatusEnum.PAID, QuoteStatusEnum.CONVERTED_TO_ORDER];
+        return visibleStatuses.includes(this.quote.status as QuoteStatusEnum);
     }
 }

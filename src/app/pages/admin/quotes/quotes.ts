@@ -66,7 +66,6 @@ import { Router } from '@angular/router';
                         <ng-template pTemplate="body" let-quote>
                             <tr>
                                 <td>
-                                    <span class="p-column-title">Quote ID</span>
                                     <span class="font-medium text-primary cursor-pointer hover:underline" (click)="viewQuote(quote)">
                                         {{ quote.quoteNumber || quote.id.substring(0, 8) }}
                                     </span>

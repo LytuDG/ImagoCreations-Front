@@ -73,6 +73,20 @@ export class QuoteService {
     }
 
     /**
+     * Actualiza cotización (Precio de items y estado)
+     */
+    updateQuote(quoteId: string, items: any[], newStatus?: string): Observable<Quote> {
+        const payload = {
+            status: newStatus,
+            items: items.map((item) => ({
+                id: item.id,
+                unitPrice: Number(item.unitPrice)
+            }))
+        };
+        return this.http.patch<Quote>(QUOTE_BY_ID_ENDPOINT(quoteId), payload);
+    }
+
+    /**
      * Eliminar una cotización
      */
     deleteQuote(id: string): Observable<void> {

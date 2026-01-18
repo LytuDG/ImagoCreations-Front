@@ -13,11 +13,12 @@ import { MessageService } from 'primeng/api';
 import { ToastModule } from 'primeng/toast';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { DialogModule } from 'primeng/dialog';
+import { InputNumberModule } from 'primeng/inputnumber';
 
 @Component({
     selector: 'app-quote-detail',
     standalone: true,
-    imports: [CommonModule, ButtonModule, TagModule, CardModule, TableModule, SelectModule, FormsModule, ToastModule, ProgressSpinnerModule, DialogModule],
+    imports: [CommonModule, ButtonModule, TagModule, CardModule, TableModule, SelectModule, FormsModule, ToastModule, ProgressSpinnerModule, DialogModule, InputNumberModule],
     providers: [MessageService],
     template: `
         <div class="card p-6">
@@ -33,10 +34,13 @@ import { DialogModule } from 'primeng/dialog';
                     <div>
                         <button pButton icon="pi pi-arrow-left" label="Back to Quotes" class="p-button-text p-button-secondary pl-0 mb-2" (click)="goBack()"></button>
                         <h1 class="text-3xl font-bold m-0 text-surface-900 dark:text-surface-0">Quote Details</h1>
-                        <div class="text-surface-500 mt-1 flex gap-3 items-center">
+                        <div class="text-surface-500 mt-1 flex gap-3 items-center flex-wrap">
                             <span>ID: {{ quote.id }}</span>
                             <span>|</span>
                             <span>{{ quote.createdAt | date: 'medium' }}</span>
+                        </div>
+                        <div class="mt-2" *ngIf="quote.publicToken">
+                            <button pButton icon="pi pi-external-link" label="View Public Tracking" class="p-button-outlined p-button-sm text-sm py-1" (click)="viewPublicTracking()"></button>
                         </div>
                     </div>
 
@@ -45,7 +49,7 @@ import { DialogModule } from 'primeng/dialog';
 
                         <div class="flex items-center gap-2 mt-2">
                             <p-select [options]="statusOptions" [(ngModel)]="selectedStatus" placeholder="Change Status" optionLabel="label" optionValue="value" [style]="{ 'min-width': '200px' }"> </p-select>
-                            <button pButton icon="pi pi-check" label="Update" (click)="updateStatus()" [loading]="updatingStatus" [disabled]="!selectedStatus || selectedStatus === quote.status"></button>
+                            <button pButton icon="pi pi-save" label="Save & Update" (click)="saveQuote()" [loading]="updatingStatus" [disabled]="!selectedStatus"></button>
                         </div>
                     </div>
                 </div>
@@ -89,8 +93,8 @@ import { DialogModule } from 'primeng/dialog';
                                             </div>
                                             <span *ngIf="!item.quoteItemAttributeValue?.length" class="text-surface-400 italic text-sm">No options</span>
                                         </td>
-                                        <td class="text-right font-medium">
-                                            {{ item.unitPrice | currency: 'USD' }}
+                                        <td class="text-right font-medium" style="min-width: 150px;">
+                                            <p-inputNumber [(ngModel)]="item.unitPrice" mode="currency" currency="USD" locale="en-US" [minFractionDigits]="2" styleClass="w-full" inputStyleClass="text-right p-inputtext-sm w-full"></p-inputNumber>
                                         </td>
                                         <td class="text-center">{{ item.quantity }}</td>
                                         <td class="text-right font-bold">
@@ -208,19 +212,28 @@ export class QuoteDetail implements OnInit {
         return this.quote.quoteItems.reduce((acc, item) => acc + item.unitPrice * item.quantity, 0);
     }
 
-    updateStatus() {
+    saveQuote() {
         if (!this.quote || !this.selectedStatus) return;
 
         this.updatingStatus = true;
-        this.quoteService.updateQuoteStatus(this.quote.id, this.selectedStatus).subscribe({
-            next: (updatedQuote) => {
-                this.quote!.status = this.selectedStatus!;
-                this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Quote status updated' });
+
+        // Prepare payload with items and status
+        const itemsPayload = this.quote.quoteItems.map((item) => ({
+            id: item.id,
+            unitPrice: item.unitPrice
+        }));
+
+        this.quoteService.updateQuote(this.quote.id, itemsPayload, this.selectedStatus).subscribe({
+            next: (updatedQuote: any) => {
+                // Type assertion or proper type
+                this.quote = updatedQuote; // Backend returns full updated quote
+                this.selectedStatus = this.quote!.status;
+                this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Quote updated successfully' });
                 this.updatingStatus = false;
             },
             error: (err) => {
-                console.error('Error updating status', err);
-                this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to update status' });
+                console.error('Error updating quote', err);
+                this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to update quote' });
                 this.updatingStatus = false;
             }
         });
@@ -228,6 +241,12 @@ export class QuoteDetail implements OnInit {
 
     goBack() {
         this.router.navigate(['/admin/quotes']);
+    }
+
+    viewPublicTracking() {
+        if (!this.quote?.publicToken) return;
+        const url = this.router.serializeUrl(this.router.createUrlTree(['/track', this.quote.publicToken]));
+        window.open(url, '_blank');
     }
 
     getSeverity(status: string): 'success' | 'info' | 'warn' | 'danger' | 'secondary' | 'contrast' | undefined {
