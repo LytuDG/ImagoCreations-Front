@@ -39,6 +39,11 @@ import { AuthService } from '@/core/services/auth.service';
                         <span>Services</span>
                     </a>
                 </li>
+                <li>
+                    <a (click)="router.navigate(['/track'])" pRipple class="px-0 py-4 text-surface-900 dark:text-surface-0 font-medium text-xl">
+                        <span>Track Order</span>
+                    </a>
+                </li>
             </ul>
             <div class="flex border-t lg:border-t-0 border-surface py-4 lg:py-0 mt-4 lg:mt-0 gap-2">
                 <p-overlaybadge [value]="cart.totalItems()">
