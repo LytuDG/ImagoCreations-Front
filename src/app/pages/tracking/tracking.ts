@@ -17,10 +17,14 @@ import { FooterWidget } from '../landing/components/footerwidget';
 import { TimelineModule } from 'primeng/timeline';
 import { QuoteResponse, QuoteStatusEnum } from '@/core/models/quote/quote';
 
+import { DialogModule } from 'primeng/dialog';
+import { Textarea } from 'primeng/textarea';
+import { FormsModule } from '@angular/forms';
+
 @Component({
     selector: 'app-tracking',
     standalone: true,
-    imports: [CommonModule, RouterModule, TagModule, ProgressSpinnerModule, CardModule, ButtonModule, TimelineModule, TopbarWidget, FooterWidget, ConfirmDialogModule, ToastModule],
+    imports: [CommonModule, RouterModule, TagModule, ProgressSpinnerModule, CardModule, ButtonModule, TimelineModule, TopbarWidget, FooterWidget, Textarea, ConfirmDialogModule, ToastModule, DialogModule, FormsModule],
     providers: [ConfirmationService, MessageService],
     template: `
         <div class="bg-surface-0 dark:bg-surface-900 min-h-screen">
@@ -194,6 +198,17 @@ import { QuoteResponse, QuoteStatusEnum } from '@/core/models/quote/quote';
             </div>
             <p-toast></p-toast>
             <p-confirmDialog header="Confirmation" icon="pi pi-exclamation-triangle"></p-confirmDialog>
+
+            <p-dialog header="Reason for Update" [(visible)]="showReasonDialog" [modal]="true" [style]="{ width: '90vw', maxWidth: '500px' }">
+                <div class="flex flex-col gap-2">
+                    <label for="reason" class="font-medium text-surface-700 dark:text-surface-200">Please let us know why (Optional)</label>
+                    <textarea id="reason" pInputTextarea [(ngModel)]="statusReason" rows="4" class="w-full" placeholder="Enter your comments here..."></textarea>
+                </div>
+                <ng-template pTemplate="footer">
+                    <button pButton label="Cancel" icon="pi pi-times" class="p-button-text" (click)="showReasonDialog = false"></button>
+                    <button pButton label="Submit" icon="pi pi-check" (click)="submitReason()"></button>
+                </ng-template>
+            </p-dialog>
         </div>
     `
 })
@@ -208,6 +223,11 @@ export class Tracking implements OnInit {
     error = false;
     quote: QuoteResponse | null = null;
     quoteItemsFormatted: any[] = [];
+
+    // Dialog state
+    showReasonDialog = false;
+    statusReason = '';
+    pendingAction: 'reject' | 'changes' | null = null;
 
     // Define timeline events explicitly
     events = [
@@ -281,25 +301,31 @@ export class Tracking implements OnInit {
     }
 
     confirmAction(action: 'approve' | 'reject' | 'changes') {
-        const title = action === 'approve' ? 'Approve Quote' : action === 'reject' ? 'Reject Quote' : 'Request Changes';
-        const message =
-            action === 'approve'
-                ? 'Are you sure you want to approve this quote? This will proceed to the next step.'
-                : action === 'reject'
-                  ? 'Are you sure you want to reject this quote?'
-                  : 'Would you like to request changes? Our team will contact you.';
-
-        this.confirmationService.confirm({
-            message: message,
-            header: title,
-            icon: 'pi pi-exclamation-triangle',
-            accept: () => {
-                this.executeStatusChange(action);
-            }
-        });
+        if (action === 'approve') {
+            this.confirmationService.confirm({
+                message: 'Are you sure you want to approve this quote? This will proceed to the next step.',
+                header: 'Approve Quote',
+                icon: 'pi pi-check-circle',
+                accept: () => {
+                    this.executeStatusChange('approve', '');
+                }
+            });
+        } else {
+            // For reject or changes, open dialog
+            this.pendingAction = action;
+            this.statusReason = '';
+            this.showReasonDialog = true;
+        }
     }
 
-    executeStatusChange(action: 'approve' | 'reject' | 'changes') {
+    submitReason() {
+        if (this.pendingAction) {
+            this.executeStatusChange(this.pendingAction, this.statusReason);
+            this.showReasonDialog = false;
+        }
+    }
+
+    executeStatusChange(action: 'approve' | 'reject' | 'changes', notes: string) {
         if (!this.quote) return;
 
         let newStatus: QuoteStatusEnum;
@@ -315,11 +341,14 @@ export class Tracking implements OnInit {
                 break;
         }
 
-        this.quoteService.updatePublicQuoteStatus(this.quote.publicToken, newStatus).subscribe({
+        this.quoteService.updatePublicQuoteStatus(this.quote.publicToken, newStatus, notes).subscribe({
             next: () => {
                 this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Quote status updated successfully' });
                 // Optimistic update or reload
-                if (this.quote) this.quote.status = newStatus;
+                if (this.quote) {
+                    this.quote.status = newStatus;
+                    if (notes) this.quote.notes = notes; // Update notes locally for visibility
+                }
             },
             error: (err) => {
                 this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Could not update status' });

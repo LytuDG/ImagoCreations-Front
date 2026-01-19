@@ -51,8 +51,8 @@ export class QuoteService {
     /**
      * Actualizar estado de cotización pública
      */
-    updatePublicQuoteStatus(token: string, status: string): Observable<any> {
-        return this.http.patch(QUOTE_PUBLIC_STATUS_ENDPOINT(token), { status });
+    updatePublicQuoteStatus(token: string, status: string, notes?: string): Observable<any> {
+        return this.http.patch(QUOTE_PUBLIC_STATUS_ENDPOINT(token), { status, notes });
     }
 
     /**
@@ -75,9 +75,10 @@ export class QuoteService {
     /**
      * Actualiza cotización (Precio de items y estado)
      */
-    updateQuote(quoteId: string, items: any[], newStatus?: string): Observable<Quote> {
+    updateQuote(quoteId: string, items: any[], newStatus?: string, notes?: string): Observable<Quote> {
         const payload = {
             status: newStatus,
+            notes,
             items: items.map((item) => ({
                 id: item.id,
                 unitPrice: Number(item.unitPrice)

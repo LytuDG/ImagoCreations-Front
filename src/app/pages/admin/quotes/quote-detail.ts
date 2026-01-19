@@ -15,10 +15,12 @@ import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { DialogModule } from 'primeng/dialog';
 import { InputNumberModule } from 'primeng/inputnumber';
 
+import { Textarea } from 'primeng/textarea';
+
 @Component({
     selector: 'app-quote-detail',
     standalone: true,
-    imports: [CommonModule, ButtonModule, TagModule, CardModule, TableModule, SelectModule, FormsModule, ToastModule, ProgressSpinnerModule, DialogModule, InputNumberModule],
+    imports: [CommonModule, ButtonModule, TagModule, CardModule, TableModule, SelectModule, FormsModule, ToastModule, ProgressSpinnerModule, DialogModule, InputNumberModule, Textarea],
     providers: [MessageService],
     template: `
         <div class="card p-6">
@@ -47,8 +49,14 @@ import { InputNumberModule } from 'primeng/inputnumber';
                     <div class="flex flex-col items-end gap-2">
                         <p-tag [value]="quote.status" [severity]="getSeverity(quote.status)" class="text-lg px-3 py-1"></p-tag>
 
-                        <div class="flex items-center gap-2 mt-2">
+                        <div class="flex flex-col gap-2 mt-2 items-end">
                             <p-select [options]="statusOptions" [(ngModel)]="selectedStatus" placeholder="Change Status" optionLabel="label" optionValue="value" [style]="{ 'min-width': '200px' }"> </p-select>
+
+                            <!-- Admin Notes Quick Input -->
+                            <div class="w-full max-w-xs">
+                                <textarea pInputTextarea [(ngModel)]="adminNotes" rows="2" class="w-full text-sm" placeholder="Add update notes (optional)..."></textarea>
+                            </div>
+
                             <button pButton icon="pi pi-save" label="Save & Update" (click)="saveQuote()" [loading]="updatingStatus" [disabled]="!selectedStatus"></button>
                         </div>
                     </div>
@@ -112,7 +120,7 @@ import { InputNumberModule } from 'primeng/inputnumber';
                         </div>
 
                         <div *ngIf="quote.notes" class="surface-card p-4 rounded-xl shadow-sm border border-surface-200 dark:border-surface-700">
-                            <h3 class="text-lg font-bold mb-2">Customer Notes</h3>
+                            <h3 class="text-lg font-bold mb-2">Quote Notes</h3>
                             <p class="text-surface-600 dark:text-surface-300 bg-surface-50 dark:bg-surface-800 p-3 rounded">{{ quote.notes }}</p>
                         </div>
                     </div>
@@ -169,6 +177,8 @@ export class QuoteDetail implements OnInit {
     updatingStatus = false;
 
     selectedStatus: string | null = null;
+    adminNotes: string = '';
+
     statusOptions = [
         { label: 'Draft', value: QuoteStatusEnum.DRAFT },
         { label: 'Sent', value: QuoteStatusEnum.SENT },
@@ -223,11 +233,12 @@ export class QuoteDetail implements OnInit {
             unitPrice: item.unitPrice
         }));
 
-        this.quoteService.updateQuote(this.quote.id, itemsPayload, this.selectedStatus).subscribe({
+        this.quoteService.updateQuote(this.quote.id, itemsPayload, this.selectedStatus, this.adminNotes).subscribe({
             next: (updatedQuote: any) => {
                 // Type assertion or proper type
                 this.quote = updatedQuote; // Backend returns full updated quote
                 this.selectedStatus = this.quote!.status;
+                this.adminNotes = ''; // Clear notes after successful update? Or keep? Usually clear if it's "send message" style.
                 this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Quote updated successfully' });
                 this.updatingStatus = false;
             },
