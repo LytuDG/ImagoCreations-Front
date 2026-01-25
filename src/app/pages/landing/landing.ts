@@ -13,11 +13,14 @@ import { ShopWidget } from './components/shop-widgets';
 
 import { SeoService } from '@/core/services/seo.service';
 import { inject, OnInit } from '@angular/core';
+import { HighlightsWidget } from "./components/highlightswidget";
+import { PricingWidget } from "./components/pricingwidget";
+import { FeaturesWidget } from "./components/featureswidget";
 
 @Component({
     selector: 'app-landing',
     standalone: true,
-    imports: [RouterModule, TopbarWidget, HeroWidget, FooterWidget, RippleModule, StyleClassModule, ButtonModule, DividerModule, ShopWidget, ToastModule],
+    imports: [RouterModule, TopbarWidget, HeroWidget, FooterWidget, RippleModule, StyleClassModule, ButtonModule, DividerModule, ShopWidget, ToastModule, HighlightsWidget, PricingWidget, FeaturesWidget],
     providers: [MessageService],
     template: `
         <div class="bg-surface-0 dark:bg-surface-900">

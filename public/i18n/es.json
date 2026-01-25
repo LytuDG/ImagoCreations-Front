@@ -1,0 +1,106 @@
+{
+  "landing": {
+    "header": {
+      "nav": {
+        "home": "Inicio",
+        "shop": "Tienda",
+        "services": "Servicios",
+        "trackOrder": "Seguir Pedido"
+      },
+      "buttons": {
+        "login": "Iniciar Sesión",
+        "cart": "Carrito de Compras"
+      }
+    },
+
+    "hero": {
+      "tagline": "Branding Corporativo Premium",
+      "title": {
+        "part1": "Eleva tu Marca con",
+        "part2": "Ropa Personalizada"
+      },
+      "description": "Nos especializamos en personalización B2B de alta calidad para uniformes, mercancía y regalos corporativos. Transforma tu identidad corporativa en calidad tangible.",
+      "buttons": {
+        "catalog": "Explorar Catálogo",
+        "whyChoose": "Por Qué Elegirnos"
+      },
+      "features": {
+        "quality": "Calidad Premium",
+        "bulk": "Pedidos al por Mayor",
+        "fast": "Entrega Rápida"
+      },
+      "imageAlt": "Personalización Corporativa",
+      "badge": {
+        "subtitle": "Confiado por",
+        "title": "500+ Empresas"
+      }
+    },
+
+    "shop": {
+      "title": "Colección Corporativa",
+      "subtitle": "Ropa refinada para tu marca.",
+      "search": {
+        "placeholder": "Buscar en la colección..."
+      },
+      "filters": {
+        "title": "Filtros",
+        "clearAll": "Limpiar todo",
+        "priceRange": "Rango de Precio",
+        "attributes": "Atributos",
+        "availability": "Disponibilidad",
+        "inStock": "En Stock",
+        "preOrder": "Pre-pedido"
+      },
+      "sort": {
+        "by": "Ordenar por:",
+        "placeholder": "Destacados",
+        "nameAsc": "Nombre (A-Z)",
+        "nameDesc": "Nombre (Z-A)",
+        "priceLowHigh": "Precio (Bajo a Alto)",
+        "priceHighLow": "Precio (Alto a Bajo)",
+        "newest": "Más Nuevo",
+        "oldest": "Más Antiguo"
+      },
+      "activeFilters": {
+        "search": "Búsqueda: ",
+        "inStock": "Solo en Stock"
+      },
+      "product": {
+        "soldOut": "Agotado",
+        "defaultDescription": "Artículo corporativo de calidad premium",
+        "addToCart": "Añadir al Carrito"
+      },
+      "empty": {
+        "message": "No hay productos que coincidan con tu refinamiento.",
+        "clearFilters": "Limpiar Filtros"
+      },
+      "dialog": {
+        "title": "Seleccionar Opciones",
+        "selected": "Seleccionado",
+        "selectPlaceholder": "Seleccionar una opción...",
+        "noOptions": "No hay opciones adicionales disponibles para este producto.",
+        "quantity": "Cantidad",
+        "addVariant": "Añadir Variante",
+        "selectedVariants": "Variantes Seleccionadas para el Carrito",
+        "noOptionsSelected": "Sin opciones seleccionadas",
+        "basePrice": "Precio Base",
+        "total": "Total",
+        "itemsPending": "artículos pendientes",
+        "cancel": "Cancelar",
+        "addAllToCart": "Añadir Todo al Carrito"
+      }
+    },
+    "footer": {
+      "logoAlt": "logo imago",
+      "links": {
+        "about": "Acerca de",
+        "contact": "Contacto",
+        "privacy": "Política de Privacidad",
+        "terms": "Términos de Servicio"
+      },
+      "copyright": "© {{year}} ImagoCreations. Todos los derechos reservados."
+    }
+
+  }
+
+}

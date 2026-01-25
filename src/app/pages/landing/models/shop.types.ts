@@ -1,5 +1,6 @@
 export interface SortOption {
-    label: string;
+    key: string;
+    label?: string;
     value: string[];
 }
 

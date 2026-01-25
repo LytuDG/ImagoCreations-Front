@@ -1,0 +1,104 @@
+{
+  "landing": {
+    "header": {
+      "nav": {
+        "home": "Home",
+        "shop": "Shop",
+        "services": "Services",
+        "trackOrder": "Track Order"
+      },
+      "buttons": {
+        "login": "Login",
+        "cart": "Shopping Cart"
+      }
+    },
+
+    "hero": {
+      "tagline": "Premium Corporate Branding",
+      "title": {
+        "part1": "Elevate Your Brand with",
+        "part2": "Custom Apparel"
+      },
+      "description": "We specialize in high-quality B2B customization for uniforms, merchandise, and corporate gifts. Transform your corporate identity into tangible quality.",
+      "buttons": {
+        "catalog": "Explore Catalog",
+        "whyChoose": "Why Choose Us"
+      },
+      "features": {
+        "quality": "Premium Quality",
+        "bulk": "Bulk Orders",
+        "fast": "Fast Turnaround"
+      },
+      "imageAlt": "Corporate Customization",
+      "badge": {
+        "subtitle": "Trusted by",
+        "title": "500+ Companies"
+      }
+    },
+
+    "shop": {
+      "title": "Corporate Collection",
+      "subtitle": "Refined apparel for your brand.",
+      "search": {
+        "placeholder": "Search collection..."
+      },
+      "filters": {
+        "title": "Filters",
+        "clearAll": "Clear all",
+        "priceRange": "Price Range",
+        "attributes": "Attributes",
+        "availability": "Availability",
+        "inStock": "In Stock",
+        "preOrder": "Pre-order"
+      },
+      "sort": {
+        "by": "Sort by:",
+        "placeholder": "Featured",
+        "nameAsc": "Name (A-Z)",
+        "nameDesc": "Name (Z-A)",
+        "priceLowHigh": "Price (Low to High)",
+        "priceHighLow": "Price (High to Low)",
+        "newest": "Newest",
+        "oldest": "Oldest"
+      },
+      "activeFilters": {
+        "search": "Search: ",
+        "inStock": "In Stock Only"
+      },
+      "product": {
+        "soldOut": "Sold Out",
+        "defaultDescription": "Premium quality corporate item",
+        "addToCart": "Add to Cart"
+      },
+      "empty": {
+        "message": "No products match your refinement.",
+        "clearFilters": "Clear Filters"
+      },
+      "dialog": {
+        "title": "Select Options",
+        "selected": "Selected",
+        "selectPlaceholder": "Select an option...",
+        "noOptions": "No additional options available for this product.",
+        "quantity": "Quantity",
+        "addVariant": "Add Variant",
+        "selectedVariants": "Selected Variants for Cart",
+        "noOptionsSelected": "No options selected",
+        "basePrice": "Base Price",
+        "total": "Total",
+        "itemsPending": "items pending",
+        "cancel": "Cancel",
+        "addAllToCart": "Add All to Cart"
+      }
+    },
+    "footer": {
+      "logoAlt": "imago logo",
+      "links": {
+        "about": "About",
+        "contact": "Contact",
+        "privacy": "Privacy Policy",
+        "terms": "Terms of Service"
+      },
+      "copyright": "© {{year}} ImagoCreations. All rights reserved."
+    }
+  }
+}

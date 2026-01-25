@@ -22,6 +22,7 @@ import { RadioButtonModule } from 'primeng/radiobutton';
 import { ShopService } from '../services/shop.service';
 import { AttributeGroup, ProductAttributeGroup, SortOption, ShopFilterState } from '../models/shop.types';
 import { ProductAttributeValue } from '@/pages/admin/products/models/product-atribute-value';
+import { TranslocoModule, TranslocoService } from '@ngneat/transloco';
 
 @Component({
     selector: 'shop-widget',
@@ -43,451 +44,417 @@ import { ProductAttributeValue } from '@/pages/admin/products/models/product-atr
         ChipModule,
         BadgeModule,
         DialogModule,
-        RadioButtonModule
+        RadioButtonModule,
+        TranslocoModule,
     ],
     template: `
-        <div id="shop" class="py-16 bg-surface-50 dark:bg-surface-950">
-            <div class="w-full max-w-[1920px] mx-auto px-4 md:px-8 lg:px-12">
-                <!-- Main Layout -->
-                <div class="flex flex-col lg:flex-row gap-12">
-                    <!-- Sidebar Filters (Left) -->
-                    <div class="w-full lg:w-1/4 xl:w-1/5 flex-shrink-0 space-y-8">
-                        <!-- Search (Mobile/Sidebar) -->
-                        <div class="relative">
-                            <input
-                                type="text"
-                                pInputText
-                                [(ngModel)]="searchTerm"
-                                (ngModelChange)="onSearchChange()"
-                                placeholder="Search collection..."
-                                class="w-full pl-10 !rounded-full !bg-white dark:!bg-surface-900 !border-surface-200 dark:!border-surface-700 shadow-sm"
-                            />
-                        </div>
+  <div id="shop" class="py-16 bg-surface-50 dark:bg-surface-950">
+      <div class="w-full max-w-[1920px] mx-auto px-4 md:px-8 lg:px-12">
+          <div class="flex flex-col lg:flex-row gap-12">
+              <div class="w-full lg:w-1/4 xl:w-1/5 flex-shrink-0 space-y-8">
+                  <div class="relative">
+                      <input
+                          type="text"
+                          pInputText
+                          [(ngModel)]="searchTerm"
+                          (ngModelChange)="onSearchChange()"
+                          [placeholder]="'landing.shop.search.placeholder' | transloco"
+                          class="w-full pl-10 !rounded-full !bg-white dark:!bg-surface-900 !border-surface-200 dark:!border-surface-700 shadow-sm"
+                      />
+                  </div>
 
-                        <div class="bg-white dark:bg-surface-900 rounded-3xl p-6 shadow-sm border border-surface-100 dark:border-surface-800">
-                            <div class="flex justify-between items-center mb-6">
-                                <h3 class="text-xl font-serif font-medium text-surface-900 dark:text-surface-0">Filters</h3>
-                                @if (hasActiveFilters()) {
-                                    <button class="text-sm text-primary-600 hover:text-primary-700 font-medium" (click)="clearAllFilters()">Clear all</button>
-                                }
-                            </div>
+                  <div class="bg-white dark:bg-surface-900 rounded-3xl p-6 shadow-sm border border-surface-100 dark:border-surface-800">
+                      <div class="flex justify-between items-center mb-6">
+                          <h3 class="text-xl font-serif font-medium text-surface-900 dark:text-surface-0">{{ 'landing.shop.filters.title' | transloco }}</h3>
+                          @if (hasActiveFilters()) {
+                              <button class="text-sm text-primary-600 hover:text-primary-700 font-medium" (click)="clearAllFilters()">{{ 'landing.shop.filters.clearAll' | transloco }}</button>
+                          }
+                      </div>
 
-                            <!-- Price Range (Client Side) - Hidden for Quote Mode -->
-                            <div class="mb-8 hidden">
-                                <h4 class="text-sm font-bold text-surface-900 dark:text-surface-0 uppercase tracking-wider mb-4">Price Range</h4>
-                                <p-slider [(ngModel)]="priceRange" [range]="true" [min]="0" [max]="1000" (onChange)="onPriceChange()" styleClass="w-full mb-4"></p-slider>
-                                <div class="flex justify-between text-sm text-surface-600 dark:text-surface-400">
-                                    <span>\${{ priceRange[0] }}</span>
-                                    <span>\${{ priceRange[1] }}</span>
-                                </div>
-                            </div>
+                      <div class="mb-8 hidden">
+                          <h4 class="text-sm font-bold text-surface-900 dark:text-surface-0 uppercase tracking-wider mb-4">{{ 'landing.shop.filters.priceRange' | transloco }}</h4>
+                          <p-slider [(ngModel)]="priceRange" [range]="true" [min]="0" [max]="1000" (onChange)="onPriceChange()" styleClass="w-full mb-4"></p-slider>
+                          <div class="flex justify-between text-sm text-surface-600 dark:text-surface-400">
+                              <span>\${{ priceRange[0] }}</span>
+                              <span>\${{ priceRange[1] }}</span>
+                          </div>
+                      </div>
 
-                            <p-divider styleClass="my-6"></p-divider>
+                      <p-divider styleClass="my-6"></p-divider>
 
-                            <!-- Attributes Filters -->
-                            @if (attributeGroups.length > 0) {
-                                <div class="space-y-6">
-                                    <h4 class="text-sm font-bold text-surface-900 dark:text-surface-0 uppercase tracking-wider mb-2">Attributes</h4>
+                      @if (attributeGroups.length > 0) {
+                          <div class="space-y-6">
+                              <h4 class="text-sm font-bold text-surface-900 dark:text-surface-0 uppercase tracking-wider mb-2">{{ 'landing.shop.filters.attributes' | transloco }}</h4>
 
-                                    @for (group of attributeGroups; track group.id) {
-                                        <div class="space-y-3">
-                                            <div class="flex items-center justify-between">
-                                                <h5 class="text-sm font-semibold text-surface-700 dark:text-surface-300">{{ group.name }}</h5>
-                                                <span class="text-xs text-surface-500"> {{ getSelectedAttributeValues(group.id).length }}/{{ group.values.length }} </span>
-                                            </div>
+                              @for (group of attributeGroups; track group.id) {
+                                  <div class="space-y-3">
+                                      <div class="flex items-center justify-between">
+                                          <h5 class="text-sm font-semibold text-surface-700 dark:text-surface-300">{{ group.name }}</h5>
+                                          <span class="text-xs text-surface-500"> {{ getSelectedAttributeValues(group.id).length }}/{{ group.values.length }} </span>
+                                      </div>
 
-                                            <div class="flex flex-wrap gap-2">
-                                                @for (value of group.values; track value.id) {
-                                                    <button
-                                                        type="button"
-                                                        class="px-3 py-1.5 text-sm rounded-full border transition-all"
-                                                        [ngClass]="{
-                                                            'border-primary-500 bg-primary-50 text-primary-700': value.selected,
-                                                            'border-surface-200 dark:border-surface-700 hover:border-surface-300': !value.selected
-                                                        }"
-                                                        (click)="toggleAttributeValue(group.id, value.id)"
-                                                    >
-                                                        <div class="flex items-center gap-1.5">
-                                                            <span>{{ value.name }}</span>
-                                                            @if (false && value.priceModifier) {
-                                                                <span class="text-xs" [ngClass]="value.priceModifier > 0 ? 'text-green-600' : 'text-red-600'"> {{ value.priceModifier > 0 ? '+' : '' }}{{ value.priceModifier | currency: 'USD' }} </span>
-                                                            }
-                                                            <span class="text-xs text-surface-500">({{ value.count }})</span>
-                                                        </div>
-                                                    </button>
-                                                }
-                                            </div>
-                                        </div>
-                                    }
-                                </div>
-                            }
+                                      <div class="flex flex-wrap gap-2">
+                                          @for (value of group.values; track value.id) {
+                                              <button
+                                                  type="button"
+                                                  class="px-3 py-1.5 text-sm rounded-full border transition-all"
+                                                  [ngClass]="{
+                                                      'border-primary-500 bg-primary-50 text-primary-700': value.selected,
+                                                      'border-surface-200 dark:border-surface-700 hover:border-surface-300': !value.selected
+                                                  }"
+                                                  (click)="toggleAttributeValue(group.id, value.id)"
+                                              >
+                                                  <div class="flex items-center gap-1.5">
+                                                      <span>{{ value.name }}</span>
+                                                      @if (false && value.priceModifier) {
+                                                          <span class="text-xs" [ngClass]="value.priceModifier > 0 ? 'text-green-600' : 'text-red-600'"> {{ value.priceModifier > 0 ? '+' : '' }}{{ value.priceModifier | currency: 'USD' }} </span>
+                                                      }
+                                                      <span class="text-xs text-surface-500">({{ value.count }})</span>
+                                                  </div>
+                                              </button>
+                                          }
+                                      </div>
+                                  </div>
+                              }
+                          </div>
+                      }
 
-                            @if (attributeGroups.length > 0) {
-                                <p-divider styleClass="my-6"></p-divider>
-                            }
+                      @if (attributeGroups.length > 0) {
+                          <p-divider styleClass="my-6"></p-divider>
+                      }
 
-                            <!-- Availability (Mock) -->
-                            <div>
-                                <h4 class="text-sm font-bold text-surface-900 dark:text-surface-0 uppercase tracking-wider mb-4">Availability</h4>
-                                <div class="flex flex-col gap-3">
-                                    <div class="flex items-center gap-2">
-                                        <p-checkbox [binary]="true" inputId="stock-in" [(ngModel)]="inStockOnly" (onChange)="onFilterChange()"></p-checkbox>
-                                        <label for="stock-in" class="text-sm text-surface-700 dark:text-surface-300 cursor-pointer">In Stock</label>
-                                    </div>
-                                    <div class="flex items-center gap-2">
-                                        <p-checkbox [binary]="true" inputId="stock-pre" [disabled]="true"></p-checkbox>
-                                        <label for="stock-pre" class="text-sm text-surface-400 dark:text-surface-600 cursor-not-allowed">Pre-order</label>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                      <div>
+                          <h4 class="text-sm font-bold text-surface-900 dark:text-surface-0 uppercase tracking-wider mb-4">{{ 'landing.shop.filters.availability' | transloco }}</h4>
+                          <div class="flex flex-col gap-3">
+                              <div class="flex items-center gap-2">
+                                  <p-checkbox [binary]="true" inputId="stock-in" [(ngModel)]="inStockOnly" (onChange)="onFilterChange()"></p-checkbox>
+                                  <label for="stock-in" class="text-sm text-surface-700 dark:text-surface-300 cursor-pointer">{{ 'landing.shop.filters.inStock' | transloco }}</label>
+                              </div>
+                              <div class="flex items-center gap-2">
+                                  <p-checkbox [binary]="true" inputId="stock-pre" [disabled]="true"></p-checkbox>
+                                  <label for="stock-pre" class="text-sm text-surface-400 dark:text-surface-600 cursor-not-allowed">{{ 'landing.shop.filters.preOrder' | transloco }}</label>
+                              </div>
+                          </div>
+                      </div>
+                  </div>
+              </div>
 
-                    <!-- Product Grid (Right) -->
-                    <div class="flex-1">
-                        <!-- Top Bar -->
-                        <div class="flex flex-col sm:flex-row justify-between items-center mb-8 gap-4">
-                            <div>
-                                <h2 class="text-3xl font-serif text-surface-900 dark:text-surface-0">Corporate Collection</h2>
-                                <p class="text-surface-500 dark:text-surface-400 mt-1 text-sm">Refined apparel for your brand.</p>
-                            </div>
+              <div class="flex-1">
+                  <div class="flex flex-col sm:flex-row justify-between items-center mb-8 gap-4">
+                      <div>
+                          <h2 class="text-3xl font-serif text-surface-900 dark:text-surface-0">{{ 'landing.shop.title' | transloco }}</h2>
+                          <p class="text-surface-500 dark:text-surface-400 mt-1 text-sm">{{ 'landing.shop.subtitle' | transloco }}</p>
+                      </div>
 
-                            <div class="flex items-center gap-3">
-                                <span class="text-sm text-surface-500 hidden sm:block">Sort by:</span>
-                                <p-select
-                                    [options]="sortOptions"
-                                    [(ngModel)]="selectedSort"
-                                    (ngModelChange)="onFilterChange()"
-                                    optionLabel="label"
-                                    placeholder="Featured"
-                                    styleClass="!border-none !bg-transparent !text-surface-900 dark:!text-surface-0 font-medium"
-                                />
-                            </div>
-                        </div>
+                      <div class="flex items-center gap-3">
+                          <span class="text-sm text-surface-500 hidden sm:block">{{ 'landing.shop.sort.by' | transloco }}</span>
+                          <p-select
+                              [options]="translatedSortOptions"
+                              [(ngModel)]="selectedSort"
+                              (ngModelChange)="onFilterChange()"
+                              optionLabel="label"
+                              [placeholder]="'landing.shop.sort.placeholder' | transloco"
+                              class="!border-none !bg-transparent !text-surface-900 dark:!text-surface-0 font-medium"
+                          ></p-select>
+                      </div>
+                  </div>
 
-                        <!-- Active Filters -->
-                        @if (hasActiveFilters()) {
-                            <div class="flex flex-wrap gap-2 mb-6">
-                                @if (searchTerm) {
-                                    <p-tag [value]="'Search: ' + searchTerm" severity="secondary" [rounded]="true" (click)="clearSearch()" styleClass="cursor-pointer px-3 !bg-surface-200 !text-surface-700">
-                                        <i class="pi pi-times ml-2 text-xs"></i>
-                                    </p-tag>
-                                }
+                  @if (hasActiveFilters()) {
+                      <div class="flex flex-wrap gap-2 mb-6">
+                          @if (searchTerm) {
+                            <p-tag value="{{ ('landing.shop.activeFilters.search' | transloco) + searchTerm }}"
+                                  severity="secondary" [rounded]="true" (click)="clearSearch()"
+                                  class="cursor-pointer px-3 !bg-surface-200 !text-surface-700">
+                                <i class="pi pi-times ml-2 text-xs"></i>
+                            </p-tag>
+                          }
 
-                                @if (inStockOnly) {
-                                    <p-tag value="In Stock Only" severity="secondary" [rounded]="true" (click)="inStockOnly = false; onFilterChange()" styleClass="cursor-pointer px-3 !bg-surface-200 !text-surface-700">
-                                        <i class="pi pi-times ml-2 text-xs"></i>
-                                    </p-tag>
-                                }
+                          @if (inStockOnly) {
+                              <p-tag [value]="'landing.shop.activeFilters.inStock' | transloco" severity="secondary" [rounded]="true" (click)="inStockOnly = false; onFilterChange()" styleClass="cursor-pointer px-3 !bg-surface-200 !text-surface-700">
+                                  <i class="pi pi-times ml-2 text-xs"></i>
+                              </p-tag>
+                          }
 
-                                <!-- Attribute Filters Chips -->
-                                @for (group of attributeGroups; track group.id) {
-                                    @for (value of group.values; track value.id) {
-                                        @if (value.selected) {
-                                            <p-tag [value]="group.name + ': ' + value.name" [rounded]="true" (click)="toggleAttributeValue(group.id, value.id)" class="cursor-pointer px-3">
-                                                <i class="pi pi-times ml-2 text-xs"></i>
-                                            </p-tag>
-                                        }
-                                    }
-                                }
-                            </div>
-                        }
+                          @for (group of attributeGroups; track group.id) {
+                              @for (value of group.values; track value.id) {
+                                  @if (value.selected) {
+                                      <p-tag [value]="group.name + ': ' + value.name" [rounded]="true" (click)="toggleAttributeValue(group.id, value.id)" class="cursor-pointer px-3">
+                                          <i class="pi pi-times ml-2 text-xs"></i>
+                                      </p-tag>
+                                  }
+                              }
+                          }
+                      </div>
+                  }
 
-                        <!-- Loading -->
-                        @if (loading) {
-                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-8 gap-y-16">
-                                @for (i of [1, 2, 3, 4, 5, 6, 7, 8]; track i) {
-                                    <div class="flex flex-col h-full">
-                                        <!-- Image Skeleton Container -->
-                                        <div class="relative aspect-[3/4] rounded-xl overflow-hidden mb-6">
-                                            <p-skeleton width="100%" height="100%"></p-skeleton>
-                                        </div>
+                  @if (loading) {
+                      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-8 gap-y-16">
+                          @for (i of [1, 2, 3, 4, 5, 6, 7, 8]; track i) {
+                              <div class="flex flex-col h-full">
+                                  <div class="relative aspect-[3/4] rounded-xl overflow-hidden mb-6">
+                                      <p-skeleton width="100%" height="100%"></p-skeleton>
+                                  </div>
 
-                                        <!-- Content Skeleton -->
-                                        <div class="flex flex-col flex-1 px-1">
-                                            <!-- Header -->
-                                            <div class="flex justify-between items-start gap-4 mb-2">
-                                                <p-skeleton width="60%" height="1.75rem"></p-skeleton>
-                                                <p-skeleton width="25%" height="1.75rem"></p-skeleton>
-                                            </div>
+                                  <div class="flex flex-col flex-1 px-1">
+                                      <div class="flex justify-between items-start gap-4 mb-2">
+                                          <p-skeleton width="60%" height="1.75rem"></p-skeleton>
+                                          <p-skeleton width="25%" height="1.75rem"></p-skeleton>
+                                      </div>
 
-                                            <!-- Description -->
-                                            <p-skeleton width="80%" height="1rem" styleClass="mb-8"></p-skeleton>
+                                      <p-skeleton width="80%" height="1rem" styleClass="mb-8"></p-skeleton>
 
-                                            <!-- Button -->
-                                            <div class="mt-auto">
-                                                <p-skeleton width="100%" height="3.75rem" styleClass="rounded-xl"></p-skeleton>
-                                            </div>
-                                        </div>
-                                    </div>
-                                }
-                            </div>
-                        }
+                                      <div class="mt-auto">
+                                          <p-skeleton width="100%" height="3.75rem" styleClass="rounded-xl"></p-skeleton>
+                                      </div>
+                                  </div>
+                              </div>
+                          }
+                      </div>
+                  }
 
-                        <!-- Products -->
-                        @if (!loading && filteredProducts.length > 0) {
-                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-8 gap-y-16">
-                                @for (product of filteredProducts; track product.id) {
-                                    <div class="group flex flex-col h-full">
-                                        <!-- Image Container -->
-                                        <div class="relative aspect-[3/4] rounded-xl overflow-hidden bg-surface-100 dark:bg-surface-800 cursor-pointer mb-6 transition-all duration-500 hover:shadow-2xl">
-                                            <img
-                                                [src]="product.picture || product.secureUrl"
-                                                [alt]="product.name"
-                                                class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                                                onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MDAiIGhlaWdodD0iNDAwIiB2aWV3Qm94PSIwIDAgNDAwIDQwMCI+PHJlY3Qgd2lkdGg9IjQwMCIgaGVpZ2h0PSI0MDAiIGZpbGw9IiNmMmYyZjIiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjIwIiBmaWxsPSIjOTk5IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+Tm8gSW1hZ2U8L3RleHQ+PC9zdmc+'"
-                                            />
+                  @if (!loading && filteredProducts.length > 0) {
+                      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-8 gap-y-16">
+                          @for (product of filteredProducts; track product.id) {
+                              <div class="group flex flex-col h-full">
+                                  <div class="relative aspect-[3/4] rounded-xl overflow-hidden bg-surface-100 dark:bg-surface-800 cursor-pointer mb-6 transition-all duration-500 hover:shadow-2xl">
+                                      <img
+                                          [src]="product.picture || product.secureUrl"
+                                          [alt]="product.name"
+                                          class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                                          onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MDAiIGhlaWdodD0iNDAwIiB2aWV3Qm94PSIwIDAgNDAwIDQwMCI+PHJlY3Qgd2lkdGg9IjQwMCIgaGVpZ2h0PSI0MDAiIGZpbGw9IiNmMmYyZjIiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjIwIiBmaWxsPSIjOTk5IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+Tm8gSW1hZ2U8L3RleHQ+PC9zdmc+'"
+                                      />
 
-                                            <!-- Sold Out Badge -->
-                                            @if (!product.isActive) {
-                                                <div class="absolute top-4 left-4">
-                                                    <span class="px-4 py-2 bg-black/60 backdrop-blur-md text-white text-xs font-bold tracking-wider uppercase rounded-full border border-white/10"> Sold Out </span>
-                                                </div>
-                                            }
+                                      @if (!product.isActive) {
+                                          <div class="absolute top-4 left-4">
+                                              <span class="px-4 py-2 bg-black/60 backdrop-blur-md text-white text-xs font-bold tracking-wider uppercase rounded-full border border-white/10">{{ 'landing.shop.product.soldOut' | transloco }}</span>
+                                          </div>
+                                      }
 
-                                            <!-- Product Attributes Badges -->
-                                            <div class="absolute top-4 right-4 flex flex-col gap-2 items-end">
-                                                @for (attr of getProductAttributes(product) | slice: 0 : 2; track $index) {
-                                                    <div class="px-3 py-1 bg-white/90 backdrop-blur-sm rounded-full shadow-sm text-xs font-medium">{{ attr.attribute.name }}: {{ attr.attributeValue?.value }}</div>
-                                                }
-                                                @if (getProductAttributes(product).length > 2) {
-                                                    <div class="px-3 py-1 bg-white/90 backdrop-blur-sm rounded-full shadow-sm text-xs font-medium">+{{ getProductAttributes(product).length - 2 }} more</div>
-                                                }
-                                            </div>
+                                      <div class="absolute top-4 right-4 flex flex-col gap-2 items-end">
+                                          @for (attr of getProductAttributes(product) | slice: 0 : 2; track $index) {
+                                              <div class="px-3 py-1 bg-white/90 backdrop-blur-sm rounded-full shadow-sm text-xs font-medium">{{ attr.attribute.name }}: {{ attr.attributeValue?.value }}</div>
+                                          }
+                                          @if (getProductAttributes(product).length > 2) {
+                                              <div class="px-3 py-1 bg-white/90 backdrop-blur-sm rounded-full shadow-sm text-xs font-medium">+{{ getProductAttributes(product).length - 2 }} more</div>
+                                          }
+                                      </div>
 
-                                            <!-- Decorative Arrow -->
-                                            <div class="absolute bottom-4 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-all duration-500 translate-y-4 group-hover:translate-y-0">
-                                                <div class="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center text-white shadow-xl hover:bg-white hover:text-surface-900 transition-colors">
-                                                    <i class="pi pi-eye text-sm"></i>
-                                                </div>
-                                            </div>
-                                        </div>
+                                      <div class="absolute bottom-4 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-all duration-500 translate-y-4 group-hover:translate-y-0">
+                                          <div class="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center text-white shadow-xl hover:bg-white hover:text-surface-900 transition-colors">
+                                              <i class="pi pi-eye text-sm"></i>
+                                          </div>
+                                      </div>
+                                  </div>
 
-                                        <!-- Content -->
-                                        <div class="flex flex-col flex-1 px-1">
-                                            <!-- Header -->
-                                            <div class="flex justify-between items-start gap-4 mb-2">
-                                                <h3 class="font-serif text-xl font-medium text-surface-900 dark:text-surface-0 leading-tight cursor-pointer group-hover:text-primary-600 transition-colors" [title]="product.name">
-                                                    {{ product.name }}
-                                                </h3>
-                                                <!-- <span class="font-serif text-xl text-surface-900 dark:text-surface-0 whitespace-nowrap"> \${{ product.basePrice.toFixed(2) }} </span> -->
-                                            </div>
+                                  <div class="flex flex-col flex-1 px-1">
+                                      <div class="flex justify-between items-start gap-4 mb-2">
+                                          <h3 class="font-serif text-xl font-medium text-surface-900 dark:text-surface-0 leading-tight cursor-pointer group-hover:text-primary-600 transition-colors" [title]="product.name">
+                                              {{ product.name }}
+                                          </h3>
+                                      </div>
 
-                                            <!-- Product Attributes Preview -->
-                                            @if (getProductAttributes(product).length > 0) {
-                                                <div class="mb-3">
-                                                    <div class="flex flex-wrap gap-1.5">
-                                                        @for (attr of getProductAttributes(product) | slice: 0 : 3; track $index) {
-                                                            <span class="text-xs px-2 py-0.5 bg-surface-100 dark:bg-surface-800 rounded text-surface-600 dark:text-surface-400">
-                                                                {{ attr.attributeValue?.value }}
-                                                            </span>
-                                                        }
-                                                    </div>
-                                                </div>
-                                            }
+                                      @if (getProductAttributes(product).length > 0) {
+                                          <div class="mb-3">
+                                              <div class="flex flex-wrap gap-1.5">
+                                                  @for (attr of getProductAttributes(product) | slice: 0 : 3; track $index) {
+                                                      <span class="text-xs px-2 py-0.5 bg-surface-100 dark:bg-surface-800 rounded text-surface-600 dark:text-surface-400">
+                                                          {{ attr.attributeValue?.value }}
+                                                      </span>
+                                                  }
+                                              </div>
+                                          </div>
+                                      }
 
-                                            <!-- Description -->
-                                            <p class="text-sm text-surface-500 dark:text-surface-400 line-clamp-1 mb-4 font-light tracking-wide">
-                                                {{ product.description || 'Premium quality corporate item' }}
-                                            </p>
+                                      <p class="text-sm text-surface-500 dark:text-surface-400 line-clamp-1 mb-4 font-light tracking-wide">
+                                          {{ product.description || ('landing.shop.product.defaultDescription' | transloco) }}
+                                      </p>
 
-                                            <!-- Action Button -->
-                                            <div class="mt-auto">
-                                                <button
-                                                    pButton
-                                                    pRipple
-                                                    label="Add to Cart"
-                                                    icon="pi pi-shopping-bag"
-                                                    class="w-full p-button-outlined p-button-lg !rounded-xl font-medium !border-surface-200 dark:!border-surface-700 !text-surface-900 dark:!text-surface-0 hover:!bg-primary-600 hover:!border-primary-600 hover:!text-white transition-all duration-300 py-4"
-                                                    (click)="openAttributeDialog(product)"
-                                                    [disabled]="!product.isActive"
-                                                ></button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                }
-                            </div>
-                        }
+                                      <div class="mt-auto">
+                                          <button
+                                              pButton
+                                              pRipple
+                                              [label]="'landing.shop.product.addToCart' | transloco"
+                                              icon="pi pi-shopping-bag"
+                                              class="w-full p-button-outlined p-button-lg !rounded-xl font-medium !border-surface-200 dark:!border-surface-700 !text-surface-900 dark:!text-surface-0 hover:!bg-primary-600 hover:!border-primary-600 hover:!text-white transition-all duration-300 py-4"
+                                              (click)="openAttributeDialog(product)"
+                                              [disabled]="!product.isActive"
+                                          ></button>
+                                      </div>
+                                  </div>
+                              </div>
+                          }
+                      </div>
+                  }
 
-                        <!-- Empty State -->
-                        @if (!loading && filteredProducts.length === 0) {
-                            <div class="py-20 text-center">
-                                <p class="text-xl text-surface-400 font-serif italic">No products match your refinement.</p>
-                                <button class="mt-4 text-primary-600 hover:underline" (click)="clearAllFilters()">Clear Filters</button>
-                            </div>
-                        }
+                  @if (!loading && filteredProducts.length === 0) {
+                      <div class="py-20 text-center">
+                          <p class="text-xl text-surface-400 font-serif italic">{{ 'landing.shop.empty.message' | transloco }}</p>
+                          <button class="mt-4 text-primary-600 hover:underline" (click)="clearAllFilters()">{{ 'landing.shop.empty.clearFilters' | transloco }}</button>
+                      </div>
+                  }
 
-                        <!-- Pagination -->
-                        @if (!loading && totalRecords > 0) {
-                            <div class="mt-16 flex justify-center">
-                                <p-paginator [rows]="pageSize" [totalRecords]="totalRecords" [first]="(currentPage - 1) * pageSize" (onPageChange)="onPageChange($event)" styleClass="!bg-transparent !border-none"></p-paginator>
-                            </div>
-                        }
-                    </div>
-                </div>
-            </div>
-        </div>
+                  @if (!loading && totalRecords > 0) {
+                      <div class="mt-16 flex justify-center">
+                          <p-paginator [rows]="pageSize" [totalRecords]="totalRecords" [first]="(currentPage - 1) * pageSize" (onPageChange)="onPageChange($event)" styleClass="!bg-transparent !border-none"></p-paginator>
+                      </div>
+                  }
+              </div>
+          </div>
+      </div>
+  </div>
 
-        <!-- Attribute Selection Dialog -->
-        <p-dialog [(visible)]="showAttributeDialog" [modal]="true" [style]="{ width: '500px' }" header="Select Options" [closable]="true" [closeOnEscape]="true" (onHide)="onDialogHide()">
-            @if (selectedProduct) {
-                <div class="space-y-6">
-                    <!-- Product Info -->
-                    <div class="flex items-start gap-4">
-                        <img [src]="selectedProduct.picture || selectedProduct.secureUrl" [alt]="selectedProduct.name" class="w-20 h-20 object-cover rounded-lg" />
-                        <div>
-                            <h4 class="font-semibold text-lg text-surface-900 dark:text-surface-0">{{ selectedProduct.name }}</h4>
-                            <p class="text-surface-600 dark:text-surface-400 text-sm mt-1">{{ selectedProduct.description | slice: 0 : 100 }}...</p>
-                            <!-- <div class="mt-2 text-xl font-bold text-surface-900 dark:text-surface-0">\${{ calculateFinalPrice() | number: '1.2-2' }}</div> -->
-                        </div>
-                    </div>
+  <p-dialog [(visible)]="showAttributeDialog" [modal]="true" [style]="{ width: '500px' }" [header]="'landing.shop.dialog.title' | transloco" [closable]="true" [closeOnEscape]="true" (onHide)="onDialogHide()">
+      @if (selectedProduct) {
+          <div class="space-y-6">
+              <div class="flex items-start gap-4">
+                  <img [src]="selectedProduct.picture || selectedProduct.secureUrl" [alt]="selectedProduct.name" class="w-20 h-20 object-cover rounded-lg" />
+                  <div>
+                      <h4 class="font-semibold text-lg text-surface-900 dark:text-surface-0">{{ selectedProduct.name }}</h4>
+                      <p class="text-surface-600 dark:text-surface-400 text-sm mt-1">{{ selectedProduct.description | slice: 0 : 100 }}...</p>
+                  </div>
+              </div>
 
-                    <!-- Attribute Selection con p-select -->
-                    @if (productAttributeGroups.length > 0) {
-                        <div class="space-y-6">
-                            @for (group of productAttributeGroups; track group.id) {
-                                <div class="space-y-3">
-                                    <div class="flex items-center justify-between">
-                                        <h5 class="text-sm font-semibold text-surface-700 dark:text-surface-300">{{ group.name }}</h5>
-                                        @if (selectedAttributeValuesForCart[group.id]) {
-                                            <span class="text-xs text-surface-500"> Selected </span>
-                                        }
-                                    </div>
+              @if (productAttributeGroups.length > 0) {
+                  <div class="space-y-6">
+                      @for (group of productAttributeGroups; track group.id) {
+                          <div class="space-y-3">
+                              <div class="flex items-center justify-between">
+                                  <h5 class="text-sm font-semibold text-surface-700 dark:text-surface-300">{{ group.name }}</h5>
+                                  @if (selectedAttributeValuesForCart[group.id]) {
+                                      <span class="text-xs text-surface-500">{{ 'landing.shop.dialog.selected' | transloco }}</span>
+                                  }
+                              </div>
 
-                                    <!-- Select para cada grupo de atributos -->
-                                    <p-select
-                                        [options]="getSelectOptionsForGroup(group)"
-                                        [(ngModel)]="selectedAttributeValuesForCart[group.id]"
-                                        (ngModelChange)="onAttributeSelectChange(group.id)"
-                                        optionLabel="name"
-                                        optionValue="id"
-                                        placeholder="Select an option..."
-                                        styleClass="w-full"
-                                        [showClear]="true"
-                                        appendTo="body"
-                                    >
-                                        <ng-template let-option pTemplate="item">
-                                            <div class="flex items-center justify-between w-full">
-                                                <span>{{ option.name }}</span>
-                                                @if (false && option.priceModifier) {
-                                                    <span class="text-xs ml-2" [ngClass]="option.priceModifier > 0 ? 'text-green-600' : 'text-red-600'"> {{ option.priceModifier > 0 ? '+' : '' }}{{ option.priceModifier | currency: 'USD' }} </span>
-                                                }
-                                            </div>
-                                        </ng-template>
-                                    </p-select>
+                              <p-select
+                                  [options]="getSelectOptionsForGroup(group)"
+                                  [(ngModel)]="selectedAttributeValuesForCart[group.id]"
+                                  (onChange)="onAttributeSelectChange(group.id)"
+                                  optionLabel="name"
+                                  optionValue="id"
+                                  [placeholder]="'landing.shop.dialog.selectPlaceholder' | transloco"
+                                  styleClass="w-full"
+                                  [showClear]="true"
+                                  appendTo="body"
+                              >
+                                  <ng-template let-option pTemplate="item">
+                                      <div class="flex items-center justify-between w-full">
+                                          <span>{{ option.name }}</span>
+                                          @if (false && option.priceModifier) {
+                                              <span class="text-xs ml-2" [ngClass]="option.priceModifier > 0 ? 'text-green-600' : 'text-red-600'"> {{ option.priceModifier > 0 ? '+' : '' }}{{ option.priceModifier | currency: 'USD' }} </span>
+                                          }
+                                      </div>
+                                  </ng-template>
+                              </p-select>
 
-                                    <!-- Información de precio adicional -->
-                                    @if (selectedAttributeValuesForCart[group.id]) {
-                                        <div class="text-xs text-surface-500 pl-1">
-                                            Selected: {{ getSelectedAttributeName(group.id) }}
-                                            @if (false && getSelectedAttributePriceModifier(group.id) !== 0) {
-                                                <span> ({{ getSelectedAttributePriceModifier(group.id) > 0 ? '+' : '' }}{{ getSelectedAttributePriceModifier(group.id) | currency: 'USD' }}) </span>
-                                            }
-                                        </div>
-                                    }
-                                </div>
-                            }
-                        </div>
-                    }
+                              @if (selectedAttributeValuesForCart[group.id]) {
+                                  <div class="text-xs text-surface-500 pl-1">
+                                      {{ 'landing.shop.dialog.selected' | transloco }}: {{ getSelectedAttributeName(group.id) }}
+                                      @if (false && getSelectedAttributePriceModifier(group.id) !== 0) {
+                                          <span> ({{ getSelectedAttributePriceModifier(group.id) > 0 ? '+' : '' }}{{ getSelectedAttributePriceModifier(group.id) | currency: 'USD' }}) </span>
+                                      }
+                                  </div>
+                              }
+                          </div>
+                      }
+                  </div>
+              }
 
-                    <!-- Message if no attributes -->
-                    @if (productAttributeGroups.length === 0) {
-                        <div class="text-center py-8 text-surface-500">
-                            <i class="pi pi-info-circle text-2xl mb-2"></i>
-                            <p>No additional options available for this product.</p>
-                        </div>
-                    }
+              @if (productAttributeGroups.length === 0) {
+                  <div class="text-center py-8 text-surface-500">
+                      <i class="pi pi-info-circle text-2xl mb-2"></i>
+                      <p>{{ 'landing.shop.dialog.noOptions' | transloco }}</p>
+                  </div>
+              }
 
-                    <!-- Quantity and Add to List -->
-                    <div class="flex items-end gap-4 bg-surface-50 dark:bg-surface-800 p-4 rounded-lg mt-6">
-                        <div class="flex-1">
-                            <label class="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-2">Quantity</label>
-                            <p-inputNumber
-                                [(ngModel)]="currentQuantity"
-                                [showButtons]="true"
-                                buttonLayout="horizontal"
-                                spinnerMode="horizontal"
-                                [min]="1"
-                                inputStyleClass="w-16 text-center font-bold"
-                                decrementButtonClass="p-button-secondary"
-                                incrementButtonClass="p-button-secondary"
-                                styleClass="w-full"
-                            ></p-inputNumber>
-                        </div>
-                        <button pButton label="Add Variant" icon="pi pi-plus" class="p-button-outlined h-[42px]" (click)="addToAccumulated()" pTooltip="Add this configuration to the list below" tooltipPosition="top"></button>
-                    </div>
+              <div class="flex items-end gap-4 bg-surface-50 dark:bg-surface-800 p-4 rounded-lg mt-6">
+                  <div class="flex-1">
+                      <label class="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-2">{{ 'landing.shop.dialog.quantity' | transloco }}</label>
+                      <p-inputNumber
+                          [(ngModel)]="currentQuantity"
+                          [showButtons]="true"
+                          buttonLayout="horizontal"
+                          spinnerMode="horizontal"
+                          [min]="1"
+                          inputStyleClass="w-16 text-center font-bold"
+                          decrementButtonClass="p-button-secondary"
+                          incrementButtonClass="p-button-secondary"
+                          styleClass="w-full"
+                      ></p-inputNumber>
+                  </div>
+                  <button pButton [label]="'landing.shop.dialog.addVariant' | transloco" icon="pi pi-plus" class="p-button-outlined h-[42px]" (click)="addToAccumulated()" pTooltip="Add this configuration to the list below" tooltipPosition="top"></button>
+              </div>
 
-                    <!-- Accumulated Variants List -->
-                    @if (accumulatedVariants.length > 0) {
-                        <div class="mt-6 border-t border-surface-200 dark:border-surface-700 pt-4">
-                            <h5 class="font-bold text-surface-900 dark:text-surface-0 mb-3 text-sm uppercase tracking-wide">Selected Variants for Cart</h5>
-                            <div class="space-y-2 max-h-48 overflow-y-auto pr-1 custom-scrollbar">
-                                @for (variant of accumulatedVariants; track variant.tempId) {
-                                    <div class="flex items-center justify-between p-3 bg-surface-0 dark:bg-surface-900 border border-surface-200 dark:border-surface-700 rounded-lg">
-                                        <div class="flex flex-col gap-1">
-                                            <div class="flex flex-wrap gap-2">
-                                                @for (attr of variant.selectedAttributes; track attr.attributeId) {
-                                                    <span class="text-xs px-2 py-1 bg-surface-100 dark:bg-surface-800 rounded font-medium"> {{ attr.attributeName }}: {{ attr.valueName }} </span>
-                                                }
-                                                @if (variant.selectedAttributes.length === 0) {
-                                                    <span class="text-xs text-surface-500">No options selected</span>
-                                                }
-                                            </div>
-                                            <span class="text-sm font-bold text-surface-900 dark:text-surface-0">Qty: {{ variant.quantity }}</span>
-                                        </div>
-                                        <button pButton icon="pi pi-trash" class="p-button-text p-button-danger p-button-sm p-button-rounded" (click)="removeAccumulated($index)"></button>
-                                    </div>
-                                }
-                            </div>
-                        </div>
-                    }
-                    <div class="bg-surface-50 dark:bg-surface-800 p-4 rounded-lg hidden">
-                        <div class="flex justify-between items-center">
-                            <span class="text-sm font-medium text-surface-700 dark:text-surface-300">Base Price:</span>
-                            <span class="font-medium text-surface-900 dark:text-surface-0"> \${{ selectedProduct.basePrice | number: '1.2-2' }} </span>
-                        </div>
+              @if (accumulatedVariants.length > 0) {
+                  <div class="mt-6 border-t border-surface-200 dark:border-surface-700 pt-4">
+                      <h5 class="font-bold text-surface-900 dark:text-surface-0 mb-3 text-sm uppercase tracking-wide">{{ 'landing.shop.dialog.selectedVariants' | transloco }}</h5>
+                      <div class="space-y-2 max-h-48 overflow-y-auto pr-1 custom-scrollbar">
+                          @for (variant of accumulatedVariants; track variant.tempId) {
+                              <div class="flex items-center justify-between p-3 bg-surface-0 dark:bg-surface-900 border border-surface-200 dark:border-surface-700 rounded-lg">
+                                  <div class="flex flex-col gap-1">
+                                      <div class="flex flex-wrap gap-2">
+                                          @for (attr of variant.selectedAttributes; track attr.attributeId) {
+                                              <span class="text-xs px-2 py-1 bg-surface-100 dark:bg-surface-800 rounded font-medium"> {{ attr.attributeName }}: {{ attr.valueName }} </span>
+                                          }
+                                          @if (variant.selectedAttributes.length === 0) {
+                                              <span class="text-xs text-surface-500">{{ 'landing.shop.dialog.noOptionsSelected' | transloco }}</span>
+                                          }
+                                      </div>
+                                      <span class="text-sm font-bold text-surface-900 dark:text-surface-0">{{ 'landing.shop.dialog.quantity' | transloco }}: {{ variant.quantity }}</span>
+                                  </div>
+                                  <button pButton icon="pi pi-trash" class="p-button-text p-button-danger p-button-sm p-button-rounded" (click)="removeAccumulated($index)"></button>
+                              </div>
+                          }
+                      </div>
+                  </div>
+              }
+              <div class="bg-surface-50 dark:bg-surface-800 p-4 rounded-lg hidden">
+                  <div class="flex justify-between items-center">
+                      <span class="text-sm font-medium text-surface-700 dark:text-surface-300">{{ 'landing.shop.dialog.basePrice' | transloco }}:</span>
+                      <span class="font-medium text-surface-900 dark:text-surface-0"> $\{{ selectedProduct.basePrice | number: '1.2-2' }} </span>
+                  </div>
 
-                        @if (hasAttributeModifiers()) {
-                            <div class="mt-2 space-y-1">
-                                @for (group of productAttributeGroups; track group.id) {
-                                    @if (selectedAttributeValuesForCart[group.id]) {
-                                        <div class="flex justify-between items-center text-sm">
-                                            <span class="text-surface-600 dark:text-surface-400"> {{ group.name }}: </span>
-                                            @if (getSelectedAttributePriceModifier(group.id) !== 0) {
-                                                <span [ngClass]="getSelectedAttributePriceModifier(group.id) > 0 ? 'text-green-600' : 'text-red-600'">
-                                                    {{ getSelectedAttributePriceModifier(group.id) > 0 ? '+' : '' }}{{ getSelectedAttributePriceModifier(group.id) | currency: 'USD' }}
-                                                </span>
-                                            }
-                                        </div>
-                                    }
-                                }
-                            </div>
-                        }
+                  @if (hasAttributeModifiers()) {
+                      <div class="mt-2 space-y-1">
+                          @for (group of productAttributeGroups; track group.id) {
+                              @if (selectedAttributeValuesForCart[group.id]) {
+                                  <div class="flex justify-between items-center text-sm">
+                                      <span class="text-surface-600 dark:text-surface-400"> {{ group.name }}: </span>
+                                      @if (getSelectedAttributePriceModifier(group.id) !== 0) {
+                                          <span [ngClass]="getSelectedAttributePriceModifier(group.id) > 0 ? 'text-green-600' : 'text-red-600'">
+                                              {{ getSelectedAttributePriceModifier(group.id) > 0 ? '+' : '' }}{{ getSelectedAttributePriceModifier(group.id) | currency: 'USD' }}
+                                          </span>
+                                      }
+                                  </div>
+                              }
+                          }
+                      </div>
+                  }
 
-                        <div class="flex justify-between items-center mt-3 pt-3 border-t border-surface-200 dark:border-surface-700">
-                            <span class="font-bold text-surface-900 dark:text-surface-0">Total:</span>
-                            <span class="text-xl font-bold text-surface-900 dark:text-surface-0"> \${{ calculateFinalPrice() | number: '1.2-2' }} </span>
-                        </div>
-                    </div>
-                </div>
-            }
+                  <div class="flex justify-between items-center mt-3 pt-3 border-t border-surface-200 dark:border-surface-700">
+                      <span class="font-bold text-surface-900 dark:text-surface-0">{{ 'landing.shop.dialog.total' | transloco }}:</span>
+                      <span class="text-xl font-bold text-surface-900 dark:text-surface-0"> $\{{ calculateFinalPrice() | number: '1.2-2' }} </span>
+                  </div>
+              </div>
+          </div>
+      }
 
-            <ng-template pTemplate="footer">
-                <div class="flex justify-between items-center w-full">
-                    <div class="text-sm text-surface-600 dark:text-surface-400">{{ accumulatedVariants.length }} items pending</div>
-                    <div class="flex gap-2">
-                        <button pButton label="Cancel" icon="pi pi-times" class="p-button-text" (click)="showAttributeDialog = false"></button>
-                        <button pButton label="Add All to Cart" icon="pi pi-shopping-bag" (click)="confirmAddToCart()" [disabled]="!canAddToCart()"></button>
-                    </div>
-                </div>
-            </ng-template>
-        </p-dialog>
+      <ng-template pTemplate="footer">
+          <div class="flex justify-between items-center w-full">
+              <div class="text-sm text-surface-600 dark:text-surface-400">{{ accumulatedVariants.length }} {{ 'landing.shop.dialog.itemsPending' | transloco }}</div>
+              <div class="flex gap-2">
+                  <button pButton [label]="'landing.shop.dialog.cancel' | transloco" icon="pi pi-times" class="p-button-text" (click)="showAttributeDialog = false"></button>
+                  <button pButton [label]="'landing.shop.dialog.addAllToCart' | transloco" icon="pi pi-shopping-bag" (click)="confirmAddToCart()" [disabled]="!canAddToCart()"></button>
+              </div>
+          </div>
+      </ng-template>
+  </p-dialog>
     `
 })
 export class ShopWidget implements OnInit {
     cart = inject(CartService);
     message = inject(MessageService);
     shopService = inject(ShopService);
+    translocoService = inject(TranslocoService);
 
     products: Product[] = [];
     filteredProducts: Product[] = [];
@@ -524,13 +491,21 @@ export class ShopWidget implements OnInit {
     private searchDebounce: any;
 
     sortOptions: SortOption[] = [
-        { label: 'Name (A-Z)', value: ['name', 'ASC'] },
-        { label: 'Name (Z-A)', value: ['name', 'DESC'] },
-        { label: 'Price (Low to High)', value: ['basePrice', 'ASC'] },
-        { label: 'Price (High to Low)', value: ['basePrice', 'DESC'] },
-        { label: 'Newest', value: ['created_at', 'DESC'] },
-        { label: 'Oldest', value: ['created_at', 'ASC'] }
+        { key: 'nameAsc', value: ['name', 'ASC'] },
+        { key: 'nameDesc', value: ['name', 'DESC'] },
+        { key: 'priceLowHigh', value: ['basePrice', 'ASC'] },
+        { key: 'priceHighLow', value: ['basePrice', 'DESC'] },
+        { key: 'newest', value: ['created_at', 'DESC'] },
+        { key: 'oldest', value: ['created_at', 'ASC'] }
     ];
+
+    get translatedSortOptions() {
+        return this.sortOptions.map(option => ({
+            ...option,
+            label: this.translocoService.translate('landing.shop.sort.' + option.key)
+        }));
+    }
+
 
     ngOnInit() {
         this.loadProducts();
