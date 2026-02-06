@@ -7,11 +7,22 @@ import { AppConfigurator } from './app.configurator';
 import { LayoutService } from '../service/layout.service';
 import { OverlayBadgeModule } from 'primeng/overlaybadge';
 import { AuthService } from '@/core/services/auth.service';
+import { SelectModule } from 'primeng/select';
+import { LanguageService } from '@/core/services/language';
+import { FormsModule } from '@angular/forms';
 
 @Component({
     selector: 'app-topbar',
     standalone: true,
-    imports: [RouterModule, CommonModule, StyleClassModule, AppConfigurator, OverlayBadgeModule],
+    imports: [
+      RouterModule,
+      CommonModule,
+      StyleClassModule,
+      AppConfigurator,
+      OverlayBadgeModule,
+      SelectModule,
+      FormsModule,
+    ],
     template: ` <div class="layout-topbar">
         <div class="layout-topbar-logo-container">
             <button class="layout-menu-button layout-topbar-action" (click)="layoutService.onMenuToggle()">
@@ -42,6 +53,19 @@ import { AuthService } from '@/core/services/auth.service';
 
         <div class="layout-topbar-actions">
             <div class="layout-config-menu">
+              <p-select
+                  [options]="languageService.languageOptions"
+                  [(ngModel)]="languageService.currentLangSignal"
+                  (onChange)="languageService.changeLanguage($event.value)"
+                  optionLabel="label"
+                  class="border-round-lg">
+                  <ng-template let-item pTemplate="item">
+                      <div class="flex align-items-center gap-2">
+                          <!-- <span class="text-xl">{{ item.flag }}</span> -->
+                          <span>{{ item.label }}</span>
+                      </div>
+                  </ng-template>
+              </p-select>
                 <button type="button" class="layout-topbar-action" (click)="toggleDarkMode()">
                     <i [ngClass]="{ 'pi ': true, 'pi-moon': layoutService.isDarkTheme(), 'pi-sun': !layoutService.isDarkTheme() }"></i>
                 </button>
@@ -86,6 +110,7 @@ import { AuthService } from '@/core/services/auth.service';
 })
 export class AppTopbar{
     layoutService = inject(LayoutService)
+    languageService = inject(LanguageService);
 
     items!: MenuItem[];
 

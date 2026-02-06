@@ -99,8 +99,438 @@
         "terms": "Términos de Servicio"
       },
       "copyright": "© {{year}} ImagoCreations. Todos los derechos reservados."
+    },
+    "services": {
+      "hero": {
+        "badge": "SERVICIOS PREMIUM",
+        "title": "Forjando Tu <span class=\"text-primary-600\">Identidad</span>",
+        "subtitle": "Desde merchandising personalizado hasta estrategias de marca integrales, diseñamos el futuro de tu negocio.",
+        "cards": {
+          "personalization": {
+            "title": "Personalización",
+            "description": "Ropa, regalos y accesorios personalizados adaptados a tu estilo único."
+          },
+          "brandDesign": {
+            "title": "Diseño de Marca",
+            "description": "Logotipos profesionales, sistemas de identidad y material de marketing."
+          }
+        }
+      },
+      "section": {
+        "title": "Nuestros Servicios Premium",
+        "subtitle": "Soluciones a medida diseñadas para elevar tu estilo personal e identidad corporativa."
+      },
+      "personalization": {
+        "badge": "Hecho a Medida",
+        "title": "Servicios de Personalización",
+        "description": "Hazlo verdaderamente tuyo. Ofrecemos personalización de alta calidad para una amplia gama de productos. Desde ropa personalizada hasta regalos únicos, nos aseguramos de que cada detalle refleje tu estilo.",
+        "features": {
+          "apparel": "Ropa Personalizada",
+          "gifts": "Regalos Personalizados",
+          "printing": "Impresión de Alta Calidad",
+          "bulk": "Pedidos al por Mayor"
+        },
+        "button": "Explorar Personalización",
+        "imageAlt": "Servicio de Personalización"
+      },
+      "brandDesign": {
+        "badge": "Para Empresas",
+        "title": "Diseño de Marca para Negocios",
+        "description": "Tu marca es tu historia. Nuestro equipo de diseño profesional crea identidades de marca cohesionadas que resuenan con tu audiencia y construyen los cimientos visuales de tu éxito.",
+        "features": {
+          "logo": "Diseño de Logotipo",
+          "guidelines": "Guías de Marca",
+          "collateral": "Material de Marketing",
+          "social": "Kits para Redes Sociales"
+        },
+        "button": "Iniciar tu Viaje de Marca",
+        "imageAlt": "Servicio de Diseño de Marca"
+      },
+      "cta": {
+        "title": "¿Listo para Crear Algo Increíble?",
+        "subtitle": "Colaboremos para hacer realidad tus ideas. Contáctanos hoy.",
+        "button": "Contáctanos"
+      }
     }
-
+  },
+  "tracker": {
+    "title": "Seguir Tu Pedido",
+    "description": "Ingresa tu Token de Cotización proporcionado en el correo de confirmación para verificar el estado.",
+    "form": {
+      "label": "Token de Cotización / ID de Pedido",
+      "placeholder": "ej. 8f7d3a...",
+      "button": "Seguir Pedido"
+    },
+    "support": "¿Necesitas ayuda? <a routerLink=\"/\" fragment=\"contact\" class=\"text-primary hover:underline cursor-pointer\">Contactar Soporte</a>",
+    "messages": {
+      "required": "Por favor ingresa tu token de cotización"
+    }
+  },
+  "tracking": {
+    "title": "Seguimiento de Cotización",
+    "subtitle": "Pedido #{{number}}",
+    "loading": "Cargando...",
+    "notFound": {
+      "title": "Cotización No Encontrada",
+      "message": "La cotización que buscas no existe o ha expirado.",
+      "button": "Ir al Inicio"
+    },
+    "sections": {
+      "items": "Artículos",
+      "actions": "Acciones",
+      "customerDetails": "Detalles del Cliente",
+      "statusHistory": "Historial de Estado",
+      "help": "¿Necesitas Ayuda?"
+    },
+    "actions": {
+      "approve": "Aprobar Cotización",
+      "changes": "Solicitar Cambios",
+      "reject": "Rechazar Cotización",
+      "contact": "Contactar Soporte",
+      "description": "Por favor revisa los detalles de la cotización. Puedes aprobar para proceder al pago o rechazar si no cumple con tus necesidades."
+    },
+    "messages": {
+      "approved": {
+        "title": "¡Cotización Aprobada!",
+        "message": "Gracias por aprobar esta cotización. Nuestro equipo procederá con los siguientes pasos pronto. Recibirás una actualización por correo."
+      },
+      "rejected": {
+        "title": "Cotización Rechazada",
+        "message": "Esta cotización ha sido rechazada."
+      }
+    },
+    "customer": {
+      "contact": "Contacto",
+      "email": "Correo",
+      "phone": "Teléfono",
+      "shippingAddress": "Dirección de Envío",
+      "notes": "Notas",
+      "company": "Empresa"
+    },
+    "pricing": {
+      "totalAmount": "Monto Total",
+      "unitPrice": "{{price}} / unidad",
+      "quantity": "Cant: {{quantity}}"
+    },
+    "dialog": {
+      "reason": "Razón de la Actualización",
+      "placeholder": "Ingresa tus comentarios aquí...",
+      "cancel": "Cancelar",
+      "submit": "Enviar",
+      "approveConfirm": "¿Estás seguro de que deseas aprobar esta cotización? Esto procederá al siguiente paso.",
+      "approveHeader": "Aprobar Cotización"
+    },
+    "status": {
+      "draft": "Borrador",
+      "sent": "Enviado",
+      "approved": "Aprobado",
+      "to_pay": "Pago",
+      "paid": "Pagado",
+      "rejected": "Rechazado",
+      "changes_requested": "Cambios Solicitados"
+    },
+    "timeline": {
+      "draft": "Cotización creada",
+      "sent": "Disponible para aprobación",
+      "approved": "Aprobado por el cliente",
+      "to_pay": "Pago pendiente",
+      "paid": "Proceso completado"
+    }
+  },
+  "cart": {
+    "title": "Carrito de Compras",
+    "empty": {
+      "title": "Tu carrito está vacío",
+      "button": "Ir de Compras"
+    },
+    "items": "Artículos",
+    "item": {
+      "options": "Opciones Seleccionadas",
+      "attributes": "Atributos del Producto",
+      "edit": "Editar opciones",
+      "remove": "Eliminar artículo"
+    },
+    "summary": {
+      "title": "Resumen del Pedido",
+      "subtotal": "Subtotal",
+      "modifiers": "Modificadores de Atributos",
+      "total": "Total"
+    },
+    "personalization": {
+      "title": "Archivo de Personalización",
+      "description": "Sube tu logo o diseño para personalización.",
+      "specsButton": "Ver Especificaciones",
+      "upload": {
+        "select": "Seleccionar Archivo",
+        "dragging": "Arrastra y suelta o haz clic para seleccionar"
+      },
+      "specs": {
+        "title": "Especificaciones del Archivo",
+        "format": "Formato",
+        "formatText": "Preferimos archivos <strong>PNG</strong> con fondo transparente para mejores resultados.",
+        "quality": "Calidad",
+        "qualityText": "Por favor proporciona la resolución más alta disponible (se recomienda al menos 300 DPI).",
+        "colors": "Colores",
+        "colorsText": "El modo de color CMYK es preferido para precisión de impresión.",
+        "gotIt": "Entendido"
+      }
+    },
+    "quote": {
+      "button": "Solicitar Cotización",
+      "note": "Al solicitar una cotización, nuestro equipo revisará tu pedido y requisitos de personalización y se pondrá en contacto contigo pronto.",
+      "warning": {
+        "title": "Sin Archivo Subido",
+        "message": "No has subido un archivo de personalización.",
+        "question": "¿Deseas continuar sin un logo o diseño personalizado?",
+        "cancel": "Cancelar",
+        "proceed": "Continuar de Todas Formas"
+      }
+    },
+    "dialog": {
+      "edit": {
+        "title": "Editar Opciones",
+        "selected": "Seleccionado",
+        "placeholder": "Seleccionar una opción...",
+        "update": "Actualizar",
+        "cancel": "Cancelar",
+        "selectedCount": "{{count}} de {{total}} seleccionados"
+      }
+    },
+    "messages": {
+      "removed": "Artículo eliminado del carrito",
+      "fileUploaded": "Archivo Subido",
+      "fileRemoved": "Archivo de personalización ha sido eliminado",
+      "updated": "Opciones del artículo han sido actualizadas",
+      "emptyCart": "Agrega artículos al carrito primero"
+    }
+  },
+  "quoteInfo": {
+    "title": "Información del Cliente",
+    "description": "Por favor proporciona tus datos para finalizar la solicitud de cotización.",
+    "form": {
+      "title": "Detalles de Contacto",
+      "companyName": "Nombre de la Empresa",
+      "contactPerson": "Persona de Contacto",
+      "email": "Correo Electrónico",
+      "phone": "Número de Teléfono",
+      "address": "Dirección",
+      "notes": "Notas Adicionales",
+      "placeholders": {
+        "company": "Tu Empresa",
+        "person": "Nombre Completo",
+        "email": "correo@ejemplo.com",
+        "phone": "+1 (555) 000-0000",
+        "address": "Dirección, Ciudad, Estado, Código Postal",
+        "notes": "¿Algún requisito específico o preguntas?"
+      }
+    },
+    "file": {
+      "attached": "Archivo de Personalización Adjunto",
+      "size": "{{name}} ({{size}})"
+    },
+    "buttons": {
+      "back": "Volver al Carrito",
+      "submit": "Enviar Solicitud de Cotización"
+    },
+    "terms": "Al enviar, aceptas nuestros términos y condiciones. Nuestro equipo revisará tu solicitud y se pondrá en contacto contigo en 24-48 horas.",
+    "success": {
+      "title": "¡Solicitud de Cotización Recibida!",
+      "message": "Gracias por tu solicitud. Hemos enviado un correo de confirmación a <strong>{{email}}</strong> con los detalles de tu cotización.",
+      "track": "Sigue el estado de tu cotización:",
+      "continue": "Continuar Comprando"
+    },
+    "validation": {
+      "required": "es requerido",
+      "invalidEmail": "Por favor ingresa un correo electrónico válido",
+      "emptyCart": "Por favor agrega artículos al carrito primero"
+    },
+    "messages": {
+      "missingInfo": "Información Faltante",
+      "invalidEmail": "Correo Inválido",
+      "uploadFailed": "Error al Subir",
+      "uploadError": "Error al subir archivo de personalización. Por favor inténtalo de nuevo.",
+      "quoteSubmitted": "Cotización Enviada",
+      "quoteCreated": "Cotización #{{number}} ha sido creada exitosamente",
+      "error": "Error",
+      "failed": "Error al enviar solicitud de cotización"
+    }
+  },
+  "notFound": {
+    "title": "No Encontrado",
+    "description": "El recurso solicitado no está disponible.",
+    "button": "Ir al Inicio",
+    "links": {
+      "faq": {
+        "title": "Preguntas Frecuentes",
+        "description": "Ultricies mi quis hendrerit dolor."
+      },
+      "support": {
+        "title": "Centro de Soluciones",
+        "description": "Phasellus faucibus scelerisque eleifend."
+      },
+      "home": {
+        "title": "Volver al Inicio",
+        "description": "Accumsan in nisl nisi scelerisque"
+      }
+    },
+    "seo": {
+      "title": "Página No Encontrada - Imago Creations",
+      "description": "La página que estás buscando no existe."
+    }
+  },
+  "dashboard": {
+    "bestSelling": {
+      "title": "Productos Más Vendidos",
+      "menu": {
+        "addNew": "Agregar Nuevo",
+        "remove": "Eliminar"
+      },
+      "products": {
+        "spaceTShirt": {
+          "name": "Camiseta Espacial",
+          "category": "Ropa",
+          "percentage": "50%"
+        },
+        "portalSticker": {
+          "name": "Sticker Portal",
+          "category": "Accesorios",
+          "percentage": "16%"
+        },
+        "supernovaSticker": {
+          "name": "Sticker Supernova",
+          "category": "Accesorios",
+          "percentage": "67%"
+        },
+        "wondersNotebook": {
+          "name": "Cuaderno Maravillas",
+          "category": "Oficina",
+          "percentage": "35%"
+        },
+        "matBlackCase": {
+          "name": "Funda Mate Negra",
+          "category": "Accesorios",
+          "percentage": "75%"
+        },
+        "robotsTShirt": {
+          "name": "Camiseta de Robots",
+          "category": "Ropa",
+          "percentage": "40%"
+        }
+      }
+    },
+    "notifications": {
+      "title": "Notificaciones",
+      "menu": {
+        "addNew": "Agregar Nuevo",
+        "remove": "Eliminar"
+      },
+      "time": {
+        "today": "HOY",
+        "yesterday": "AYER",
+        "lastWeek": "LA SEMANA PASADA"
+      },
+      "today": {
+        "purchase": {
+          "name": "Richard Jones",
+          "description": "ha comprado una camiseta azul por",
+          "amount": "$79.00"
+        },
+        "withdrawal": {
+          "description": "Tu solicitud de retiro de",
+          "amount": "$2500.00",
+          "action": "ha sido iniciada."
+        }
+      },
+      "yesterday": {
+        "purchase": {
+          "name": "Keyser Wick",
+          "description": "ha comprado una chaqueta negra por",
+          "amount": "$59.00"
+        },
+        "question": {
+          "name": "Jane Davis",
+          "description": "ha publicado una nueva pregunta sobre tu producto."
+        }
+      },
+      "lastWeek": {
+        "revenue": {
+          "description": "Tus ingresos han aumentado en",
+          "percentage": "25%"
+        },
+        "wishlist": {
+          "count": "12",
+          "description": "usuarios han añadido tus productos a su lista de deseos."
+        }
+      }
+    },
+    "recentSales": {
+      "title": "Ventas Recientes",
+      "table": {
+        "headers": {
+          "image": "Imagen",
+          "name": "Nombre",
+          "price": "Precio",
+          "view": "Ver"
+        },
+        "actions": {
+          "view": "Ver"
+        },
+        "emptyMessage": "No se encontraron ventas recientes."
+      }
+    },
+    "revenueStream": {
+      "title": "Flujo de Ingresos",
+      "chart": {
+        "labels": {
+          "quarters": ["Q1", "Q2", "Q3", "Q4"]
+        },
+        "datasets": {
+          "subscriptions": "Suscripciones",
+          "advertising": "Publicidad",
+          "affiliate": "Afiliados"
+        }
+      }
+    },
+    "stats": {
+      "orders": {
+        "title": "Pedidos",
+        "period": "desde la última visita",
+        "new": "nuevos"
+      },
+      "revenue": {
+        "title": "Ingresos",
+        "period": "desde la semana pasada"
+      },
+      "customers": {
+        "title": "Clientes",
+        "period": "nuevos registrados"
+      },
+      "comments": {
+        "title": "Comentarios",
+        "period": "respondidos",
+        "unread": "Sin leer"
+      }
+    }
+  },
+  "admin": {
+    "menu": {
+      "home": "Inicio",
+      "dashboard": "Panel",
+      "admin": "Administración",
+      "products": "Productos",
+      "attributes": "Atributos",
+      "orders": "Pedidos",
+      "quotes": "Cotizaciones",
+      "payments": "Pagos",
+      "clients": "Clientes",
+      "statistics": "Estadísticas",
+      "configuration": "Configuración",
+      "users": "Usuarios",
+      "agencies": "Agencias",
+      "pages": "Páginas",
+      "landing": "Inicio Público",
+      "account": "Cuenta",
+      "logout": "Cerrar Sesión"
+    }
   }
-
 }

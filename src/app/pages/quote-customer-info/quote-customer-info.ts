@@ -1,4 +1,3 @@
-// src/app/pages/quote-info/quote-info.component.ts
 import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -15,11 +14,25 @@ import { FooterWidget } from '../landing/components/footerwidget';
 import { MessageService } from 'primeng/api';
 import { ToastModule } from 'primeng/toast';
 import { SeoService } from '@/core/services/seo.service';
+import { TranslocoModule, TranslocoService } from '@ngneat/transloco';
 
 @Component({
     selector: 'app-quote-customer-info',
     standalone: true,
-    imports: [CommonModule, FormsModule, RouterModule, ButtonModule, InputTextModule, TextareaModule, DialogModule, ProgressSpinnerModule, TopbarWidget, FooterWidget, ToastModule],
+    imports: [
+        CommonModule,
+        FormsModule,
+        RouterModule,
+        ButtonModule,
+        InputTextModule,
+        TextareaModule,
+        DialogModule,
+        ProgressSpinnerModule,
+        TopbarWidget,
+        FooterWidget,
+        ToastModule,
+        TranslocoModule
+    ],
     providers: [MessageService],
     template: `
         <div class="bg-surface-0 dark:bg-surface-900 min-h-screen">
@@ -29,44 +42,92 @@ import { SeoService } from '@/core/services/seo.service';
                 <div class="pt-48 px-4 md:px-6 lg:px-20 pb-8 min-h-[calc(100vh-400px)]">
                     <div class="max-w-2xl mx-auto">
                         <div class="mb-8">
-                            <button pButton label="Back to Cart" icon="pi pi-arrow-left" class="p-button-text pl-0" routerLink="/cart"></button>
-                            <h1 class="text-3xl font-bold text-surface-900 dark:text-surface-0 mt-2">Customer Information</h1>
-                            <p class="text-surface-600 dark:text-surface-200">Please provide your details to finalize the quote request.</p>
+                            <button pButton
+                                    [label]="'quoteInfo.buttons.back' | transloco"
+                                    icon="pi pi-arrow-left"
+                                    class="p-button-text pl-0"
+                                    routerLink="/cart"></button>
+                            <h1 class="text-3xl font-bold text-surface-900 dark:text-surface-0 mt-2">
+                                {{ 'quoteInfo.title' | transloco }}
+                            </h1>
+                            <p class="text-surface-600 dark:text-surface-200">
+                                {{ 'quoteInfo.description' | transloco }}
+                            </p>
                         </div>
 
                         <!-- Customer Information Form -->
                         <div class="surface-card p-8 rounded-xl bg-surface-0 dark:bg-surface-900 shadow-md">
-                            <h2 class="text-xl font-bold text-surface-900 dark:text-surface-0 mb-6">Contact Details</h2>
+                            <h2 class="text-xl font-bold text-surface-900 dark:text-surface-0 mb-6">
+                                {{ 'quoteInfo.form.title' | transloco }}
+                            </h2>
 
                             <div class="space-y-6">
                                 <div class="flex flex-col gap-2">
-                                    <label for="companyName" class="font-medium text-surface-900 dark:text-surface-0"> Company Name <span class="text-red-500">*</span> </label>
-                                    <input pInputText id="companyName" [(ngModel)]="info.companyName" placeholder="Your Company" class="w-full" />
+                                    <label for="companyName" class="font-medium text-surface-900 dark:text-surface-0">
+                                        {{ 'quoteInfo.form.companyName' | transloco }} <span class="text-red-500">*</span>
+                                    </label>
+                                    <input pInputText
+                                           id="companyName"
+                                           [(ngModel)]="info.companyName"
+                                           [placeholder]="'quoteInfo.form.placeholders.company' | transloco"
+                                           class="w-full" />
                                 </div>
 
                                 <div class="flex flex-col gap-2">
-                                    <label for="contactPerson" class="font-medium text-surface-900 dark:text-surface-0"> Contact Person <span class="text-red-500">*</span> </label>
-                                    <input pInputText id="contactPerson" [(ngModel)]="info.contactPerson" placeholder="Full Name" class="w-full" />
+                                    <label for="contactPerson" class="font-medium text-surface-900 dark:text-surface-0">
+                                        {{ 'quoteInfo.form.contactPerson' | transloco }} <span class="text-red-500">*</span>
+                                    </label>
+                                    <input pInputText
+                                           id="contactPerson"
+                                           [(ngModel)]="info.contactPerson"
+                                           [placeholder]="'quoteInfo.form.placeholders.person' | transloco"
+                                           class="w-full" />
                                 </div>
 
                                 <div class="flex flex-col gap-2">
-                                    <label for="email" class="font-medium text-surface-900 dark:text-surface-0"> Email Address <span class="text-red-500">*</span> </label>
-                                    <input pInputText id="email" type="email" [(ngModel)]="info.email" placeholder="email@example.com" class="w-full" />
+                                    <label for="email" class="font-medium text-surface-900 dark:text-surface-0">
+                                        {{ 'quoteInfo.form.email' | transloco }} <span class="text-red-500">*</span>
+                                    </label>
+                                    <input pInputText
+                                           id="email"
+                                           type="email"
+                                           [(ngModel)]="info.email"
+                                           [placeholder]="'quoteInfo.form.placeholders.email' | transloco"
+                                           class="w-full" />
                                 </div>
 
                                 <div class="flex flex-col gap-2">
-                                    <label for="phone" class="font-medium text-surface-900 dark:text-surface-0"> Phone Number <span class="text-red-500">*</span> </label>
-                                    <input pInputText id="phone" [(ngModel)]="info.phone" placeholder="+1 (555) 000-0000" class="w-full" />
+                                    <label for="phone" class="font-medium text-surface-900 dark:text-surface-0">
+                                        {{ 'quoteInfo.form.phone' | transloco }} <span class="text-red-500">*</span>
+                                    </label>
+                                    <input pInputText
+                                           id="phone"
+                                           [(ngModel)]="info.phone"
+                                           [placeholder]="'quoteInfo.form.placeholders.phone' | transloco"
+                                           class="w-full" />
                                 </div>
 
                                 <div class="flex flex-col gap-2">
-                                    <label for="address" class="font-medium text-surface-900 dark:text-surface-0">Address</label>
-                                    <input pInputText id="address" [(ngModel)]="info.address" placeholder="Street Address, City, State, Zip" class="w-full" />
+                                    <label for="address" class="font-medium text-surface-900 dark:text-surface-0">
+                                        {{ 'quoteInfo.form.address' | transloco }}
+                                    </label>
+                                    <input pInputText
+                                           id="address"
+                                           [(ngModel)]="info.address"
+                                           [placeholder]="'quoteInfo.form.placeholders.address' | transloco"
+                                           class="w-full" />
                                 </div>
 
                                 <div class="flex flex-col gap-2">
-                                    <label for="notes" class="font-medium text-surface-900 dark:text-surface-0">Additional Notes</label>
-                                    <textarea pInputTextarea id="notes" [(ngModel)]="info.notes" rows="4" placeholder="Any specific requirements or questions?" class="w-full"></textarea>
+                                    <label for="notes" class="font-medium text-surface-900 dark:text-surface-0">
+                                        {{ 'quoteInfo.form.notes' | transloco }}
+                                    </label>
+                                    <textarea pInputTextarea
+                                              id="notes"
+                                              [(ngModel)]="info.notes"
+                                              rows="4"
+                                              [placeholder]="'quoteInfo.form.placeholders.notes' | transloco"
+                                              class="w-full"></textarea>
                                 </div>
 
                                 <!-- File Upload Summary -->
@@ -75,8 +136,12 @@ import { SeoService } from '@/core/services/seo.service';
                                         <div class="flex items-center gap-3">
                                             <i class="pi pi-file text-xl text-primary"></i>
                                             <div class="flex-1">
-                                                <p class="font-medium text-surface-900 dark:text-surface-0">Personalization File Attached</p>
-                                                <p class="text-sm text-surface-500">{{ cart.quoteFile()?.name }} ({{ formatFileSize(cart.quoteFile()?.size) }})</p>
+                                                <p class="font-medium text-surface-900 dark:text-surface-0">
+                                                    {{ 'quoteInfo.file.attached' | transloco }}
+                                                </p>
+                                                <p class="text-sm text-surface-500">
+                                                    {{ 'quoteInfo.file.size' | transloco:{name: cart.quoteFile()?.name, size: formatFileSize(cart.quoteFile()?.size)} }}
+                                                </p>
                                             </div>
                                             <i class="pi pi-check-circle text-green-500"></i>
                                         </div>
@@ -84,9 +149,17 @@ import { SeoService } from '@/core/services/seo.service';
                                 }
 
                                 <div class="pt-4">
-                                    <button pButton label="Submit Quote Request" icon="pi pi-check" class="w-full p-button-lg font-bold" (click)="finalizeQuote()" [loading]="loading" [disabled]="cart.items().length === 0"></button>
+                                    <button pButton
+                                            [label]="'quoteInfo.buttons.submit' | transloco"
+                                            icon="pi pi-check"
+                                            class="w-full p-button-lg font-bold"
+                                            (click)="finalizeQuote()"
+                                            [loading]="loading"
+                                            [disabled]="cart.items().length === 0"></button>
 
-                                    <p class="text-sm text-surface-500 dark:text-surface-400 mt-4 text-center">By submitting, you agree to our terms and conditions. Our team will review your request and contact you within 24-48 hours.</p>
+                                    <p class="text-sm text-surface-500 dark:text-surface-400 mt-4 text-center">
+                                        {{ 'quoteInfo.terms' | transloco }}
+                                    </p>
                                 </div>
                             </div>
                         </div>
@@ -102,18 +175,27 @@ import { SeoService } from '@/core/services/seo.service';
                     <div class="w-20 h-20 rounded-full bg-green-100 flex items-center justify-center mb-6">
                         <i class="pi pi-check text-4xl text-green-600"></i>
                     </div>
-                    <h2 class="text-2xl font-bold text-surface-900 dark:text-surface-0 mb-2">Quote Request Received!</h2>
-                    <p class="text-surface-600 dark:text-surface-200 mb-6 leading-relaxed">
-                        Thank you for your request. We have sent a confirmation email to <strong>{{ info.email }}</strong> with your quote details.
-                    </p>
+                    <h2 class="text-2xl font-bold text-surface-900 dark:text-surface-0 mb-2">
+                        {{ 'quoteInfo.success.title' | transloco }}
+                    </h2>
+                    <p class="text-surface-600 dark:text-surface-200 mb-6 leading-relaxed" [innerHTML]="'quoteInfo.success.message' | transloco:{email: info.email}"></p>
 
                     <div class="w-full p-4 bg-surface-50 dark:bg-surface-800 rounded-lg mb-6">
-                        <p class="text-sm text-surface-500 mb-1">Track your quote status:</p>
-                        <a [routerLink]="['/track', quoteResponse?.publicToken]" class="text-primary font-medium hover:underline break-all" target="_blank"> https://imagocreations.com/track/{{ quoteResponse?.publicToken }} </a>
+                        <p class="text-sm text-surface-500 mb-1">
+                            {{ 'quoteInfo.success.track' | transloco }}
+                        </p>
+                        <a [routerLink]="['/track', quoteResponse?.publicToken]"
+                           class="text-primary font-medium hover:underline break-all"
+                           target="_blank">
+                            https://imagocreations.com/track/{{ quoteResponse?.publicToken }}
+                        </a>
                     </div>
 
                     <div class="flex flex-col gap-3 w-full">
-                        <button pButton label="Continue Shopping" class="p-button-outlined" routerLink="/"></button>
+                        <button pButton
+                                [label]="'quoteInfo.success.continue' | transloco"
+                                class="p-button-outlined"
+                                routerLink="/"></button>
                     </div>
                 </div>
             </p-dialog>
@@ -126,6 +208,7 @@ export class QuoteCustomerInfo implements OnInit {
     messageService = inject(MessageService);
     seoService = inject(SeoService);
     quoteService = inject(QuoteService);
+    translocoService = inject(TranslocoService); // <-- Añade esto
 
     info: CustomerInfo = {
         companyName: '',
@@ -145,12 +228,10 @@ export class QuoteCustomerInfo implements OnInit {
         this.seoService.updateTitle('Request a Quote - Imago Creations');
         this.seoService.updateUrl('https://imagocreations.com/quote-info');
 
-        // Redirect if cart is empty
         if (this.cart.items().length === 0) {
             this.router.navigate(['/cart']);
         }
 
-        // Pre-fill with saved customer info if available
         const savedInfo = this.cart.customerInfo();
         if (savedInfo) {
             this.info = { ...savedInfo };
@@ -174,7 +255,7 @@ export class QuoteCustomerInfo implements OnInit {
             this.messageService.add({
                 severity: 'warn',
                 summary: 'Empty Cart',
-                detail: 'Please add items to cart first'
+                detail: this.translocoService.translate('quoteInfo.validation.emptyCart')
             });
             return;
         }
@@ -192,8 +273,8 @@ export class QuoteCustomerInfo implements OnInit {
                     this.loading = false;
                     this.messageService.add({
                         severity: 'error',
-                        summary: 'Upload Failed',
-                        detail: 'Failed to upload personalization file. Please try again.',
+                        summary: this.translocoService.translate('quoteInfo.messages.uploadFailed'),
+                        detail: this.translocoService.translate('quoteInfo.messages.uploadError'),
                         life: 5000
                     });
                 }
@@ -204,26 +285,21 @@ export class QuoteCustomerInfo implements OnInit {
     }
 
     submitQuote(fileUrl?: string) {
-        // Usar el nuevo método helper para crear la cotización con la URL del archivo
         const quoteData = this.quoteService.createQuoteFromCart(this.cart.items(), this.info, this.info.notes, fileUrl);
 
-        // Enviar a la API
         this.quoteService.createQuote(quoteData).subscribe({
             next: (response) => {
                 this.quoteResponse = response;
                 this.loading = false;
                 this.showSuccessModal = true;
 
-                // Guardar información del cliente
                 this.cart.setCustomerInfo(this.info);
-
-                // Limpiar el carrito después de enviar la cotización
                 this.cart.clearCart();
 
                 this.messageService.add({
                     severity: 'success',
-                    summary: 'Quote Submitted',
-                    detail: `Quote #${response.quoteNumber} has been created successfully`,
+                    summary: this.translocoService.translate('quoteInfo.messages.quoteSubmitted'),
+                    detail: this.translocoService.translate('quoteInfo.messages.quoteCreated', { number: response.quoteNumber }),
                     life: 5000
                 });
             },
@@ -231,14 +307,14 @@ export class QuoteCustomerInfo implements OnInit {
                 console.error('Error creating quote:', error);
                 this.loading = false;
 
-                let errorMessage = 'Failed to submit quote request';
+                let errorMessage = this.translocoService.translate('quoteInfo.messages.failed');
                 if (error.error?.message) {
                     errorMessage = Array.isArray(error.error.message) ? error.error.message.join(', ') : error.error.message;
                 }
 
                 this.messageService.add({
                     severity: 'error',
-                    summary: 'Error',
+                    summary: this.translocoService.translate('quoteInfo.messages.error'),
                     detail: errorMessage,
                     life: 5000
                 });
@@ -250,8 +326,8 @@ export class QuoteCustomerInfo implements OnInit {
         if (!this.info.companyName?.trim()) {
             this.messageService.add({
                 severity: 'warn',
-                summary: 'Missing Information',
-                detail: 'Company Name is required'
+                summary: this.translocoService.translate('quoteInfo.messages.missingInfo'),
+                detail: `${this.translocoService.translate('quoteInfo.form.companyName')} ${this.translocoService.translate('quoteInfo.validation.required')}`
             });
             return false;
         }
@@ -259,8 +335,8 @@ export class QuoteCustomerInfo implements OnInit {
         if (!this.info.contactPerson?.trim()) {
             this.messageService.add({
                 severity: 'warn',
-                summary: 'Missing Information',
-                detail: 'Contact Person is required'
+                summary: this.translocoService.translate('quoteInfo.messages.missingInfo'),
+                detail: `${this.translocoService.translate('quoteInfo.form.contactPerson')} ${this.translocoService.translate('quoteInfo.validation.required')}`
             });
             return false;
         }
@@ -268,8 +344,8 @@ export class QuoteCustomerInfo implements OnInit {
         if (!this.info.email?.trim()) {
             this.messageService.add({
                 severity: 'warn',
-                summary: 'Missing Information',
-                detail: 'Email Address is required'
+                summary: this.translocoService.translate('quoteInfo.messages.missingInfo'),
+                detail: `${this.translocoService.translate('quoteInfo.form.email')} ${this.translocoService.translate('quoteInfo.validation.required')}`
             });
             return false;
         }
@@ -278,8 +354,8 @@ export class QuoteCustomerInfo implements OnInit {
         if (!emailRegex.test(this.info.email)) {
             this.messageService.add({
                 severity: 'warn',
-                summary: 'Invalid Email',
-                detail: 'Please enter a valid email address'
+                summary: this.translocoService.translate('quoteInfo.messages.invalidEmail'),
+                detail: this.translocoService.translate('quoteInfo.validation.invalidEmail')
             });
             return false;
         }
@@ -287,8 +363,8 @@ export class QuoteCustomerInfo implements OnInit {
         if (!this.info.phone?.trim()) {
             this.messageService.add({
                 severity: 'warn',
-                summary: 'Missing Information',
-                detail: 'Phone Number is required'
+                summary: this.translocoService.translate('quoteInfo.messages.missingInfo'),
+                detail: `${this.translocoService.translate('quoteInfo.form.phone')} ${this.translocoService.translate('quoteInfo.validation.required')}`
             });
             return false;
         }
@@ -298,8 +374,6 @@ export class QuoteCustomerInfo implements OnInit {
 
     viewQuoteDetails() {
         if (this.quoteResponse?.id) {
-            // Aquí puedes navegar a una página de detalles de cotización
-            // o mostrar más información en un modal
             this.router.navigate(['/quote', this.quoteResponse.id]);
             this.showSuccessModal = false;
         }

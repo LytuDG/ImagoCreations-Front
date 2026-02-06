@@ -99,6 +99,438 @@
         "terms": "Terms of Service"
       },
       "copyright": "© {{year}} ImagoCreations. All rights reserved."
+    },
+    "services": {
+      "hero": {
+        "badge": "PREMIUM SERVICES",
+        "title": "Crafting Your <span class=\"text-primary-600\">Identity</span>",
+        "subtitle": "From bespoke merchandise to comprehensive brand strategies, we design the future of your business.",
+        "cards": {
+          "personalization": {
+            "title": "Personalization",
+            "description": "Custom apparel, gifts, and accessories tailored to your unique style."
+          },
+          "brandDesign": {
+            "title": "Brand Design",
+            "description": "Professional logos, identity systems, and marketing collateral."
+          }
+        }
+      },
+      "section": {
+        "title": "Our Premium Services",
+        "subtitle": "Tailored solutions designed to elevate your personal style and corporate identity."
+      },
+      "personalization": {
+        "badge": "Custom Made",
+        "title": "Personalization Services",
+        "description": "Make it truly yours. We offer high-quality personalization for a wide range of products. From custom apparel to unique gifts, we ensure every detail reflects your style.",
+        "features": {
+          "apparel": "Custom Apparel",
+          "gifts": "Personalized Gifts",
+          "printing": "High-Quality Printing",
+          "bulk": "Bulk Orders"
+        },
+        "button": "Explore Personalization",
+        "imageAlt": "Personalization Service"
+      },
+      "brandDesign": {
+        "badge": "For Business",
+        "title": "Brand Design for Businesses",
+        "description": "Your brand is your story. Our professional design team creates cohesive brand identities that resonate with your audience and build the visual foundation of your success.",
+        "features": {
+          "logo": "Logo Design",
+          "guidelines": "Brand Guidelines",
+          "collateral": "Marketing Collateral",
+          "social": "Social Media Kits"
+        },
+        "button": "Start Your Brand Journey",
+        "imageAlt": "Brand Design Service"
+      },
+      "cta": {
+        "title": "Ready to Create Something Amazing?",
+        "subtitle": "Let's collaborate to bring your ideas to reality. Contact us today.",
+        "button": "Contact Us"
+      }
+    }
+  },
+  "tracker": {
+    "title": "Track Your Order",
+    "description": "Enter your Quote Token provided in your confirmation email to check the status.",
+    "form": {
+      "label": "Quote Token / Order ID",
+      "placeholder": "e.g. 8f7d3a...",
+      "button": "Track Order"
+    },
+    "support": "Need assistance? <a routerLink=\"/\" fragment=\"contact\" class=\"text-primary hover:underline cursor-pointer\">Contact Support</a>",
+    "messages": {
+      "required": "Please enter your quote token"
+    }
+  },
+  "tracking": {
+    "title": "Quote Tracking",
+    "subtitle": "Order #{{number}}",
+    "loading": "Loading...",
+    "notFound": {
+      "title": "Quote Not Found",
+      "message": "The quote you are looking for does not exist or has expired.",
+      "button": "Go Home"
+    },
+    "sections": {
+      "items": "Items",
+      "actions": "Actions",
+      "customerDetails": "Customer Details",
+      "statusHistory": "Status History",
+      "help": "Need Help?"
+    },
+    "actions": {
+      "approve": "Approve Quote",
+      "changes": "Request Changes",
+      "reject": "Reject Quote",
+      "contact": "Contact Support",
+      "description": "Please review the quote details above. You can approve to proceed to payment or reject if it doesn't meet your needs."
+    },
+    "messages": {
+      "approved": {
+        "title": "Quote Approved!",
+        "message": "Thank you for approving this quote. Our team will proceed with the next steps shortly. You will receive an update via email."
+      },
+      "rejected": {
+        "title": "Quote Rejected",
+        "message": "This quote has been rejected."
+      }
+    },
+    "customer": {
+      "contact": "Contact",
+      "email": "Email",
+      "phone": "Phone",
+      "shippingAddress": "Shipping Address",
+      "notes": "Notes",
+      "company": "Company"
+    },
+    "pricing": {
+      "totalAmount": "Total Amount",
+      "unitPrice": "{{price}} / unit",
+      "quantity": "Qty: {{quantity}}"
+    },
+    "dialog": {
+      "reason": "Reason for Update",
+      "placeholder": "Enter your comments here...",
+      "cancel": "Cancel",
+      "submit": "Submit",
+      "approveConfirm": "Are you sure you want to approve this quote? This will proceed to the next step.",
+      "approveHeader": "Approve Quote"
+    },
+    "status": {
+      "draft": "Draft",
+      "sent": "Sent",
+      "approved": "Approved",
+      "to_pay": "Payment",
+      "paid": "Paid",
+      "rejected": "Rejected",
+      "changes_requested": "Changes Requested"
+    },
+    "timeline": {
+      "draft": "Quote created",
+      "sent": "Available for approval",
+      "approved": "Approved by client",
+      "to_pay": "Payment pending",
+      "paid": "Process complete"
+    }
+  },
+  "cart": {
+    "title": "Shopping Cart",
+    "empty": {
+      "title": "Your cart is empty",
+      "button": "Go Shopping"
+    },
+    "items": "Items",
+    "item": {
+      "options": "Selected Options",
+      "attributes": "Product Attributes",
+      "edit": "Edit options",
+      "remove": "Remove item"
+    },
+    "summary": {
+      "title": "Order Summary",
+      "subtotal": "Subtotal",
+      "modifiers": "Attribute Modifiers",
+      "total": "Total"
+    },
+    "personalization": {
+      "title": "Personalization File",
+      "description": "Upload your logo or design for customization.",
+      "specsButton": "View File Specs",
+      "upload": {
+        "select": "Select File",
+        "dragging": "Drag and drop or click to select"
+      },
+      "specs": {
+        "title": "File Specifications",
+        "format": "Format",
+        "formatText": "We prefer <strong>PNG</strong> files with a transparent background for the best results.",
+        "quality": "Quality",
+        "qualityText": "Please provide the highest resolution available (at least 300 DPI is recommended).",
+        "colors": "Colors",
+        "colorsText": "CMYK color mode is preferred for print accuracy.",
+        "gotIt": "Got it"
+      }
+    },
+    "quote": {
+      "button": "Request Quote",
+      "note": "By requesting a quote, our team will review your order and personalization requirements and get back to you shortly.",
+      "warning": {
+        "title": "No File Uploaded",
+        "message": "You haven't uploaded a personalization file.",
+        "question": "Would you like to proceed without a custom logo or design?",
+        "cancel": "Cancel",
+        "proceed": "Proceed Anyway"
+      }
+    },
+    "dialog": {
+      "edit": {
+        "title": "Edit Options",
+        "selected": "Selected",
+        "placeholder": "Select an option...",
+        "update": "Update",
+        "cancel": "Cancel",
+        "selectedCount": "{{count}} of {{total}} selected"
+      }
+    },
+    "messages": {
+      "removed": "Item removed from cart",
+      "fileUploaded": "File Uploaded",
+      "fileRemoved": "Personalization file has been removed",
+      "updated": "Item options have been updated",
+      "emptyCart": "Add items to cart first"
+    }
+  },
+  "quoteInfo": {
+    "title": "Customer Information",
+    "description": "Please provide your details to finalize the quote request.",
+    "form": {
+      "title": "Contact Details",
+      "companyName": "Company Name",
+      "contactPerson": "Contact Person",
+      "email": "Email Address",
+      "phone": "Phone Number",
+      "address": "Address",
+      "notes": "Additional Notes",
+      "placeholders": {
+        "company": "Your Company",
+        "person": "Full Name",
+        "email": "email@example.com",
+        "phone": "+1 (555) 000-0000",
+        "address": "Street Address, City, State, Zip",
+        "notes": "Any specific requirements or questions?"
+      }
+    },
+    "file": {
+      "attached": "Personalization File Attached",
+      "size": "{{name}} ({{size}})"
+    },
+    "buttons": {
+      "back": "Back to Cart",
+      "submit": "Submit Quote Request"
+    },
+    "terms": "By submitting, you agree to our terms and conditions. Our team will review your request and contact you within 24-48 hours.",
+    "success": {
+      "title": "Quote Request Received!",
+      "message": "Thank you for your request. We have sent a confirmation email to <strong>{{email}}</strong> with your quote details.",
+      "track": "Track your quote status:",
+      "continue": "Continue Shopping"
+    },
+    "validation": {
+      "required": "is required",
+      "invalidEmail": "Please enter a valid email address",
+      "emptyCart": "Please add items to cart first"
+    },
+    "messages": {
+      "missingInfo": "Missing Information",
+      "invalidEmail": "Invalid Email",
+      "uploadFailed": "Upload Failed",
+      "uploadError": "Failed to upload personalization file. Please try again.",
+      "quoteSubmitted": "Quote Submitted",
+      "quoteCreated": "Quote #{{number}} has been created successfully",
+      "error": "Error",
+      "failed": "Failed to submit quote request"
+    }
+  },
+  "notFound": {
+    "title": "Not Found",
+    "description": "Requested resource is not available.",
+    "button": "Go to Homepage",
+    "links": {
+      "faq": {
+        "title": "Frequently Asked Questions",
+        "description": "Ultricies mi quis hendrerit dolor."
+      },
+      "support": {
+        "title": "Solution Center",
+        "description": "Phasellus faucibus scelerisque eleifend."
+      },
+      "home": {
+        "title": "Return to Home",
+        "description": "Accumsan in nisl nisi scelerisque"
+      }
+    },
+    "seo": {
+      "title": "Page Not Found - Imago Creations",
+      "description": "The page you are looking for does not exist."
+    }
+  },
+  "dashboard": {
+    "bestSelling": {
+      "title": "Best Selling Products",
+      "menu": {
+        "addNew": "Add New",
+        "remove": "Remove"
+      },
+      "products": {
+        "spaceTShirt": {
+          "name": "Space T-Shirt",
+          "category": "Clothing",
+          "percentage": "50%"
+        },
+        "portalSticker": {
+          "name": "Portal Sticker",
+          "category": "Accessories",
+          "percentage": "16%"
+        },
+        "supernovaSticker": {
+          "name": "Supernova Sticker",
+          "category": "Accessories",
+          "percentage": "67%"
+        },
+        "wondersNotebook": {
+          "name": "Wonders Notebook",
+          "category": "Office",
+          "percentage": "35%"
+        },
+        "matBlackCase": {
+          "name": "Mat Black Case",
+          "category": "Accessories",
+          "percentage": "75%"
+        },
+        "robotsTShirt": {
+          "name": "Robots T-Shirt",
+          "category": "Clothing",
+          "percentage": "40%"
+        }
+      }
+    },
+    "notifications": {
+      "title": "Notifications",
+      "menu": {
+        "addNew": "Add New",
+        "remove": "Remove"
+      },
+      "time": {
+        "today": "TODAY",
+        "yesterday": "YESTERDAY",
+        "lastWeek": "LAST WEEK"
+      },
+      "today": {
+        "purchase": {
+          "name": "Richard Jones",
+          "description": "has purchased a blue t-shirt for",
+          "amount": "$79.00"
+        },
+        "withdrawal": {
+          "description": "Your request for withdrawal of",
+          "amount": "$2500.00",
+          "action": "has been initiated."
+        }
+      },
+      "yesterday": {
+        "purchase": {
+          "name": "Keyser Wick",
+          "description": "has purchased a black jacket for",
+          "amount": "$59.00"
+        },
+        "question": {
+          "name": "Jane Davis",
+          "description": "has posted a new question about your product."
+        }
+      },
+      "lastWeek": {
+        "revenue": {
+          "description": "Your revenue has increased by",
+          "percentage": "25%"
+        },
+        "wishlist": {
+          "count": "12",
+          "description": "users have added your products to their wishlist."
+        }
+      }
+    },
+    "recentSales": {
+      "title": "Recent Sales",
+      "table": {
+        "headers": {
+          "image": "Image",
+          "name": "Name",
+          "price": "Price",
+          "view": "View"
+        },
+        "actions": {
+          "view": "View"
+        },
+        "emptyMessage": "No recent sales found."
+      }
+    },
+    "revenueStream": {
+      "title": "Revenue Stream",
+      "chart": {
+        "labels": {
+          "quarters": ["Q1", "Q2", "Q3", "Q4"]
+        },
+        "datasets": {
+          "subscriptions": "Subscriptions",
+          "advertising": "Advertising",
+          "affiliate": "Affiliate"
+        }
+      }
+    },
+    "stats": {
+      "orders": {
+        "title": "Orders",
+        "period": "since last visit",
+        "new": "new"
+      },
+      "revenue": {
+        "title": "Revenue",
+        "period": "since last week"
+      },
+      "customers": {
+        "title": "Customers",
+        "period": "newly registered"
+      },
+      "comments": {
+        "title": "Comments",
+        "period": "responded",
+        "unread": "Unread"
+      }
+    }
+  },
+  "admin": {
+    "menu": {
+      "home": "Home",
+      "dashboard": "Dashboard",
+      "admin": "Admin",
+      "products": "Products",
+      "attributes": "Attributes",
+      "orders": "Orders",
+      "quotes": "Quotes",
+      "payments": "Payments",
+      "clients": "Clients",
+      "statistics": "Statistics",
+      "configuration": "Configuration",
+      "users": "Users",
+      "agencies": "Agencies",
+      "pages": "Pages",
+      "landing": "Landing",
+      "account": "Account",
+      "logout": "Logout"
     }
   }
 }
