@@ -12,6 +12,7 @@ import { InputIconModule } from 'primeng/inputicon';
 import { IconFieldModule } from 'primeng/iconfield';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { MessageService, ConfirmationService } from 'primeng/api';
+import { TranslocoModule, TranslocoService } from '@ngneat/transloco';
 import { AgencyService } from './agency.service';
 import { Agency } from './models/agency';
 import { RadioButtonModule } from 'primeng/radiobutton';
@@ -35,21 +36,55 @@ import { AgencyFormComponent } from './agency-form.dialog';
         IconFieldModule,
         ConfirmDialogModule,
         RadioButtonModule,
-        AgencyFormComponent // Importar el nuevo componente
+        AgencyFormComponent,
+        TranslocoModule
     ],
     template: `
         <p-toast />
 
         <p-toolbar class="mb-6">
             <ng-template #start>
-                <p-button label="Nueva Agencia" icon="pi pi-plus" severity="secondary" class="mr-2" (onClick)="openNew()" />
-                <p-button label="Editar Agencia" icon="pi pi-pencil" severity="secondary" class="mr-2" (onClick)="editAgency()" [disabled]="!selectedAgency" />
-                <p-button severity="secondary" label="Eliminar" icon="pi pi-trash" outlined (onClick)="deleteAgency()" [disabled]="!selectedAgency" />
+                <p-button
+                    [label]="'admin.agencies.buttons.newAgency' | transloco"
+                    icon="pi pi-plus"
+                    severity="secondary"
+                    class="mr-2"
+                    (onClick)="openNew()"
+                />
+                <p-button
+                    [label]="'admin.agencies.buttons.editAgency' | transloco"
+                    icon="pi pi-pencil"
+                    severity="secondary"
+                    class="mr-2"
+                    (onClick)="editAgency()"
+                    [disabled]="!selectedAgency"
+                />
+                <p-button
+                    [label]="'admin.agencies.buttons.delete' | transloco"
+                    severity="secondary"
+                    label="Eliminar"
+                    icon="pi pi-trash"
+                    outlined
+                    (onClick)="deleteAgency()"
+                    [disabled]="!selectedAgency"
+                />
             </ng-template>
 
             <ng-template #end>
-                <p-button label="Exportar" icon="pi pi-upload" severity="secondary" (onClick)="exportCSV()" />
-                <p-button label="Recargar" icon="pi pi-refresh" severity="secondary" class="ml-1" (onClick)="loadAgencies()" [loading]="loading()" />
+                <p-button
+                    [label]="'admin.agencies.buttons.export' | transloco"
+                    icon="pi pi-upload"
+                    severity="secondary"
+                    (onClick)="exportCSV()"
+                />
+                <p-button
+                    [label]="'admin.agencies.buttons.reload' | transloco"
+                    icon="pi pi-refresh"
+                    severity="secondary"
+                    class="ml-1"
+                    (onClick)="loadAgencies()"
+                    [loading]="loading()"
+                />
             </ng-template>
         </p-toolbar>
 
@@ -64,17 +99,22 @@ import { AgencyFormComponent } from './agency-form.dialog';
             [rowHover]="true"
             dataKey="id"
             selectionMode="single"
-            currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} agencias"
+            [currentPageReportTemplate]="'admin.agencies.table.pagination.showingAgencies' | transloco"
             [showCurrentPageReport]="true"
             [rowsPerPageOptions]="[10, 20, 30]"
             [loading]="loading()"
         >
             <ng-template #caption>
                 <div class="flex items-center justify-between">
-                    <h5 class="m-0">Gestión de Agencias</h5>
+                    <h5 class="m-0">{{ 'admin.agencies.title' | transloco }}</h5>
                     <p-iconfield>
                         <p-inputicon class="pi pi-search" />
-                        <input pInputText type="text" (keyup)="applyFilter($event, 'name')" placeholder="Buscar por nombre..." />
+                        <input
+                            pInputText
+                            type="text"
+                            (keyup)="applyFilter($event, 'name')"
+                            [placeholder]="'admin.agencies.search.placeholder' | transloco"
+                        />
                     </p-iconfield>
                 </div>
             </ng-template>
@@ -83,18 +123,18 @@ import { AgencyFormComponent } from './agency-form.dialog';
                 <tr>
                     <th style="width: 3rem"></th>
                     <th pSortableColumn="name" style="min-width:20rem">
-                        Nombre
+                        {{ 'admin.agencies.table.columns.name' | transloco }}
                         <p-sortIcon field="name" />
                     </th>
                     <th pSortableColumn="email" style="min-width:20rem">
-                        Email
+                        {{ 'admin.agencies.table.columns.email' | transloco }}
                         <p-sortIcon field="email" />
                     </th>
                     <th pSortableColumn="address" style="min-width:25rem">
-                        Dirección
+                        {{ 'admin.agencies.table.columns.address' | transloco }}
                         <p-sortIcon field="address" />
                     </th>
-                    <th style="min-width:15rem">Teléfono</th>
+                    <th style="min-width:15rem">{{ 'admin.agencies.table.columns.phone' | transloco }}</th>
                 </tr>
             </ng-template>
 
@@ -105,12 +145,14 @@ import { AgencyFormComponent } from './agency-form.dialog';
                     </td>
                     <td style="min-width: 20rem">{{ agency.name }}</td>
                     <td style="min-width: 20rem">{{ agency.email }}</td>
-                    <td style="min-width: 25rem">{{ agency.address || 'N/A' }}</td>
+                    <td style="min-width: 25rem">{{ agency.address || ('admin.agencies.table.address.notAvailable' | transloco) }}</td>
                     <td style="min-width: 15rem">
                         @if (agency.phone) {
                             +{{ agency.phoneCountryCode }} {{ agency.phone }}
                         } @else {
-                            <span class="text-color-secondary">No especificado</span>
+                            <span class="text-color-secondary">
+                                {{ 'admin.agencies.table.phone.notSpecified' | transloco }}
+                            </span>
                         }
                     </td>
                 </tr>
@@ -121,8 +163,14 @@ import { AgencyFormComponent } from './agency-form.dialog';
                     <td colspan="5" class="text-center py-6">
                         <div class="flex flex-column align-items-center gap-3">
                             <i class="pi pi-building text-6xl text-color-secondary"></i>
-                            <span class="text-xl text-color-secondary font-medium"> No se encontraron agencias </span>
-                            <p-button label="Recargar" icon="pi pi-refresh" (onClick)="loadAgencies()" />
+                            <span class="text-xl text-color-secondary font-medium">
+                                {{ 'admin.agencies.table.empty.title' | transloco }}
+                            </span>
+                            <p-button
+                                [label]="'admin.agencies.table.empty.reload' | transloco"
+                                icon="pi pi-refresh"
+                                (onClick)="loadAgencies()"
+                            />
                         </div>
                     </td>
                 </tr>
@@ -130,7 +178,15 @@ import { AgencyFormComponent } from './agency-form.dialog';
         </p-table>
 
         <!-- Usar el componente del formulario -->
-        <app-agency-form [visible]="agencyDialog" [isEditMode]="isEditMode" [agency]="selectedAgencyForEdit" (save)="saveAgency($event)" (cancel)="hideDialog()" (hide)="hideDialog()" [saving]="saving()"></app-agency-form>
+        <app-agency-form
+            [visible]="agencyDialog"
+            [isEditMode]="isEditMode"
+            [agency]="selectedAgencyForEdit"
+            (save)="saveAgency($event)"
+            (cancel)="hideDialog()"
+            (hide)="hideDialog()"
+            [saving]="saving()">
+        </app-agency-form>
 
         <p-confirmdialog [style]="{ width: '450px' }" />
     `,
@@ -140,6 +196,7 @@ export class Agencies implements OnInit {
     private agencyService = inject(AgencyService);
     private messageService = inject(MessageService);
     private confirmationService = inject(ConfirmationService);
+    private translocoService = inject(TranslocoService);
 
     agencyDialog: boolean = false;
     agencies = signal<Agency[]>([]);
@@ -172,6 +229,12 @@ export class Agencies implements OnInit {
                 console.error('Error loading agencies:', error);
                 this.loading.set(false);
                 this.agencies.set([]);
+                this.messageService.add({
+                    severity: 'error',
+                    summary: 'Error',
+                    detail: this.translocoService.translate('admin.agencies.messages.error.loadingAgencies'),
+                    life: 5000
+                });
             }
         });
     }
@@ -208,16 +271,16 @@ export class Agencies implements OnInit {
         if (!this.selectedAgency) return;
 
         this.confirmationService.confirm({
-            message: '¿Estás seguro de que quieres eliminar ' + this.selectedAgency.name + '?',
-            header: 'Confirmar',
+            message: this.translocoService.translate('admin.agencies.confirmations.delete.message', { name: this.selectedAgency.name }),
+            header: this.translocoService.translate('admin.agencies.confirmations.delete.header'),
             icon: 'pi pi-exclamation-triangle',
             accept: () => {
                 this.agencies.set(this.agencies().filter((val) => val.id !== this.selectedAgency?.id));
                 this.selectedAgency = null!;
                 this.messageService.add({
                     severity: 'success',
-                    summary: 'Éxito',
-                    detail: 'Agencia Eliminada',
+                    summary: 'Success',
+                    detail: this.translocoService.translate('admin.agencies.messages.success.agencyDeleted'),
                     life: 3000
                 });
             }
@@ -248,8 +311,8 @@ export class Agencies implements OnInit {
                     this.agencyDialog = false;
                     this.messageService.add({
                         severity: 'success',
-                        summary: 'Éxito',
-                        detail: 'Agencia actualizada correctamente',
+                        summary: 'Success',
+                        detail: this.translocoService.translate('admin.agencies.messages.success.agencyUpdated'),
                         life: 5000
                     });
                     this.loadAgencies();
@@ -261,7 +324,7 @@ export class Agencies implements OnInit {
                     this.messageService.add({
                         severity: 'error',
                         summary: 'Error',
-                        detail: error.error?.message || 'Error al actualizar la agencia',
+                        detail: error.error?.message || this.translocoService.translate('admin.agencies.messages.error.updatingAgency'),
                         life: 5000
                     });
                 }
@@ -273,8 +336,8 @@ export class Agencies implements OnInit {
                     this.agencyDialog = false;
                     this.messageService.add({
                         severity: 'success',
-                        summary: 'Éxito',
-                        detail: 'Agencia creada correctamente',
+                        summary: 'Success',
+                        detail: this.translocoService.translate('admin.agencies.messages.success.agencyCreated'),
                         life: 5000
                     });
                     this.loadAgencies();
@@ -285,7 +348,7 @@ export class Agencies implements OnInit {
                     this.messageService.add({
                         severity: 'error',
                         summary: 'Error',
-                        detail: error.error?.message || 'Error al crear la agencia',
+                        detail: error.error?.message || this.translocoService.translate('admin.agencies.messages.error.creatingAgency'),
                         life: 5000
                     });
                 }

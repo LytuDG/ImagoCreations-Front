@@ -35,6 +35,7 @@ import { TooltipModule } from 'primeng/tooltip';
 import { ProductAttributeValue } from './models/product-atribute-value';
 import { ProductAttributeValueService } from './service/product-atributte-value.service';
 import { ProductAttributesDialog } from './product-attribute-form.dialog';
+import { TranslocoModule, TranslocoService } from '@ngneat/transloco';
 
 interface Column {
     field: string;
@@ -77,22 +78,62 @@ interface ExportColumn {
         CheckboxModule,
         CardModule,
         TooltipModule,
-        ProductAttributesDialog
+        ProductAttributesDialog,
+        TranslocoModule
     ],
     template: `
         <p-toast />
 
         <p-toolbar class="mb-6">
             <ng-template #start>
-                <p-button label="New" icon="pi pi-plus" severity="secondary" class="mr-2" (onClick)="openNew()" />
-                <p-button label="Edit" icon="pi pi-pencil" severity="secondary" class="mr-2" (onClick)="editSelectedProduct()" [disabled]="!selectedProduct" />
-                <p-button label="Manage Attributes" icon="pi pi-tags" severity="secondary" class="mr-2" (onClick)="manageAttributes()" [disabled]="!selectedProduct" />
-                <p-button severity="secondary" label="Delete" icon="pi pi-trash" outlined (onClick)="deleteSelectedProduct()" [disabled]="!selectedProduct" />
+                <p-button
+                    [label]="'admin.products.buttons.new' | transloco"
+                    icon="pi pi-plus"
+                    severity="secondary"
+                    class="mr-2"
+                    (onClick)="openNew()"
+                />
+                <p-button
+                    [label]="'admin.products.buttons.edit' | transloco"
+                    icon="pi pi-pencil"
+                    severity="secondary"
+                    class="mr-2"
+                    (onClick)="editSelectedProduct()"
+                    [disabled]="!selectedProduct"
+                />
+                <p-button
+                    [label]="'admin.products.buttons.manageAttributes' | transloco"
+                    icon="pi pi-tags"
+                    severity="secondary"
+                    class="mr-2"
+                    (onClick)="manageAttributes()"
+                    [disabled]="!selectedProduct"
+                />
+                <p-button
+                    [label]="'admin.products.buttons.delete' | transloco"
+                    severity="secondary"
+                    icon="pi pi-trash"
+                    outlined
+                    (onClick)="deleteSelectedProduct()"
+                    [disabled]="!selectedProduct"
+                />
             </ng-template>
 
             <ng-template #end>
-                <p-button label="Export" icon="pi pi-upload" severity="secondary" (onClick)="exportCSV()" />
-                <p-button label="Refresh" icon="pi pi-refresh" severity="secondary" class="ml-1" (onClick)="loadProducts()" [loading]="loading()" />
+                <p-button
+                    [label]="'admin.products.buttons.export' | transloco"
+                    icon="pi pi-upload"
+                    severity="secondary"
+                    (onClick)="exportCSV()"
+                />
+                <p-button
+                    [label]="'admin.products.buttons.refresh' | transloco"
+                    icon="pi pi-refresh"
+                    severity="secondary"
+                    class="ml-1"
+                    (onClick)="loadProducts()"
+                    [loading]="loading()"
+                />
             </ng-template>
         </p-toolbar>
 
@@ -112,40 +153,45 @@ interface ExportColumn {
             [rowHover]="true"
             dataKey="id"
             selectionMode="single"
-            currentPageReportTemplate="Showing {first} to {last} of {totalRecords} products"
+            [currentPageReportTemplate]="'admin.products.table.pagination.showingProducts' | transloco"
             [showCurrentPageReport]="true"
             [rowsPerPageOptions]="[10, 20, 50]"
             [first]="(currentPage - 1) * pageSize"
         >
             <ng-template #caption>
                 <div class="flex items-center justify-between">
-                    <h5 class="m-0">Manage Products</h5>
+                    <h5 class="m-0">{{ 'admin.products.title' | transloco }}</h5>
                     <p-iconfield>
                         <p-inputicon styleClass="pi pi-search" />
-                        <input pInputText type="text" (keyup)="applyFilter($event, 'name')" placeholder="Search by name, SKU or type..." />
+                        <input
+                            pInputText
+                            type="text"
+                            (keyup)="applyFilter($event, 'name')"
+                            [placeholder]="'admin.products.search.placeholder' | transloco"
+                        />
                     </p-iconfield>
                 </div>
             </ng-template>
             <ng-template #header>
                 <tr>
                     <th style="width: 3rem"></th>
-                    <th style="min-width: 12rem">SKU</th>
+                    <th style="min-width: 12rem">{{ 'admin.products.table.columns.sku' | transloco }}</th>
                     <th pSortableColumn="name" style="min-width:16rem">
-                        Name
+                        {{ 'admin.products.table.columns.name' | transloco }}
                         <p-sortIcon field="name" />
                     </th>
-                    <th>Image</th>
+                    <th>{{ 'admin.products.table.columns.image' | transloco }}</th>
                     <th pSortableColumn="basePrice" style="min-width: 8rem">
-                        Price
+                        {{ 'admin.products.table.columns.price' | transloco }}
                         <p-sortIcon field="basePrice" />
                     </th>
                     <th pSortableColumn="type" style="min-width:10rem">
-                        Type
+                        {{ 'admin.products.table.columns.type' | transloco }}
                         <p-sortIcon field="type" />
                     </th>
-                    <th style="min-width: 12rem">Attributes</th>
+                    <th style="min-width: 12rem">{{ 'admin.products.table.columns.attributes' | transloco }}</th>
                     <th pSortableColumn="isActive" style="min-width: 10rem">
-                        Status
+                        {{ 'admin.products.table.columns.status' | transloco }}
                         <p-sortIcon field="isActive" />
                     </th>
                 </tr>
@@ -164,14 +210,14 @@ interface ExportColumn {
                             <p-radioButton [value]="product" [(ngModel)]="selectedProduct" />
                         </div>
                     </td>
-                    <td class="p-3" style="min-width: 12rem">{{ product.sku || 'N/A' }}</td>
+                    <td class="p-3" style="min-width: 12rem">{{ product.sku || ('admin.products.table.na' | transloco) }}</td>
                     <td class="p-3" style="min-width: 16rem">{{ product.name }}</td>
                     <td class="p-3">
                         <img [src]="product.picture" [alt]="product.name" style="width: 64px; height: 64px; object-fit: cover;" class="rounded" />
                     </td>
                     <td class="p-3">{{ product.basePrice | currency: 'USD' }}</td>
                     <td class="p-3">
-                        <p-tag [value]="product.type" [severity]="getTypeSeverity(product.type)" />
+                        <p-tag [value]="getTranslatedProductType(product.type)" [severity]="getTypeSeverity(product.type)" />
                     </td>
                     <td class="p-3">
                         @if (product.productsAttributesValues?.length) {
@@ -185,11 +231,14 @@ interface ExportColumn {
                             </div>
                         }
                         @if (!product.productsAttributesValues?.length) {
-                            <span class="text-gray-400 text-sm">No attributes</span>
+                            <span class="text-gray-400 text-sm">{{ 'admin.products.table.noAttributes' | transloco }}</span>
                         }
                     </td>
                     <td class="p-3">
-                        <p-tag [value]="product.isActive ? 'Active' : 'Inactive'" [severity]="product.isActive ? 'success' : 'danger'" />
+                        <p-tag
+                            [value]="product.isActive ? ('admin.products.status.active' | transloco) : ('admin.products.status.inactive' | transloco)"
+                            [severity]="product.isActive ? 'success' : 'danger'"
+                        />
                     </td>
                 </tr>
             </ng-template>
@@ -199,10 +248,22 @@ interface ExportColumn {
                     <td colspan="8" class="text-center py-6">
                         <div class="flex flex-col items-center gap-3">
                             <i class="pi pi-box text-6xl text-gray-400"></i>
-                            <span class="text-xl text-gray-500 font-medium"> No products found. Create your first product! </span>
+                            <span class="text-xl text-gray-500 font-medium">
+                                {{ 'admin.products.table.empty.message' | transloco }}
+                            </span>
                             <div class="flex gap-2">
-                                <p-button label="Refresh" icon="pi pi-refresh" severity="secondary" outlined (onClick)="loadProducts()" />
-                                <p-button label="Create Product" icon="pi pi-plus" (onClick)="openNew()" />
+                                <p-button
+                                    [label]="'admin.products.buttons.refresh' | transloco"
+                                    icon="pi pi-refresh"
+                                    severity="secondary"
+                                    outlined
+                                    (onClick)="loadProducts()"
+                                />
+                                <p-button
+                                    [label]="'admin.products.buttons.createProduct' | transloco"
+                                    icon="pi pi-plus"
+                                    (onClick)="openNew()"
+                                />
                             </div>
                         </div>
                     </td>
@@ -211,11 +272,19 @@ interface ExportColumn {
         </p-table>
 
         <!-- Diálogo principal de producto -->
-        <p-dialog [(visible)]="productDialog" [style]="{ width: '600px' }" [modal]="true" [closable]="!isUploading && !isSaving" [closeOnEscape]="!isUploading && !isSaving">
+        <p-dialog
+            [(visible)]="productDialog"
+            [style]="{ width: '600px' }"
+            [modal]="true"
+            [closable]="!isUploading && !isSaving"
+            [closeOnEscape]="!isUploading && !isSaving"
+        >
             <ng-template #header>
                 <div class="flex items-center gap-3">
                     <i class="pi pi-box text-2xl"></i>
-                    <span class="font-semibold text-xl">{{ newProduct.name || 'New Product' }}</span>
+                    <span class="font-semibold text-xl">
+                        {{ newProduct.name || ('admin.products.dialog.newProduct' | transloco) }}
+                    </span>
                 </div>
             </ng-template>
 
@@ -227,58 +296,117 @@ interface ExportColumn {
                             <div class="flex flex-col items-center gap-3">
                                 <i class="pi pi-cloud-upload text-5xl text-gray-400"></i>
                                 <div>
-                                    <p class="font-semibold text-gray-700 mb-1">Click to upload product image</p>
-                                    <p class="text-sm text-gray-500">PNG, JPG, GIF or WebP (max. 10MB)</p>
+                                    <p class="font-semibold text-gray-700 mb-1">
+                                        {{ 'admin.products.dialog.upload.title' | transloco }}
+                                    </p>
+                                    <p class="text-sm text-gray-500">
+                                        {{ 'admin.products.dialog.upload.description' | transloco }}
+                                    </p>
                                 </div>
                                 <input type="file" #fileInput (change)="onFileSelect($event)" accept="image/*" class="hidden" id="imageUpload" />
-                                <p-button label="Choose Image" icon="pi pi-upload" (onClick)="fileInput.click()" [disabled]="isUploading || isSaving" />
+                                <p-button
+                                    [label]="'admin.products.dialog.upload.button' | transloco"
+                                    icon="pi pi-upload"
+                                    (onClick)="fileInput.click()"
+                                    [disabled]="isUploading || isSaving"
+                                />
                             </div>
                         }
 
                         @if (selectedFile || imagePreview) {
                             <div class="flex flex-col items-center gap-3">
                                 @if (imagePreview) {
-                                    <img [src]="imagePreview" alt="Product preview" class="max-h-48 rounded-lg shadow-md" />
+                                    <img [src]="imagePreview" [alt]="'admin.products.dialog.previewAlt' | transloco" class="max-h-48 rounded-lg shadow-md" />
                                 }
                                 <div class="flex items-center gap-2 text-sm text-gray-600">
                                     <i class="pi pi-file"></i>
                                     <span>{{ selectedFile?.name }}</span>
                                     <span class="text-gray-400">{{ formatFileSize(selectedFile?.size) }}</span>
                                 </div>
-                                <p-button label="Change Image" icon="pi pi-refresh" severity="secondary" [outlined]="true" (onClick)="fileInput.click()" [disabled]="isUploading || isSaving" />
+                                <p-button
+                                    [label]="'admin.products.dialog.upload.changeButton' | transloco"
+                                    icon="pi pi-refresh"
+                                    severity="secondary"
+                                    [outlined]="true"
+                                    (onClick)="fileInput.click()"
+                                    [disabled]="isUploading || isSaving"
+                                />
                                 <input type="file" #fileInput (change)="onFileSelect($event)" accept="image/*" class="hidden" />
                             </div>
                         }
 
-                        @if (submitted && !selectedFile) {
-                            <small class="text-red-500 block mt-2">Product image is required.</small>
+                        @if (submitted && !selectedFile && !product.id) {
+                            <small class="text-red-500 block mt-2">
+                                {{ 'admin.products.validation.imageRequired' | transloco }}
+                            </small>
                         }
                     </div>
 
                     <!-- Product Name -->
                     <div>
-                        <label for="productName" class="block font-semibold mb-2 text-gray-700"> Product Name <span class="text-red-500">*</span> </label>
-                        <input type="text" pInputText id="productName" [(ngModel)]="newProduct.name" placeholder="Enter product name" [disabled]="isUploading || isSaving" class="w-full" fluid />
+                        <label for="productName" class="block font-semibold mb-2 text-gray-700">
+                            {{ 'admin.products.form.name' | transloco }} <span class="text-red-500">*</span>
+                        </label>
+                        <input
+                            type="text"
+                            pInputText
+                            id="productName"
+                            [(ngModel)]="newProduct.name"
+                            [placeholder]="'admin.products.form.placeholders.name' | transloco"
+                            [disabled]="isUploading || isSaving"
+                            class="w-full"
+                            fluid
+                        />
                         @if (submitted && !newProduct.name) {
-                            <small class="text-red-500">Product name is required.</small>
+                            <small class="text-red-500">
+                                {{ 'admin.products.validation.nameRequired' | transloco }}
+                            </small>
                         }
                     </div>
 
                     <!-- Description -->
                     <div>
-                        <label for="productDescription" class="block font-semibold mb-2 text-gray-700"> Description <span class="text-red-500">*</span> </label>
-                        <textarea id="productDescription" pTextarea [(ngModel)]="newProduct.description" placeholder="Describe the product features and characteristics" [disabled]="isUploading || isSaving" rows="4" class="w-full" fluid></textarea>
+                        <label for="productDescription" class="block font-semibold mb-2 text-gray-700">
+                            {{ 'admin.products.form.description' | transloco }} <span class="text-red-500">*</span>
+                        </label>
+                        <textarea
+                            id="productDescription"
+                            pTextarea
+                            [(ngModel)]="newProduct.description"
+                            [placeholder]="'admin.products.form.placeholders.description' | transloco"
+                            [disabled]="isUploading || isSaving"
+                            rows="4"
+                            class="w-full"
+                            fluid
+                        ></textarea>
                         @if (submitted && !newProduct.description) {
-                            <small class="text-red-500">Description is required.</small>
+                            <small class="text-red-500">
+                                {{ 'admin.products.validation.descriptionRequired' | transloco }}
+                            </small>
                         }
                     </div>
 
                     <!-- Base Price -->
                     <div>
-                        <label for="basePrice" class="block font-semibold mb-2 text-gray-700"> Base Price <span class="text-red-500">*</span> </label>
-                        <p-inputnumber id="basePrice" [(ngModel)]="newProduct.basePrice" mode="currency" currency="USD" locale="en-US" [disabled]="isUploading || isSaving" placeholder="0.00" [min]="0" class="w-full" fluid />
+                        <label for="basePrice" class="block font-semibold mb-2 text-gray-700">
+                            {{ 'admin.products.form.basePrice' | transloco }} <span class="text-red-500">*</span>
+                        </label>
+                        <p-inputnumber
+                            id="basePrice"
+                            [(ngModel)]="newProduct.basePrice"
+                            mode="currency"
+                            currency="USD"
+                            locale="en-US"
+                            [disabled]="isUploading || isSaving"
+                            [placeholder]="'0.00'"
+                            [min]="0"
+                            class="w-full"
+                            fluid
+                        />
                         @if (submitted && !newProduct.basePrice) {
-                            <small class="text-red-500">Base price is required.</small>
+                            <small class="text-red-500">
+                                {{ 'admin.products.validation.basePriceRequired' | transloco }}
+                            </small>
                         }
                     </div>
 
@@ -286,8 +414,18 @@ interface ExportColumn {
                     @if (product.id) {
                         <div class="border-t pt-4 mt-4">
                             <div class="flex items-center justify-between mb-3">
-                                <label class="block font-semibold text-gray-700">Product Attributes</label>
-                                <p-button label="Manage Attributes" icon="pi pi-tags" severity="secondary" [outlined]="true" size="small" (onClick)="openAttributesDialog()" [disabled]="isUploading || isSaving" />
+                                <label class="block font-semibold text-gray-700">
+                                    {{ 'admin.products.form.productAttributes' | transloco }}
+                                </label>
+                                <p-button
+                                    [label]="'admin.products.form.manageAttributes' | transloco"
+                                    icon="pi pi-tags"
+                                    severity="secondary"
+                                    [outlined]="true"
+                                    size="small"
+                                    (onClick)="openAttributesDialog()"
+                                    [disabled]="isUploading || isSaving"
+                                />
                             </div>
 
                             @if (product.productsAttributesValues?.length) {
@@ -298,8 +436,13 @@ interface ExportColumn {
                                                 <span class="font-medium">{{ attr.attribute.name }}</span>
                                                 <span class="text-gray-600 ml-2">→ {{ attr.attributeValue?.value }}</span>
                                                 <div class="text-xs text-gray-500 mt-1">
-                                                    <span class="mr-3">Required: {{ attr.required ? 'Yes' : 'No' }}</span>
-                                                    <span>Order: {{ attr.attributeValue?.order }}</span>
+                                                    <span class="mr-3">
+                                                        {{ 'admin.products.form.required' | transloco }}:
+                                                        {{ attr.required ? ('admin.products.buttons.yes' | transloco) : ('admin.products.buttons.no' | transloco) }}
+                                                    </span>
+                                                    <span>
+                                                        {{ 'admin.products.form.order' | transloco }}: {{ attr.attributeValue?.order }}
+                                                    </span>
                                                 </div>
                                             </div>
                                         </div>
@@ -310,7 +453,7 @@ interface ExportColumn {
                             @if (!product.productsAttributesValues?.length) {
                                 <div class="text-center py-4 text-gray-400">
                                     <i class="pi pi-tags text-xl mr-2"></i>
-                                    No attributes assigned yet
+                                    {{ 'admin.products.form.noAttributes' | transloco }}
                                 </div>
                             }
                         </div>
@@ -319,8 +462,12 @@ interface ExportColumn {
                     <!-- Active Status -->
                     <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                         <div>
-                            <label class="font-semibold text-gray-700 block mb-1">Active Status</label>
-                            <p class="text-sm text-gray-500">Make this product available for purchase</p>
+                            <label class="font-semibold text-gray-700 block mb-1">
+                                {{ 'admin.products.form.activeStatus' | transloco }}
+                            </label>
+                            <p class="text-sm text-gray-500">
+                                {{ 'admin.products.form.activeStatusDescription' | transloco }}
+                            </p>
                         </div>
                         <p-toggleswitch [(ngModel)]="newProduct.isActive" [disabled]="isUploading || isSaving" />
                     </div>
@@ -329,7 +476,9 @@ interface ExportColumn {
                     @if (isUploading) {
                         <div class="flex items-center gap-3 p-4 bg-blue-50 rounded-lg border border-blue-200">
                             <p-progressSpinner [style]="{ width: '30px', height: '30px' }" strokeWidth="4" />
-                            <span class="text-blue-700 font-medium">Uploading image...</span>
+                            <span class="text-blue-700 font-medium">
+                                {{ 'admin.products.messages.uploading' | transloco }}
+                            </span>
                         </div>
                     }
 
@@ -337,7 +486,9 @@ interface ExportColumn {
                     @if (isSaving) {
                         <div class="flex items-center gap-3 p-4 bg-green-50 rounded-lg border border-green-200">
                             <p-progressSpinner [style]="{ width: '30px', height: '30px' }" strokeWidth="4" />
-                            <span class="text-green-700 font-medium">Creating product...</span>
+                            <span class="text-green-700 font-medium">
+                                {{ getSavingMessage() }}
+                            </span>
                         </div>
                     }
                 </div>
@@ -345,8 +496,21 @@ interface ExportColumn {
 
             <ng-template #footer>
                 <div class="flex justify-end gap-2">
-                    <p-button label="Cancel" icon="pi pi-times" severity="secondary" [outlined]="true" (onClick)="hideDialog()" [disabled]="isUploading || isSaving" />
-                    <p-button [label]="product.id ? 'Update Product' : 'Create Product'" icon="pi pi-check" (onClick)="saveProduct()" [loading]="isUploading || isSaving" [disabled]="isUploading || isSaving" />
+                    <p-button
+                        [label]="'admin.products.buttons.cancel' | transloco"
+                        icon="pi pi-times"
+                        severity="secondary"
+                        [outlined]="true"
+                        (onClick)="hideDialog()"
+                        [disabled]="isUploading || isSaving"
+                    />
+                    <p-button
+                        [label]="getSaveButtonLabel()"
+                        icon="pi pi-check"
+                        (onClick)="saveProduct()"
+                        [loading]="isUploading || isSaving"
+                        [disabled]="isUploading || isSaving"
+                    />
                 </div>
             </ng-template>
         </p-dialog>
@@ -372,6 +536,7 @@ export class Products implements OnInit {
     private imageUploadService = inject(ImageUploadService);
     private sanitizer = inject(DomSanitizer);
     private productAttributeValueService = inject(ProductAttributeValueService);
+    private translocoService = inject(TranslocoService);
 
     productDialog: boolean = false;
     attributesDialog: boolean = false;
@@ -393,8 +558,8 @@ export class Products implements OnInit {
 
     newProduct: Partial<Product> = {};
     productTypes = [
-        { label: 'Simple Product', value: PRODUCT_TYPE.SIMPLE },
-        { label: 'Product with Variants', value: PRODUCT_TYPE.VARIANT }
+        { label: 'admin.products.types.simple', value: PRODUCT_TYPE.SIMPLE },
+        { label: 'admin.products.types.variant', value: PRODUCT_TYPE.VARIANT }
     ];
 
     isUploading = false;
@@ -405,6 +570,7 @@ export class Products implements OnInit {
 
     ngOnInit() {
         this.initializeColumns();
+        this.loadProducts();
     }
 
     exportCSV() {
@@ -413,14 +579,17 @@ export class Products implements OnInit {
 
     initializeColumns() {
         this.cols = [
-            { field: 'sku', header: 'SKU', customExportHeader: 'Product SKU' },
-            { field: 'name', header: 'Name' },
-            { field: 'secureUrl', header: 'Image' },
-            { field: 'basePrice', header: 'Price' },
-            { field: 'type', header: 'Type' },
-            { field: 'isActive', header: 'Status' }
+            { field: 'sku', header: this.translocoService.translate('admin.products.table.columns.sku'), customExportHeader: 'Product SKU' },
+            { field: 'name', header: this.translocoService.translate('admin.products.table.columns.name') },
+            { field: 'secureUrl', header: this.translocoService.translate('admin.products.table.columns.image') },
+            { field: 'basePrice', header: this.translocoService.translate('admin.products.table.columns.price') },
+            { field: 'type', header: this.translocoService.translate('admin.products.table.columns.type') },
+            { field: 'isActive', header: this.translocoService.translate('admin.products.table.columns.status') }
         ];
-        this.exportColumns = this.cols.map((col) => ({ title: col.header, dataKey: col.field }));
+        this.exportColumns = this.cols.map((col) => ({
+            title: col.customExportHeader || col.header,
+            dataKey: col.field
+        }));
     }
 
     onPageChange(event: any) {
@@ -468,8 +637,8 @@ export class Products implements OnInit {
         if (!this.selectedProduct) {
             this.messageService.add({
                 severity: 'warn',
-                summary: 'Selection Required',
-                detail: 'Please select a product to edit',
+                summary: this.translocoService.translate('admin.products.messages.selectionRequired.title'),
+                detail: this.translocoService.translate('admin.products.messages.selectionRequired.edit'),
                 life: 3000
             });
             return;
@@ -489,8 +658,8 @@ export class Products implements OnInit {
         if (!this.selectedProduct) {
             this.messageService.add({
                 severity: 'warn',
-                summary: 'Selection Required',
-                detail: 'Please select a product to delete',
+                summary: this.translocoService.translate('admin.products.messages.selectionRequired.title'),
+                detail: this.translocoService.translate('admin.products.messages.selectionRequired.delete'),
                 life: 3000
             });
             return;
@@ -499,9 +668,11 @@ export class Products implements OnInit {
     }
 
     deleteProduct(product: Product) {
+        const message = this.translocoService.translate('admin.products.confirmations.delete.message', { name: product.name });
+
         this.confirmationService.confirm({
-            message: 'Are you sure you want to delete ' + product.name + '?',
-            header: 'Confirm',
+            message: message,
+            header: this.translocoService.translate('admin.products.confirmations.delete.header'),
             icon: 'pi pi-exclamation-triangle',
             accept: () => {
                 if (product.id) {
@@ -517,8 +688,8 @@ export class Products implements OnInit {
                                 console.error('Error deleting product attributes:', error);
                                 this.messageService.add({
                                     severity: 'error',
-                                    summary: 'Error',
-                                    detail: 'Failed to delete product attributes',
+                                    summary: this.translocoService.translate('admin.products.messages.error.title'),
+                                    detail: this.translocoService.translate('admin.products.messages.error.deletingAttributes'),
                                     life: 3000
                                 });
                             }
@@ -545,8 +716,8 @@ export class Products implements OnInit {
 
                 this.messageService.add({
                     severity: 'success',
-                    summary: 'Successful',
-                    detail: 'Product Deleted',
+                    summary: this.translocoService.translate('admin.products.messages.success.title'),
+                    detail: this.translocoService.translate('admin.products.messages.success.deleted'),
                     life: 3000
                 });
             },
@@ -554,8 +725,8 @@ export class Products implements OnInit {
                 console.error('Error deleting product:', error);
                 this.messageService.add({
                     severity: 'error',
-                    summary: 'Error',
-                    detail: 'Failed to delete product',
+                    summary: this.translocoService.translate('admin.products.messages.error.title'),
+                    detail: this.translocoService.translate('admin.products.messages.error.deletingProduct'),
                     life: 3000
                 });
             }
@@ -583,8 +754,8 @@ export class Products implements OnInit {
                 console.error('Error loading products:', error);
                 this.messageService.add({
                     severity: 'error',
-                    summary: 'Error',
-                    detail: 'Failed to load products',
+                    summary: this.translocoService.translate('admin.products.messages.error.title'),
+                    detail: this.translocoService.translate('admin.products.messages.error.loading'),
                     life: 5000
                 });
                 this.loading.set(false);
@@ -597,15 +768,17 @@ export class Products implements OnInit {
     }
 
     getAttributeDisplay(attr: ProductAttributeValue): string {
-        return `${attr.attribute?.name || 'Unknown'}: ${attr.attributeValue?.value || 'Unknown'}`;
+        const attributeName = attr.attribute?.name || this.translocoService.translate('admin.products.table.unknown');
+        const attributeValue = attr.attributeValue?.value || this.translocoService.translate('admin.products.table.unknown');
+        return `${attributeName}: ${attributeValue}`;
     }
 
     manageAttributes(): void {
         if (!this.selectedProduct?.id) {
             this.messageService.add({
                 severity: 'warn',
-                summary: 'Selection Required',
-                detail: 'Please select a product to manage its attributes',
+                summary: this.translocoService.translate('admin.products.messages.selectionRequired.title'),
+                detail: this.translocoService.translate('admin.products.messages.selectionRequired.manageAttributes'),
                 life: 3000
             });
             return;
@@ -627,8 +800,8 @@ export class Products implements OnInit {
 
         this.messageService.add({
             severity: 'success',
-            summary: 'Success',
-            detail: 'Product attributes saved successfully',
+            summary: this.translocoService.translate('admin.products.messages.success.title'),
+            detail: this.translocoService.translate('admin.products.messages.success.attributesSaved'),
             life: 3000
         });
     }
@@ -641,6 +814,12 @@ export class Products implements OnInit {
         return type === PRODUCT_TYPE.SIMPLE ? 'info' : 'secondary';
     }
 
+    getTranslatedProductType(type: string): string {
+        const translationKey = `admin.products.types.${type.toLowerCase()}`;
+        const translated = this.translocoService.translate(translationKey);
+        return translated !== translationKey ? translated : type;
+    }
+
     onFileSelect(event: Event): void {
         const input = event.target as HTMLInputElement;
         if (input.files && input.files.length > 0) {
@@ -650,8 +829,8 @@ export class Products implements OnInit {
             if (!validation.isValid) {
                 this.messageService.add({
                     severity: 'error',
-                    summary: 'Invalid File',
-                    detail: validation.error,
+                    summary: this.translocoService.translate('admin.products.messages.error.title'),
+                    detail: validation.error || this.translocoService.translate('admin.products.messages.error.invalidFile'),
                     life: 5000
                 });
                 return;
@@ -684,8 +863,8 @@ export class Products implements OnInit {
         if (!this.newProduct.name || !this.newProduct.description || !this.newProduct.basePrice) {
             this.messageService.add({
                 severity: 'warn',
-                summary: 'Validation Error',
-                detail: 'Please fill in all required fields',
+                summary: this.translocoService.translate('admin.products.messages.validation.title'),
+                detail: this.translocoService.translate('admin.products.messages.validation.requiredFields'),
                 life: 5000
             });
             return;
@@ -694,8 +873,8 @@ export class Products implements OnInit {
         if (!isUpdate && !this.selectedFile) {
             this.messageService.add({
                 severity: 'warn',
-                summary: 'Validation Error',
-                detail: 'Product image is required for new products',
+                summary: this.translocoService.translate('admin.products.messages.validation.title'),
+                detail: this.translocoService.translate('admin.products.messages.validation.imageRequired'),
                 life: 5000
             });
             return;
@@ -713,7 +892,7 @@ export class Products implements OnInit {
                 basePrice: this.newProduct.basePrice,
                 type: this.newProduct.type || PRODUCT_TYPE.SIMPLE,
                 isActive: this.newProduct.isActive ?? true,
-                haveStock: false, // Default to true as per swagger requirement
+                haveStock: false,
                 publicId: publicId,
                 secureUrl: secureUrl
             };
@@ -726,8 +905,8 @@ export class Products implements OnInit {
                 if (!productDto.publicId || !productDto.secureUrl) {
                     this.messageService.add({
                         severity: 'error',
-                        summary: 'Error',
-                        detail: 'Image data missing for new product',
+                        summary: this.translocoService.translate('admin.products.messages.error.title'),
+                        detail: this.translocoService.translate('admin.products.messages.error.imageDataMissing'),
                         life: 5000
                     });
                     this.isSaving = false;
@@ -743,11 +922,11 @@ export class Products implements OnInit {
                     this.loadProducts(this.currentPage, this.pageSize);
                     this.selectedProduct = null;
 
-                    const message = isUpdate ? 'Product updated successfully' : 'Product created successfully';
+                    const messageKey = isUpdate ? 'admin.products.messages.success.updated' : 'admin.products.messages.success.created';
                     this.messageService.add({
                         severity: 'success',
-                        summary: 'Success',
-                        detail: message,
+                        summary: this.translocoService.translate('admin.products.messages.success.title'),
+                        detail: this.translocoService.translate(messageKey),
                         life: 3000
                     });
 
@@ -762,13 +941,14 @@ export class Products implements OnInit {
                 },
                 error: (error: any) => {
                     this.isSaving = false;
-                    let errorMessage = 'Failed to save product';
+                    let errorMessage = this.translocoService.translate('admin.products.messages.error.saving');
+
                     if (error.status === 0) {
-                        errorMessage = 'Network error - please check your connection';
+                        errorMessage = this.translocoService.translate('admin.products.messages.error.network');
                     } else if (error.status === 413) {
-                        errorMessage = 'Image file is too large';
+                        errorMessage = this.translocoService.translate('admin.products.messages.error.fileTooLarge');
                     } else if (error.status === 415) {
-                        errorMessage = 'Unsupported file type';
+                        errorMessage = this.translocoService.translate('admin.products.messages.error.unsupportedFile');
                     } else if (error.error?.message) {
                         errorMessage = error.error.message;
                     } else if (error.message) {
@@ -777,7 +957,7 @@ export class Products implements OnInit {
 
                     this.messageService.add({
                         severity: 'error',
-                        summary: 'Error',
+                        summary: this.translocoService.translate('admin.products.messages.error.title'),
                         detail: errorMessage,
                         life: 5000
                     });
@@ -793,8 +973,8 @@ export class Products implements OnInit {
                     if (!uploadResponse?.public_id || !uploadResponse?.secure_url) {
                         this.messageService.add({
                             severity: 'error',
-                            summary: 'Error',
-                            detail: 'Image upload failed',
+                            summary: this.translocoService.translate('admin.products.messages.error.title'),
+                            detail: this.translocoService.translate('admin.products.messages.error.uploadFailed'),
                             life: 5000
                         });
                         this.isSaving = false;
@@ -813,13 +993,13 @@ export class Products implements OnInit {
                 error: (error) => {
                     this.isUploading = false;
                     this.isSaving = false;
-                    let errorMessage = 'Failed to upload image';
+                    let errorMessage = this.translocoService.translate('admin.products.messages.error.uploadFailed');
                     if (error.error?.message) {
                         errorMessage = error.error.message;
                     }
                     this.messageService.add({
                         severity: 'error',
-                        summary: 'Error',
+                        summary: this.translocoService.translate('admin.products.messages.error.title'),
                         detail: errorMessage,
                         life: 5000
                     });
@@ -828,5 +1008,18 @@ export class Products implements OnInit {
         } else {
             saveFlow();
         }
+    }
+
+    // Métodos auxiliares para traducciones dinámicas
+    getSaveButtonLabel(): string {
+        return this.product.id
+            ? this.translocoService.translate('admin.products.buttons.updateProduct')
+            : this.translocoService.translate('admin.products.buttons.createProduct');
+    }
+
+    getSavingMessage(): string {
+        return this.product.id
+            ? this.translocoService.translate('admin.products.messages.updating')
+            : this.translocoService.translate('admin.products.messages.creating');
     }
 }

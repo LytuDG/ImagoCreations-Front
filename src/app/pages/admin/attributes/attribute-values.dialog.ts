@@ -1,4 +1,3 @@
-// pages/attributes/attribute-values.dialog.ts
 import { Component, inject, Input, Output, EventEmitter, OnInit, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -13,16 +12,15 @@ import { TableModule } from 'primeng/table';
 import { ToastModule } from 'primeng/toast';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { MessageService, ConfirmationService } from 'primeng/api';
+import { TranslocoModule, TranslocoService } from '@ngneat/transloco';
 import { Attribute } from './models/attribute';
 import { AttributeValue } from './models/attributeValue';
 import { AttributeValueService } from './services/attribute-value.service';
 import { ApiResponse } from '@/core/models/apiResponse';
-import { Divider } from 'primeng/divider';
-import { InputGroupAddon } from 'primeng/inputgroupaddon';
 import { DividerModule } from 'primeng/divider';
 import { TagModule } from 'primeng/tag';
 import { InputGroupModule } from 'primeng/inputgroup';
-import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
+import { InputGroupAddon } from "primeng/inputgroupaddon";
 
 @Component({
   selector: 'app-attribute-values-dialog',
@@ -40,20 +38,19 @@ import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
     TableModule,
     ToastModule,
     ConfirmDialogModule,
-    Divider,
-    InputGroupAddon,
     DividerModule,
     TagModule,
     InputGroupModule,
-    InputGroupAddonModule
-  ],
+    TranslocoModule,
+    InputGroupAddon
+],
   template: `
     <p-toast />
 
     <p-dialog
       [(visible)]="visible"
       [style]="{ maxHeight: '80vh', minWidth: '49vw' }"
-      [header]="dialogHeader"
+      [header]="getDialogHeader()"
       [modal]="true"
       [draggable]="false"
       [closable]="!saving"
@@ -67,8 +64,10 @@ import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
                 <div class="grid justify-center">
                     <!-- Valor (texto) - Ocupa toda la fila -->
                     <div class="col-12 field mb-4">
-                        <h5 class="m-0">{{ isEditingValue ? 'Editar Valor' : 'Nuevo Valor' }}</h5>
-                        <label for="value" class="block font-bold mb-2">Valor</label>
+                        <h5 class="m-0">{{ getFormTitle() }}</h5>
+                        <label for="value" class="block font-bold mb-2">
+                            {{ 'admin.attributes.values.form.value' | transloco }}
+                        </label>
                         <input
                         type="text"
                         pInputText
@@ -76,35 +75,56 @@ import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
                         [(ngModel)]="editingValue.value"
                         required
                         class="w-full"
-                        placeholder="Ej: Rojo, XL, Algodón..."
+                        [placeholder]="'admin.attributes.values.placeholders.value' | transloco"
                         [disabled]="saving"
                         />
                     </div>
 
                     <!-- Sección de Modificador de Precio -->
                     <div class="col-12">
-                        <label class="font-bold mt-2">Modificador de Precio</label>
+                        <label class="font-bold mt-2">
+                            {{ 'admin.attributes.values.form.priceModifier.title' | transloco }}
+                        </label>
                         <div class="mb-6 mt-2">
                         <!-- Tipo de Modificador -->
                           <div class="col-12 md:col-6 mb-6">
-                            <label class="block text-sm mb-2">Tipo</label>
+                            <label class="block text-sm mb-2">
+                                {{ 'admin.attributes.values.form.priceModifier.type' | transloco }}
+                            </label>
                             <div class="flex gap-3">
                             <!-- Opciones de radio button -->
                               <div class="flex items-center">
-                                <p-radiobutton inputId="fixed" name="modifierType" value="fixed" [(ngModel)]="editingValue.modifierType" [disabled]="saving" />
-                                <label for="fixed" class="ml-2 cursor-pointer">Fijo</label>
+                                <p-radiobutton
+                                    inputId="fixed"
+                                    name="modifierType"
+                                    value="fixed"
+                                    [(ngModel)]="editingValue.modifierType"
+                                    [disabled]="saving"
+                                />
+                                <label for="fixed" class="ml-2 cursor-pointer">
+                                    {{ 'admin.attributes.values.form.priceModifier.fixed' | transloco }}
+                                </label>
                               </div>
                               <div class="flex items-center">
-                                <p-radiobutton inputId="percent" name="modifierType" value="percent" [(ngModel)]="editingValue.modifierType" [disabled]="saving" />
-                                <label for="percent" class="ml-2 cursor-pointer">Porcentaje</label>
+                                <p-radiobutton
+                                    inputId="percent"
+                                    name="modifierType"
+                                    value="percent"
+                                    [(ngModel)]="editingValue.modifierType"
+                                    [disabled]="saving"
+                                />
+                                <label for="percent" class="ml-2 cursor-pointer">
+                                    {{ 'admin.attributes.values.form.priceModifier.percent' | transloco }}
+                                </label>
                               </div>
                             </div>
                           </div>
 
                         <!-- Monto del Modificador -->
                           <div class="col-12 md:col-6">
-                            <label for="priceModifier" class="block text-sm mb-2">Monto</label>
-                            <!-- Uso correcto de p-inputgroup -->
+                            <label for="priceModifier" class="block text-sm mb-2">
+                                {{ 'admin.attributes.values.form.priceModifier.amount' | transloco }}
+                            </label>
                             <p-inputgroup>
                             <p-inputgroup-addon>
                                 {{ editingValue.modifierType === 'percent' ? '%' : '$' }}
@@ -121,6 +141,13 @@ import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
                                 [disabled]="saving">
                             </p-inputnumber>
                             </p-inputgroup>
+
+                            <!-- Ejemplo de cálculo -->
+                            @if (editingValue.priceModifier !== 0) {
+                                <small class="text-color-secondary block mt-2">
+                                    {{ getModifierExample() }}
+                                </small>
+                            }
                           </div>
                         </div>
                     </div>
@@ -128,7 +155,9 @@ import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
                 <!-- Orden y Estado en la misma fila -->
                   <div class="col-12 grid">
                     <div class="col-12 md:col-6 field">
-                    <label for="order" class="block font-bold mb-2">Orden</label>
+                    <label for="order" class="block font-bold mb-2">
+                        {{ 'admin.attributes.values.form.order.label' | transloco }}
+                    </label>
                     <p-inputnumber
                         id="order"
                         [(ngModel)]="editingValue.order"
@@ -137,16 +166,20 @@ import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
                         class="w-full"
                         [disabled]="saving">
                     </p-inputnumber>
-                    <small class="text-color-secondary">Controla el orden de visualización</small>
+                    <small class="text-color-secondary">
+                        {{ 'admin.attributes.values.form.order.description' | transloco }}
+                    </small>
                     </div>
 
                     <div class="col-12 md:col-6 field mt-6">
-                      <label class="block font-bold mb-2">Estado</label>
+                      <label class="block font-bold mb-2">
+                        {{ 'admin.attributes.values.form.status.label' | transloco }}
+                      </label>
                       <div class="flex items-center">
                         <p-togglebutton
                         [(ngModel)]="editingValue.isActive"
-                        onLabel="Activo"
-                        offLabel="Inactivo"
+                        [onLabel]="'admin.attributes.values.form.status.active' | transloco"
+                        [offLabel]="'admin.attributes.values.form.status.inactive' | transloco"
                         onIcon="pi pi-check"
                         offIcon="pi pi-times"
                         [style]="{ 'width': '120px' }"
@@ -158,8 +191,20 @@ import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
 
                 <!-- Botones del formulario -->
                 <div class="flex justify-between col-12 mt-6">
-                  <p-button label="Cancelar" icon="pi pi-times" text (click)="cancelEditValue()" [disabled]="saving" />
-                  <p-button label="Guardar Valor" icon="pi pi-check" (click)="saveValue()" [disabled]="!editingValue.value || saving" [loading]="saving" />
+                  <p-button
+                    [label]="'admin.attributes.values.buttons.cancel' | transloco"
+                    icon="pi pi-times"
+                    text
+                    (click)="cancelEditValue()"
+                    [disabled]="saving"
+                  />
+                  <p-button
+                    [label]="'admin.attributes.values.buttons.saveValue' | transloco"
+                    icon="pi pi-check"
+                    (click)="saveValue()"
+                    [disabled]="!editingValue.value || saving"
+                    [loading]="saving"
+                  />
                 </div>
                 </div>
                 <!-- Fin del contenedor grid -->
@@ -170,9 +215,9 @@ import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
         <!-- Lista de valores existentes -->
         <div class="flex flex-col">
           <div class="flex justify-between">
-            <h5 class="m-0">Valores Configurados</h5>
+            <h5 class="m-0">{{ 'admin.attributes.values.table.title' | transloco }}</h5>
             <p-button
-              label="Nuevo Valor"
+              [label]="'admin.attributes.values.buttons.newValue' | transloco"
               icon="pi pi-plus"
               severity="secondary"
               size="small"
@@ -191,11 +236,21 @@ import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
             >
               <ng-template #header>
                 <tr>
-                  <th style="min-width: 8rem">Valor</th>
-                  <th style="min-width: 10rem">Modificador</th>
-                  <th style="min-width: 5rem">Orden</th>
-                  <th style="min-width: 6rem">Estado</th>
-                  <th style="min-width: 8rem">Acciones</th>
+                  <th style="min-width: 8rem">
+                    {{ 'admin.attributes.values.table.columns.value' | transloco }}
+                  </th>
+                  <th style="min-width: 10rem">
+                    {{ 'admin.attributes.values.table.columns.modifier' | transloco }}
+                  </th>
+                  <th style="min-width: 5rem">
+                    {{ 'admin.attributes.values.table.columns.order' | transloco }}
+                  </th>
+                  <th style="min-width: 6rem">
+                    {{ 'admin.attributes.values.table.columns.status' | transloco }}
+                  </th>
+                  <th style="min-width: 8rem">
+                    {{ 'admin.attributes.values.table.columns.actions' | transloco }}
+                  </th>
                 </tr>
               </ng-template>
 
@@ -212,16 +267,22 @@ import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
                       <span class="font-medium text-green-600">
                         +{{ value.priceModifier | currency:'USD':'symbol':'1.2-2' }}
                       </span>
-                      <div class="text-xs text-color-secondary">Fijo</div>
+                      <div class="text-xs text-color-secondary">
+                        {{ 'admin.attributes.values.table.modifierTypes.fixed' | transloco }}
+                      </div>
                     }
                     @if (value.modifierType === 'percent') {
                       <span class="font-medium text-blue-600">
                         +{{ value.priceModifier }}%
                       </span>
-                      <div class="text-xs text-color-secondary">Porcentaje</div>
+                      <div class="text-xs text-color-secondary">
+                        {{ 'admin.attributes.values.table.modifierTypes.percent' | transloco }}
+                      </div>
                     }
                     @if (value.priceModifier === 0) {
-                      <span class="text-color-secondary">Sin modificador</span>
+                      <span class="text-color-secondary">
+                        {{ 'admin.attributes.values.table.modifierTypes.none' | transloco }}
+                      </span>
                     }
                   </td>
                   <td style="min-width: 5rem">
@@ -229,7 +290,9 @@ import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
                   </td>
                   <td style="min-width: 6rem">
                     <p-tag
-                      [value]="value.isActive ? 'Activo' : 'Inactivo'"
+                      [value]="value.isActive ?
+                        ('admin.attributes.values.form.status.active' | transloco) :
+                        ('admin.attributes.values.form.status.inactive' | transloco)"
                       [severity]="value.isActive ? 'success' : 'secondary'"
                     />
                   </td>
@@ -241,7 +304,7 @@ import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
                         [text]="true"
                         severity="secondary"
                         (click)="editValue(value)"
-                        [title]="'Editar ' + value.value"
+                        [title]="'admin.attributes.values.buttons.edit' | transloco"
                       />
                       <p-button
                         icon="pi pi-trash"
@@ -249,7 +312,7 @@ import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
                         [text]="true"
                         severity="danger"
                         (click)="deleteValue(value)"
-                        [title]="'Eliminar ' + value.value"
+                        [title]="'admin.attributes.values.buttons.delete' | transloco"
                       />
                     </div>
                   </td>
@@ -261,7 +324,9 @@ import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
                   <td colspan="5" class="text-center py-4">
                     <div class="flex flex-column items-center gap-2">
                       <i class="pi pi-inbox text-4xl text-color-secondary"></i>
-                      <span class="text-color-secondary">No hay valores configurados</span>
+                      <span class="text-color-secondary">
+                        {{ 'admin.attributes.values.table.empty.title' | transloco }}
+                      </span>
                     </div>
                   </td>
                 </tr>
@@ -270,9 +335,11 @@ import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
           } @else {
             <div class="text-center py-8 border surface-border border-round">
               <i class="pi pi-inbox text-4xl text-color-secondary mb-3"></i>
-              <p class="text-color-secondary mb-4">No hay valores configurados para este atributo</p>
+              <p class="text-color-secondary mb-4">
+                {{ 'admin.attributes.values.table.empty.description' | transloco }}
+              </p>
               <p-button
-                label="Agregar Primer Valor"
+                [label]="'admin.attributes.values.table.empty.addFirst' | transloco"
                 icon="pi pi-plus"
                 (onClick)="addNewValue()"
               />
@@ -290,6 +357,7 @@ export class AttributeValuesDialogComponent implements OnInit, OnChanges {
   private attributeValueService = inject(AttributeValueService);
   private messageService = inject(MessageService);
   private confirmationService = inject(ConfirmationService);
+  private translocoService = inject(TranslocoService);
 
   @Input() visible: boolean = false;
   @Input() attribute: Attribute | null = null;
@@ -308,12 +376,6 @@ export class AttributeValuesDialogComponent implements OnInit, OnChanges {
   // Valor que se está editando/creando
   editingValue: AttributeValue = this.getDefaultValue();
 
-  // Header dinámico del diálogo
-  get dialogHeader(): string {
-    if (!this.attribute) return 'Valores de Atributo';
-    return `${this.attribute.name}`;
-  }
-
   ngOnInit() {
     if (this.attribute?.id) {
       this.loadAttributeValues();
@@ -326,6 +388,43 @@ export class AttributeValuesDialogComponent implements OnInit, OnChanges {
     }
   }
 
+  // Obtener header del diálogo traducido
+  getDialogHeader(): string {
+    if (!this.attribute) return this.translocoService.translate('admin.attributes.values.dialog.header', { name: '' });
+
+    const name = this.attribute.name || '';
+    return this.translocoService.translate('admin.attributes.values.dialog.header', { name });
+  }
+
+  // Obtener título del formulario traducido
+  getFormTitle(): string {
+    return this.isEditingValue
+      ? this.translocoService.translate('admin.attributes.values.dialog.editValue')
+      : this.translocoService.translate('admin.attributes.values.dialog.newValue');
+  }
+
+  // Obtener ejemplo de modificador traducido
+  getModifierExample(): string {
+    const basePrice = 100;
+    const modifier = this.editingValue.priceModifier || 0;
+
+    if (this.editingValue.modifierType === 'fixed') {
+      const result = basePrice + modifier;
+      return this.translocoService.translate('admin.attributes.values.form.priceModifier.example', {
+        price: basePrice.toFixed(2),
+        modifier: `$${modifier.toFixed(2)}`,
+        result: result.toFixed(2)
+      });
+    } else {
+      const result = basePrice * (1 + modifier / 100);
+      return this.translocoService.translate('admin.attributes.values.form.priceModifier.example', {
+        price: basePrice.toFixed(2),
+        modifier: `${modifier}%`,
+        result: result.toFixed(2)
+      });
+    }
+  }
+
   // Cargar valores del atributo
   loadAttributeValues(): void {
     if (!this.attribute?.id) return;
@@ -334,9 +433,7 @@ export class AttributeValuesDialogComponent implements OnInit, OnChanges {
 
     this.attributeValueService.getValuesByAttribute(this.attribute.id, {
       page: 1,
-      pageSize: 100, // Cargar muchos valores para este atributo
-/*       sortField: 'order',
-      sortDirection: 'asc' */
+      pageSize: 100
     }).subscribe({
       next: (response: ApiResponse<AttributeValue>) => {
         this.attributeValues = response.data || [];
@@ -348,7 +445,7 @@ export class AttributeValuesDialogComponent implements OnInit, OnChanges {
         this.messageService.add({
           severity: 'error',
           summary: 'Error',
-          detail: 'Error cargando valores del atributo',
+          detail: this.translocoService.translate('admin.attributes.values.messages.error.loading'),
           life: 3000
         });
       }
@@ -384,6 +481,14 @@ export class AttributeValuesDialogComponent implements OnInit, OnChanges {
       attributeId: this.attribute.id
     };
 
+    const successMessage = this.isEditingValue
+      ? 'admin.attributes.values.messages.success.valueUpdated'
+      : 'admin.attributes.values.messages.success.valueCreated';
+
+    const errorMessage = this.isEditingValue
+      ? 'admin.attributes.values.messages.error.updating'
+      : 'admin.attributes.values.messages.error.creating';
+
     if (this.isEditingValue && valueToSave.id) {
       // Actualizar
       this.attributeValueService.updateAttributeValue(valueToSave.id, valueToSave).subscribe({
@@ -397,8 +502,8 @@ export class AttributeValuesDialogComponent implements OnInit, OnChanges {
           this.showForm = false;
           this.messageService.add({
             severity: 'success',
-            summary: 'Éxito',
-            detail: 'Valor actualizado correctamente',
+            summary: 'Success',
+            detail: this.translocoService.translate(successMessage),
             life: 3000
           });
         },
@@ -407,40 +512,40 @@ export class AttributeValuesDialogComponent implements OnInit, OnChanges {
           this.messageService.add({
             severity: 'error',
             summary: 'Error',
-            detail: 'Error al actualizar el valor',
+            detail: this.translocoService.translate(errorMessage),
             life: 3000
           });
         }
       });
     } else {
       // Crear nuevo
-        this.attributeValueService.createAttributeValue(valueToSave).subscribe({
-            next: (response: ApiResponse<AttributeValue>) => {
-                let newValue: AttributeValue = valueToSave;
+      this.attributeValueService.createAttributeValue(valueToSave).subscribe({
+        next: (response: ApiResponse<AttributeValue>) => {
+          let newValue: AttributeValue = valueToSave;
 
-                if (response.data && response.data.length > 0) {
-                newValue = response.data[0];
-                }
+          if (response.data && response.data.length > 0) {
+            newValue = response.data[0];
+          }
 
-                this.attributeValues = [...this.attributeValues, newValue];
-                this.showForm = false;
-                this.messageService.add({
-                severity: 'success',
-                summary: 'Éxito',
-                detail: 'Valor creado correctamente',
-                life: 3000
-                });
-            },
-            error: (error) => {
-                console.error('Error creando valor:', error);
-                this.messageService.add({
-                severity: 'error',
-                summary: 'Error',
-                detail: 'Error al crear el valor',
-                life: 3000
-                });
-            }
-        });
+          this.attributeValues = [...this.attributeValues, newValue];
+          this.showForm = false;
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Success',
+            detail: this.translocoService.translate(successMessage),
+            life: 3000
+          });
+        },
+        error: (error) => {
+          console.error('Error creando valor:', error);
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: this.translocoService.translate(errorMessage),
+            life: 3000
+          });
+        }
+      });
     }
   }
 
@@ -448,9 +553,13 @@ export class AttributeValuesDialogComponent implements OnInit, OnChanges {
   deleteValue(value: AttributeValue): void {
     if (!value.id) return;
 
+    // Interpolación manual del mensaje
+    const message = this.translocoService.translate('admin.attributes.values.confirmations.delete.message')
+      .replace('{value}', value.value);
+
     this.confirmationService.confirm({
-      message: `¿Estás seguro de eliminar el valor "${value.value}"?`,
-      header: 'Confirmar',
+      message: message,
+      header: this.translocoService.translate('admin.attributes.values.confirmations.delete.header'),
       icon: 'pi pi-exclamation-triangle',
       accept: () => {
         this.attributeValueService.deleteAttributeValue(value.id!).subscribe({
@@ -458,8 +567,8 @@ export class AttributeValuesDialogComponent implements OnInit, OnChanges {
             this.attributeValues = this.attributeValues.filter(v => v.id !== value.id);
             this.messageService.add({
               severity: 'success',
-              summary: 'Éxito',
-              detail: 'Valor eliminado correctamente',
+              summary: 'Success',
+              detail: this.translocoService.translate('admin.attributes.values.messages.success.valueDeleted'),
               life: 3000
             });
           },
@@ -468,7 +577,7 @@ export class AttributeValuesDialogComponent implements OnInit, OnChanges {
             this.messageService.add({
               severity: 'error',
               summary: 'Error',
-              detail: 'Error al eliminar el valor',
+              detail: this.translocoService.translate('admin.attributes.values.messages.error.deleting'),
               life: 3000
             });
           }
@@ -488,28 +597,6 @@ export class AttributeValuesDialogComponent implements OnInit, OnChanges {
       attributeId: this.attribute?.id || '',
     };
   }
-
-// Añade estos métodos en tu clase:
-
-    getFixedModifierExample(): string {
-        const modifier = this.editingValue.priceModifier || 0;
-        const result = 100 + modifier;
-        // Formatea a 2 decimales
-        return result.toLocaleString('en-US', {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2
-        });
-    }
-
-    getPercentModifierExample(): string {
-        const percent = this.editingValue.priceModifier || 0;
-        const result = 100 * (1 + percent / 100);
-        // Formatea a 2 decimales
-        return result.toLocaleString('en-US', {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2
-        });
-    }
 
   // Eventos del diálogo principal
   onSave(): void {

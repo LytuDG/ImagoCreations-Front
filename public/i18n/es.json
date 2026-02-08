@@ -531,6 +531,567 @@
       "landing": "Inicio Público",
       "account": "Cuenta",
       "logout": "Cerrar Sesión"
+    },
+    "users": {
+      "title": "Gestión de Usuarios",
+      "buttons": {
+        "newUser": "Nuevo Usuario",
+        "delete": "Eliminar",
+        "export": "Exportar",
+        "reload": "Recargar",
+        "cancel": "Cancelar",
+        "save": "Guardar",
+        "search": "Buscar...",
+        "filter": "Filtrar..."
+      },
+      "table": {
+        "columns": {
+          "name": "Nombre",
+          "email": "Correo",
+          "role": "Rol",
+          "phone": "Teléfono",
+          "agency": "Agencia"
+        },
+        "pagination": {
+          "showingUsers": "Mostrando {first} a {last} de {totalRecords} usuarios"
+        },
+        "empty": {
+          "title": "No se encontraron usuarios",
+          "reload": "Recargar"
+        },
+        "phone": {
+          "notSpecified": "No especificado"
+        }
+      },
+      "dialog": {
+        "title": "Detalles del Usuario",
+        "fields": {
+          "name": "Nombre",
+          "lastName": "Apellido",
+          "email": "Email",
+          "role": "Rol",
+          "password": "Contraseña",
+          "confirmPassword": "Confirmar Contraseña"
+        }
+      },
+      "confirmations": {
+        "deleteSelected": {
+          "message": "¿Estás seguro de que quieres eliminar los usuarios seleccionados?",
+          "header": "Confirmar",
+          "accept": "Eliminar",
+          "reject": "Cancelar"
+        },
+        "deleteSingle": {
+          "message": "¿Estás seguro de que quieres eliminar {name}?",
+          "header": "Confirmar"
+        }
+      },
+      "messages": {
+        "success": {
+          "usersDeleted": "Usuarios Eliminados",
+          "userDeleted": "Usuario Eliminado",
+          "userSaved": "Usuario Guardado"
+        },
+        "error": {
+          "loadingUsers": "Error al cargar usuarios",
+          "loadingRoles": "Error al cargar roles"
+        },
+        "loading": "Cargando...",
+        "saving": "Guardando..."
+      },
+      "roles": {
+        "admin": "Administrador",
+        "user": "Usuario",
+        "superadmin": "Super Administrador",
+        "manager": "Gerente"
+      },
+      "agency": {
+        "notAvailable": "N/A"
+      }
+    },
+    "agencies": {
+      "title": "Gestión de Agencias",
+      "buttons": {
+        "newAgency": "Nueva Agencia",
+        "editAgency": "Editar Agencia",
+        "delete": "Eliminar",
+        "export": "Exportar",
+        "reload": "Recargar",
+        "cancel": "Cancelar",
+        "save": "Guardar"
+      },
+      "search": {
+        "placeholder": "Buscar por nombre..."
+      },
+      "table": {
+        "columns": {
+          "name": "Nombre",
+          "email": "Email",
+          "address": "Dirección",
+          "phone": "Teléfono"
+        },
+        "pagination": {
+          "showingAgencies": "Mostrando {first} a {last} de {totalRecords} agencias"
+        },
+        "empty": {
+          "title": "No se encontraron agencias",
+          "reload": "Recargar"
+        },
+        "phone": {
+          "notSpecified": "No especificado"
+        },
+        "address": {
+          "notAvailable": "N/A"
+        }
+      },
+      "dialog": {
+        "newTitle": "Nueva Agencia",
+        "editTitle": "Editar Agencia",
+        "sections": {
+          "agencyData": "Datos de la Agencia",
+          "adminUser": "Usuario Administrador"
+        },
+        "fields": {
+          "agencyName": "Nombre de la Agencia",
+          "agencyEmail": "Email de la Agencia",
+          "address": "Dirección",
+          "countryCode": "Código País",
+          "phone": "Teléfono",
+          "adminName": "Nombre",
+          "adminLastName": "Apellido",
+          "adminEmail": "Email",
+          "password": "Contraseña",
+          "confirmPassword": "Confirmar Contraseña"
+        },
+        "placeholders": {
+          "agencyName": "Ingrese el nombre de la agencia",
+          "agencyEmail": "email@agencia.com",
+          "address": "Dirección completa de la agencia",
+          "countryCode": "57",
+          "phone": "Número telefónico",
+          "adminName": "Nombre del administrador",
+          "adminLastName": "Apellido del administrador",
+          "adminEmail": "admin@email.com",
+          "password": "Contraseña del administrador",
+          "confirmPassword": "Confirmar contraseña"
+        },
+        "validations": {
+          "required": "es requerido",
+          "passwordsMatch": "Las contraseñas no coinciden",
+          "agencyName": "El nombre de la agencia es requerido",
+          "agencyEmail": "El email de la agencia es requerido",
+          "agencyAddress": "La dirección es requerida",
+          "adminName": "El nombre del administrador es requerido",
+          "adminEmail": "El email del administrador es requerido",
+          "adminPassword": "La contraseña es requerida",
+          "confirmPassword": "La confirmación de contraseña es requerida"
+        }
+      },
+      "confirmations": {
+        "delete": {
+          "message": "¿Estás seguro de que quieres eliminar {{name}}?",
+          "header": "Confirmar"
+        }
+      },
+      "messages": {
+        "success": {
+          "agencyDeleted": "Agencia Eliminada",
+          "agencyUpdated": "Agencia actualizada correctamente",
+          "agencyCreated": "Agencia creada correctamente"
+        },
+        "error": {
+          "loadingAgencies": "Error al cargar agencias",
+          "updatingAgency": "Error al actualizar la agencia",
+          "creatingAgency": "Error al crear la agencia"
+        }
+      }
+    },
+    "attributes": {
+      "title": "Gestión de Atributos",
+      "buttons": {
+        "newAttribute": "Nuevo Atributo",
+        "editAttribute": "Editar Atributo",
+        "manageValues": "Gestionar Valores",
+        "delete": "Eliminar",
+        "export": "Exportar",
+        "reload": "Recargar",
+        "cancel": "Cancelar",
+        "save": "Guardar",
+        "yes": "Sí",
+        "no": "No"
+      },
+      "tooltips": {
+        "manageValues": "Gestionar valores del atributo seleccionado"
+      },
+      "search": {
+        "placeholder": "Buscar por nombre..."
+      },
+      "table": {
+        "columns": {
+          "name": "Nombre",
+          "inputType": "Tipo de Campo",
+          "required": "Requerido",
+          "reusable": "Reutilizable",
+          "visibleB2B": "Visible B2B",
+          "visibleB2C": "Visible B2C"
+        },
+        "pagination": {
+          "showingAttributes": "Mostrando {first} a {last} de {totalRecords} atributos"
+        },
+        "empty": {
+          "title": "No se encontraron atributos",
+          "reload": "Recargar"
+        }
+      },
+      "inputTypes": {
+        "select": "Selector Simple",
+        "multi": "Selector Múltiple",
+        "file": "Archivo",
+        "text": "Texto",
+        "number": "Número"
+      },
+      "typeDescriptions": {
+        "select": "El usuario selecciona UNA opción de una lista",
+        "multi": "El usuario selecciona MÚLTIPLES opciones de una lista",
+        "file": "El usuario sube un archivo (imagen, PDF, etc.)",
+        "text": "El usuario ingresa texto libre",
+        "number": "El usuario ingresa un valor numérico"
+      },
+      "confirmations": {
+        "delete": {
+          "message": "¿Estás seguro de eliminar \"{name}\"?",
+          "header": "Confirmar"
+        }
+      },
+      "messages": {
+        "success": {
+          "attributeDeleted": "Atributo eliminado",
+          "attributeUpdated": "Atributo actualizado correctamente",
+          "attributeCreated": "Atributo creado correctamente",
+          "valuesSaved": "Valores guardados correctamente"
+        },
+        "error": {
+          "loadingAttributes": "Error cargando atributos",
+          "deletingAttribute": "No se pudo eliminar el atributo",
+          "updatingAttribute": "Error al actualizar el atributo",
+          "creatingAttribute": "Error al crear el atributo"
+        },
+        "warning": {
+          "selectionRequired": "Selección requerida",
+          "selectAttribute": "Por favor, selecciona un atributo para gestionar sus valores"
+        }
+      },
+      "form": {
+        "title": {
+          "new": "Nuevo Atributo",
+          "edit": "Editar Atributo"
+        },
+        "fields": {
+          "name": "Nombre",
+          "inputType": "Tipo de Campo",
+          "agency": "Agencia",
+          "configuration": "Configuración"
+        },
+        "labels": {
+          "required": "Requerido",
+          "reusable": "Reutilizable",
+          "visibleB2B": "Visible B2B",
+          "visibleB2C": "Visible B2C"
+        },
+        "placeholders": {
+          "name": "Ej: Color, Talla, Material",
+          "inputType": "Selecciona un tipo"
+        },
+        "sections": {
+          "predefinedValues": "Valores Predefinidos",
+          "manageValues": "Gestionar Valores"
+        },
+        "messages": {
+          "requiresValues": "(Requiere valores predefinidos)",
+          "valuesInstruction": "Este atributo requiere valores predefinidos. Haz clic en 'Gestionar Valores' para agregarlos.",
+          "valuesWarning": "⚠️ Este tipo requiere valores predefinidos. Deberás agregarlos después de guardar."
+        },
+        "buttons": {
+          "cancel": "Cancelar",
+          "save": "Guardar",
+          "manageValues": "Gestionar Valores"
+        },
+        "toggle": {
+          "yes": "Sí",
+          "no": "No"
+        }
+      },
+      "values": {
+        "dialog": {
+          "header": "Valores de {{name}}",
+          "newValue": "Nuevo Valor",
+          "editValue": "Editar Valor"
+        },
+        "form": {
+          "value": "Valor",
+          "priceModifier": {
+            "title": "Modificador de Precio",
+            "type": "Tipo",
+            "fixed": "Fijo",
+            "percent": "Porcentaje",
+            "amount": "Monto",
+            "example": "Ejemplo: {price} + {modifier} = {result}"
+          },
+          "order": {
+            "label": "Orden",
+            "description": "Controla el orden de visualización"
+          },
+          "status": {
+            "label": "Estado",
+            "active": "Activo",
+            "inactive": "Inactivo"
+          }
+        },
+        "table": {
+          "title": "Valores Configurados",
+          "columns": {
+            "value": "Valor",
+            "modifier": "Modificador",
+            "order": "Orden",
+            "status": "Estado",
+            "actions": "Acciones"
+          },
+          "modifierTypes": {
+            "fixed": "Fijo",
+            "percent": "Porcentaje",
+            "none": "Sin modificador"
+          },
+          "empty": {
+            "title": "No hay valores configurados",
+            "description": "No hay valores configurados para este atributo",
+            "addFirst": "Agregar Primer Valor"
+          }
+        },
+        "buttons": {
+          "cancel": "Cancelar",
+          "saveValue": "Guardar Valor",
+          "newValue": "Nuevo Valor",
+          "edit": "Editar",
+          "delete": "Eliminar"
+        },
+        "placeholders": {
+          "value": "Ej: Rojo, XL, Algodón..."
+        },
+        "confirmations": {
+          "delete": {
+            "message": "¿Estás seguro de eliminar el valor \"{value}\"?",
+            "header": "Confirmar"
+          }
+        },
+        "messages": {
+          "success": {
+            "valueCreated": "Valor creado correctamente",
+            "valueUpdated": "Valor actualizado correctamente",
+            "valueDeleted": "Valor eliminado correctamente"
+          },
+          "error": {
+            "loading": "Error cargando valores del atributo",
+            "creating": "Error al crear el valor",
+            "updating": "Error al actualizar el valor",
+            "deleting": "Error al eliminar el valor"
+          }
+        }
+      }
+    },
+    "products": {
+      "title": "Gestionar Productos",
+      "buttons": {
+        "new": "Nuevo",
+        "edit": "Editar",
+        "manageAttributes": "Gestionar Atributos",
+        "delete": "Eliminar",
+        "export": "Exportar",
+        "refresh": "Recargar",
+        "cancel": "Cancelar",
+        "createProduct": "Crear Producto",
+        "updateProduct": "Actualizar Producto",
+        "yes": "Sí",
+        "no": "No"
+      },
+      "search": {
+        "placeholder": "Buscar por nombre, SKU o tipo..."
+      },
+      "table": {
+        "columns": {
+          "sku": "SKU",
+          "name": "Nombre",
+          "image": "Imagen",
+          "price": "Precio",
+          "type": "Tipo",
+          "attributes": "Atributos",
+          "status": "Estado"
+        },
+        "pagination": {
+          "showingProducts": "Mostrando {first} a {last} de {totalRecords} productos"
+        },
+        "na": "N/A",
+        "noAttributes": "Sin atributos",
+        "unknown": "Desconocido",
+        "empty": {
+          "message": "No se encontraron productos. ¡Crea tu primer producto!"
+        }
+      },
+      "dialog": {
+        "newProduct": "Nuevo Producto",
+        "upload": {
+          "title": "Haz clic para subir imagen del producto",
+          "description": "PNG, JPG, GIF o WebP (máx. 10MB)",
+          "button": "Seleccionar Imagen",
+          "changeButton": "Cambiar Imagen"
+        },
+        "previewAlt": "Vista previa del producto"
+      },
+      "form": {
+        "name": "Nombre del Producto",
+        "description": "Descripción",
+        "basePrice": "Precio Base",
+        "productAttributes": "Atributos del Producto",
+        "manageAttributes": "Gestionar Atributos",
+        "required": "Requerido",
+        "order": "Orden",
+        "noAttributes": "Sin atributos asignados aún",
+        "activeStatus": "Estado Activo",
+        "activeStatusDescription": "Hacer este producto disponible para compra"
+      },
+      "validation": {
+        "imageRequired": "La imagen del producto es requerida",
+        "nameRequired": "El nombre del producto es requerido",
+        "descriptionRequired": "La descripción es requerida",
+        "basePriceRequired": "El precio base es requerido"
+      },
+      "types": {
+        "simple": "Producto Simple",
+        "variant": "Producto con Variantes"
+      },
+      "status": {
+        "active": "Activo",
+        "inactive": "Inactivo"
+      },
+      "confirmations": {
+        "delete": {
+          "header": "Confirmar",
+          "message": "¿Estás seguro de que quieres eliminar {{name}}?"
+        }
+      },
+      "messages": {
+        "selectionRequired": {
+          "title": "Selección Requerida",
+          "edit": "Por favor selecciona un producto para editar",
+          "delete": "Por favor selecciona un producto para eliminar",
+          "manageAttributes": "Por favor selecciona un producto para gestionar sus atributos"
+        },
+        "validation": {
+          "title": "Error de Validación",
+          "requiredFields": "Por favor completa todos los campos requeridos",
+          "imageRequired": "La imagen del producto es requerida para nuevos productos"
+        },
+        "success": {
+          "title": "Exitoso",
+          "created": "Producto creado exitosamente",
+          "updated": "Producto actualizado exitosamente",
+          "deleted": "Producto Eliminado",
+          "attributesSaved": "Atributos del producto guardados exitosamente"
+        },
+        "error": {
+          "title": "Error",
+          "loading": "Error al cargar productos",
+          "saving": "Error al guardar producto",
+          "deletingProduct": "Error al eliminar producto",
+          "deletingAttributes": "Error al eliminar atributos del producto",
+          "uploadFailed": "Error al subir imagen",
+          "imageDataMissing": "Faltan datos de imagen para nuevo producto",
+          "invalidFile": "Archivo inválido",
+          "network": "Error de red - por favor verifica tu conexión",
+          "fileTooLarge": "El archivo de imagen es demasiado grande",
+          "unsupportedFile": "Tipo de archivo no soportado"
+        },
+        "uploading": "Subiendo imagen...",
+        "creating": "Creando producto...",
+        "updating": "Actualizando producto..."
+      }
+    },
+    "productAttributes": {
+      "title": "Gestionar Atributos para {{productName}}",
+      "loading": {
+        "attributes": "Cargando atributos disponibles...",
+        "values": "Cargando valores de atributos..."
+      },
+      "sections": {
+        "currentAttributes": {
+          "title": "Atributos Actualmente Asignados",
+          "count": "{{count}} atributo{{plural}}",
+          "unknownAttribute": "Atributo Desconocido",
+          "noValue": "Sin valor",
+          "required": "Requerido",
+          "order": "Orden: {{order}}"
+        },
+        "addNewAttributes": {
+          "title": "Agregar Nuevos Atributos",
+          "hint": "Los atributos ya asignados están ocultos",
+          "placeholder": "Seleccionar atributos para asignar",
+          "tooltip": "Los atributos marcados como reutilizables pueden asignarse a múltiples productos",
+          "noValuesAvailable": "No hay valores disponibles para este atributo"
+        },
+        "configuration": {
+          "selectValue": "Seleccionar Valor",
+          "chooseValue": "Elegir un valor",
+          "valueRequired": "Este atributo requiere un valor",
+          "order": "Orden",
+          "orderPlaceholder": "Orden",
+          "requiredForProduct": "Requerido para este producto",
+          "emptyState": "Selecciona atributos del menú desplegable para configurarlos para este producto"
+        }
+      },
+      "labels": {
+        "assigned": "Asignados: {{count}}",
+        "new": "Nuevos: {{count}}"
+      },
+      "buttons": {
+        "remove": "Eliminar atributo",
+        "removeAttribute": "Eliminar",
+        "cancel": "Cancelar",
+        "saveNewAttributes": "Guardar Nuevos Atributos",
+        "saveTooltip": "Guardar solo nuevos atributos. Usa el icono de basura para eliminar los existentes."
+      },
+      "messages": {
+        "saving": "Guardando atributos...",
+        "noChanges": "Sin Cambios",
+        "noAttributesToAdd": "No hay nuevos atributos para agregar",
+        "validation": {
+          "valueRequired": "Valor requerido para atributo: {{attributeName}}"
+        },
+        "success": {
+          "attributesSaved": "Atributos del producto guardados exitosamente"
+        },
+        "error": {
+          "loadingAttributes": "Error al cargar atributos disponibles",
+          "loadingValues": "Error al cargar valores de atributos",
+          "savingAttributes": "Error al guardar atributos del producto",
+          "removingAttribute": "Error al eliminar atributo. Por favor inténtalo de nuevo."
+        }
+      },
+      "confirmations": {
+        "removeAttribute": {
+          "header": "Confirmar Eliminación",
+          "message": "¿Estás seguro de que quieres eliminar el atributo \"{{attributeName}}\"?"
+        }
+      },
+      "inputTypes": {
+        "text": "Texto",
+        "number": "Número",
+        "select": "Selector",
+        "multi": "Selector Múltiple",
+        "checkbox": "Casilla",
+        "radio": "Radio",
+        "textarea": "Área de Texto",
+        "date": "Fecha",
+        "file": "Archivo"
+      }
     }
   }
 }

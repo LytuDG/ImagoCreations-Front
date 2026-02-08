@@ -1,4 +1,3 @@
-// pages/attributes/components/attribute-list/attribute-list.component.ts
 import { Component, inject, OnInit, signal, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -14,11 +13,13 @@ import { IconFieldModule } from 'primeng/iconfield';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { RadioButtonModule } from 'primeng/radiobutton';
 import { MessageService, ConfirmationService } from 'primeng/api';
+import { TranslocoModule, TranslocoService } from '@ngneat/transloco';
 import { AttributeService } from './services/attribute.service';
 import { Attribute } from './models/attribute';
 import { ApiResponse } from '@/core/models/apiResponse';
 import { AttributeFormComponent } from './attribute-form.dialog';
 import { AttributeValuesDialogComponent } from './attribute-values.dialog';
+import { TooltipModule } from 'primeng/tooltip';
 
 type TagSeverity = "success" | "info" | "warn" | "danger" | "secondary" | "contrast" | null | undefined;
 
@@ -39,6 +40,8 @@ type TagSeverity = "success" | "info" | "warn" | "danger" | "secondary" | "contr
     IconFieldModule,
     ConfirmDialogModule,
     RadioButtonModule,
+    TranslocoModule,
+    TooltipModule,
     AttributeFormComponent,
     AttributeValuesDialogComponent
   ],
@@ -48,14 +51,14 @@ type TagSeverity = "success" | "info" | "warn" | "danger" | "secondary" | "contr
     <p-toolbar class="mb-6">
       <ng-template #start>
         <p-button
-          label="Nuevo Atributo"
+          [label]="'admin.attributes.buttons.newAttribute' | transloco"
           icon="pi pi-plus"
           severity="secondary"
           class="mr-2"
           (onClick)="openNew()"
         />
         <p-button
-          label="Editar Atributo"
+          [label]="'admin.attributes.buttons.editAttribute' | transloco"
           icon="pi pi-pencil"
           severity="secondary"
           class="mr-2"
@@ -64,18 +67,18 @@ type TagSeverity = "success" | "info" | "warn" | "danger" | "secondary" | "contr
         />
 
         <p-button
-          label="Gestionar Valores"
+          [label]="'admin.attributes.buttons.manageValues' | transloco"
           icon="pi pi-list"
           severity="secondary"
           class="mr-2"
           (onClick)="manageSelectedAttributeValues()"
           [disabled]="!selectedAttribute"
-          pTooltip="Gestionar valores del atributo seleccionado"
+          [pTooltip]="'admin.attributes.tooltips.manageValues' | transloco"
         />
 
         <p-button
+          [label]="'admin.attributes.buttons.delete' | transloco"
           severity="secondary"
-          label="Eliminar"
           icon="pi pi-trash"
           outlined
           (onClick)="deleteAttribute()"
@@ -85,13 +88,13 @@ type TagSeverity = "success" | "info" | "warn" | "danger" | "secondary" | "contr
 
       <ng-template #end>
         <p-button
-          label="Exportar"
+          [label]="'admin.attributes.buttons.export' | transloco"
           icon="pi pi-upload"
           severity="secondary"
           (onClick)="exportCSV()"
         />
         <p-button
-          label="Recargar"
+          [label]="'admin.attributes.buttons.reload' | transloco"
           icon="pi pi-refresh"
           severity="secondary"
           class="ml-1"
@@ -111,7 +114,7 @@ type TagSeverity = "success" | "info" | "warn" | "danger" | "secondary" | "contr
       [rowHover]="true"
       dataKey="id"
       selectionMode="single"
-      currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} atributos"
+      [currentPageReportTemplate]="'admin.attributes.table.pagination.showingAttributes' | transloco"
       [showCurrentPageReport]="true"
       [rowsPerPageOptions]="[10, 20, 30]"
       [loading]="loading()"
@@ -122,14 +125,14 @@ type TagSeverity = "success" | "info" | "warn" | "danger" | "secondary" | "contr
     >
       <ng-template #caption>
         <div class="flex items-center justify-between">
-          <h5 class="m-0">Gestión de Atributos</h5>
+          <h5 class="m-0">{{ 'admin.attributes.title' | transloco }}</h5>
           <p-iconfield>
             <p-inputicon class="pi pi-search" />
             <input
               pInputText
               type="text"
               (keyup)="applyFilter($event, 'name')"
-              placeholder="Buscar por nombre..."
+              [placeholder]="'admin.attributes.search.placeholder' | transloco"
             />
           </p-iconfield>
         </div>
@@ -139,17 +142,17 @@ type TagSeverity = "success" | "info" | "warn" | "danger" | "secondary" | "contr
         <tr>
           <th></th>
           <th pSortableColumn="name">
-            Nombre
+            {{ 'admin.attributes.table.columns.name' | transloco }}
             <p-sortIcon field="name" />
           </th>
           <th pSortableColumn="inputType">
-            Tipo de Campo
+            {{ 'admin.attributes.table.columns.inputType' | transloco }}
             <p-sortIcon field="inputType" />
           </th>
-          <th>Requerido</th>
-          <th>Reutilizable</th>
-          <th>Visible B2B</th>
-          <th>Visible B2C</th>
+          <th>{{ 'admin.attributes.table.columns.required' | transloco }}</th>
+          <th>{{ 'admin.attributes.table.columns.reusable' | transloco }}</th>
+          <th>{{ 'admin.attributes.table.columns.visibleB2B' | transloco }}</th>
+          <th>{{ 'admin.attributes.table.columns.visibleB2C' | transloco }}</th>
         </tr>
       </ng-template>
 
@@ -173,31 +176,31 @@ type TagSeverity = "success" | "info" | "warn" | "danger" | "secondary" | "contr
           <td class="p-3">{{ attribute.name }}</td>
           <td class="p-3">
             <p-tag
-              [value]="getInputTypeLabel(attribute.inputType)"
+              [value]="getTranslatedInputType(attribute.inputType)"
               [severity]="getInputTypeSeverity(attribute.inputType)"
             />
           </td>
           <td class="p-3">
             <p-tag
-              [value]="attribute.required ? 'Sí' : 'No'"
+              [value]="getYesNoTagValue(attribute.required)"
               [severity]="attribute.required ? 'success' : 'secondary'"
             />
           </td>
           <td class="p-3">
             <p-tag
-              [value]="attribute.reusable ? 'Sí' : 'No'"
+              [value]="getYesNoTagValue(attribute.reusable)"
               [severity]="attribute.reusable ? 'success' : 'secondary'"
             />
           </td>
           <td class="p-3">
             <p-tag
-              [value]="attribute.visibleB2B ? 'Sí' : 'No'"
+              [value]="getYesNoTagValue(attribute.visibleB2B)"
               [severity]="attribute.visibleB2B ? 'success' : 'secondary'"
             />
           </td>
           <td class="p-3">
             <p-tag
-              [value]="attribute.visibleB2C ? 'Sí' : 'No'"
+              [value]="getYesNoTagValue(attribute.visibleB2C)"
               [severity]="attribute.visibleB2C ? 'success' : 'secondary'"
             />
           </td>
@@ -210,9 +213,13 @@ type TagSeverity = "success" | "info" | "warn" | "danger" | "secondary" | "contr
             <div class="flex flex-column items-center gap-3">
               <i class="pi pi-tag text-6xl text-color-secondary"></i>
               <span class="text-xl text-color-secondary font-medium">
-                No se encontraron atributos
+                {{ 'admin.attributes.table.empty.title' | transloco }}
               </span>
-              <p-button label="Recargar" icon="pi pi-refresh" (onClick)="loadAttributes()" />
+              <p-button
+                [label]="'admin.attributes.table.empty.reload' | transloco"
+                icon="pi pi-refresh"
+                (onClick)="loadAttributes()"
+              />
             </div>
           </td>
         </tr>
@@ -249,6 +256,7 @@ export class Attributes implements OnInit {
   private attributeService = inject(AttributeService);
   private messageService = inject(MessageService);
   private confirmationService = inject(ConfirmationService);
+  private translocoService = inject(TranslocoService);
 
   attributeDialog: boolean = false;
   attributeValuesDialog: boolean = false;
@@ -277,32 +285,32 @@ export class Attributes implements OnInit {
     this.loading.set(true);
 
     const params: any = {
-        page: this.requestBody.page,
-        pageSize: this.requestBody.limit
+      page: this.requestBody.page,
+      pageSize: this.requestBody.limit
     };
 
     if (this.requestBody.name) {
-        params.name = this.requestBody.name;
+      params.name = this.requestBody.name;
     }
 
     this.attributeService.getAttribute(params).subscribe({
-        next: (response: ApiResponse<Attribute>) => {
+      next: (response: ApiResponse<Attribute>) => {
         this.attributes.set(response.data || []);
         this.totalRecords = response.total || 0;
         this.loading.set(false);
-        },
-        error: (error) => {
+      },
+      error: (error) => {
         console.error('Error loading attributes:', error);
         this.loading.set(false);
         this.messageService.add({
-            severity: 'error',
-            summary: 'Error',
-            detail: 'Error cargando atributos',
-            life: 5000
+          severity: 'error',
+          summary: 'Error',
+          detail: this.translocoService.translate('admin.attributes.messages.error.loadingAttributes'),
+          life: 5000
         });
         this.attributes.set([]);
         this.totalRecords = 0;
-        }
+      }
     });
   }
 
@@ -371,8 +379,8 @@ export class Attributes implements OnInit {
     if (!this.selectedAttribute?.id) {
       this.messageService.add({
         severity: 'warn',
-        summary: 'Selección requerida',
-        detail: 'Por favor, selecciona un atributo para gestionar sus valores',
+        summary: this.translocoService.translate('admin.attributes.messages.warning.selectionRequired'),
+        detail: this.translocoService.translate('admin.attributes.messages.warning.selectAttribute'),
         life: 3000
       });
       return;
@@ -403,8 +411,8 @@ export class Attributes implements OnInit {
 
     this.messageService.add({
       severity: 'success',
-      summary: 'Éxito',
-      detail: 'Valores guardados correctamente',
+      summary: 'Success',
+      detail: this.translocoService.translate('admin.attributes.messages.success.valuesSaved'),
       life: 3000
     });
   }
@@ -418,9 +426,13 @@ export class Attributes implements OnInit {
   deleteAttribute() {
     if (!this.selectedAttribute) return;
 
+    // Interpolación manual para el mensaje de confirmación
+    const message = this.translocoService.translate('admin.attributes.confirmations.delete.message')
+      .replace('{name}', this.selectedAttribute.name);
+
     this.confirmationService.confirm({
-      message: `¿Estás seguro de eliminar "${this.selectedAttribute.name}"?`,
-      header: 'Confirmar',
+      message: message,
+      header: this.translocoService.translate('admin.attributes.confirmations.delete.header'),
       icon: 'pi pi-exclamation-triangle',
       accept: () => {
         this.attributeService.deleteAttribute(this.selectedAttribute!.id!).subscribe({
@@ -443,8 +455,8 @@ export class Attributes implements OnInit {
 
             this.messageService.add({
               severity: 'success',
-              summary: 'Éxito',
-              detail: 'Atributo eliminado',
+              summary: 'Success',
+              detail: this.translocoService.translate('admin.attributes.messages.success.attributeDeleted'),
               life: 3000
             });
           },
@@ -453,7 +465,7 @@ export class Attributes implements OnInit {
             this.messageService.add({
               severity: 'error',
               summary: 'Error',
-              detail: 'No se pudo eliminar el atributo',
+              detail: this.translocoService.translate('admin.attributes.messages.error.deletingAttribute'),
               life: 3000
             });
           }
@@ -488,8 +500,8 @@ export class Attributes implements OnInit {
           this.attributeDialog = false;
           this.messageService.add({
             severity: 'success',
-            summary: 'Éxito',
-            detail: 'Atributo actualizado correctamente',
+            summary: 'Success',
+            detail: this.translocoService.translate('admin.attributes.messages.success.attributeUpdated'),
             life: 5000
           });
           this.loadAttributes();
@@ -501,7 +513,7 @@ export class Attributes implements OnInit {
           this.messageService.add({
             severity: 'error',
             summary: 'Error',
-            detail: error.error?.message || 'Error al actualizar el atributo',
+            detail: error.error?.message || this.translocoService.translate('admin.attributes.messages.error.updatingAttribute'),
             life: 5000
           });
         }
@@ -513,8 +525,8 @@ export class Attributes implements OnInit {
           this.attributeDialog = false;
           this.messageService.add({
             severity: 'success',
-            summary: 'Éxito',
-            detail: 'Atributo creado correctamente',
+            summary: 'Success',
+            detail: this.translocoService.translate('admin.attributes.messages.success.attributeCreated'),
             life: 5000
           });
           this.loadAttributes();
@@ -525,7 +537,7 @@ export class Attributes implements OnInit {
           this.messageService.add({
             severity: 'error',
             summary: 'Error',
-            detail: error.error?.message || 'Error al crear el atributo',
+            detail: error.error?.message || this.translocoService.translate('admin.attributes.messages.error.creatingAttribute'),
             life: 5000
           });
         }
@@ -538,17 +550,16 @@ export class Attributes implements OnInit {
   }
 
   // Métodos auxiliares para visualización
-  getInputTypeLabel(inputType: string): string {
-    const labels: { [key: string]: string } = {
-      'text': 'Texto',
-      'number': 'Número',
-      'select': 'Select',
-      'checkbox': 'Checkbox',
-      'radio': 'Radio',
-      'textarea': 'Textarea',
-      'date': 'Fecha'
-    };
-    return labels[inputType] || inputType;
+  getTranslatedInputType(inputType: string): string {
+    const translationKey = `admin.attributes.inputTypes.${inputType}`;
+    const translated = this.translocoService.translate(translationKey);
+    return translated !== translationKey ? translated : inputType;
+  }
+
+  getYesNoTagValue(value: boolean | undefined): string {
+    return value
+      ? this.translocoService.translate('admin.attributes.buttons.yes')
+      : this.translocoService.translate('admin.attributes.buttons.no');
   }
 
   getInputTypeSeverity(inputType: string): TagSeverity {

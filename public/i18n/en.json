@@ -531,6 +531,571 @@
       "landing": "Landing",
       "account": "Account",
       "logout": "Logout"
+    },
+    "users": {
+      "title": "User Management",
+      "buttons": {
+        "newUser": "New User",
+        "delete": "Delete",
+        "export": "Export",
+        "reload": "Reload",
+        "cancel": "Cancel",
+        "save": "Save",
+        "search": "Search...",
+        "filter": "Filter..."
+      },
+      "table": {
+        "columns": {
+          "name": "Name",
+          "email": "Email",
+          "role": "Role",
+          "phone": "Phone",
+          "agency": "Agency"
+        },
+        "pagination": {
+          "showingUsers": "Showing {first} to {last} of {totalRecords} users"
+        },
+        "empty": {
+          "title": "No users found",
+          "reload": "Reload"
+        },
+        "phone": {
+          "notSpecified": "Not specified"
+        }
+      },
+      "dialog": {
+        "title": "User Details",
+        "fields": {
+          "name": "Name",
+          "lastName": "Last Name",
+          "email": "Email",
+          "role": "Role",
+          "password": "Password",
+          "confirmPassword": "Confirm Password"
+        }
+      },
+      "confirmations": {
+        "deleteSelected": {
+          "message": "Are you sure you want to delete the selected users?",
+          "header": "Confirm",
+          "accept": "Delete",
+          "reject": "Cancel"
+        },
+        "deleteSingle": {
+          "message": "Are you sure you want to delete {name}?",
+          "header": "Confirm"
+        }
+      },
+      "messages": {
+        "success": {
+          "usersDeleted": "Users Deleted",
+          "userDeleted": "User Deleted",
+          "userSaved": "User Saved"
+        },
+        "error": {
+          "loadingUsers": "Error loading users",
+          "loadingRoles": "Error loading roles"
+        },
+        "loading": "Loading...",
+        "saving": "Saving..."
+      },
+      "roles": {
+        "admin": "Administrator",
+        "user": "User",
+        "superadmin": "Super Administrator",
+        "manager": "Manager"
+      },
+      "agency": {
+        "notAvailable": "N/A"
+      }
+    },
+    "agencies": {
+      "title": "Agency Management",
+      "buttons": {
+        "newAgency": "New Agency",
+        "editAgency": "Edit Agency",
+        "delete": "Delete",
+        "export": "Export",
+        "reload": "Reload",
+        "cancel": "Cancel",
+        "save": "Save"
+      },
+      "search": {
+        "placeholder": "Search by name..."
+      },
+      "table": {
+        "columns": {
+          "name": "Name",
+          "email": "Email",
+          "address": "Address",
+          "phone": "Phone"
+        },
+        "pagination": {
+          "showingAgencies": "Showing {first} to {last} of {totalRecords} agencies"
+        },
+        "empty": {
+          "title": "No agencies found",
+          "reload": "Reload"
+        },
+        "phone": {
+          "notSpecified": "Not specified"
+        },
+        "address": {
+          "notAvailable": "N/A"
+        }
+      },
+      "dialog": {
+        "newTitle": "New Agency",
+        "editTitle": "Edit Agency",
+        "sections": {
+          "agencyData": "Agency Data",
+          "adminUser": "Administrator User"
+        },
+        "fields": {
+          "agencyName": "Agency Name",
+          "agencyEmail": "Agency Email",
+          "address": "Address",
+          "countryCode": "Country Code",
+          "phone": "Phone",
+          "adminName": "Name",
+          "adminLastName": "Last Name",
+          "adminEmail": "Email",
+          "password": "Password",
+          "confirmPassword": "Confirm Password"
+        },
+        "placeholders": {
+          "agencyName": "Enter agency name",
+          "agencyEmail": "email@agency.com",
+          "address": "Complete agency address",
+          "countryCode": "57",
+          "phone": "Phone number",
+          "adminName": "Administrator name",
+          "adminLastName": "Administrator last name",
+          "adminEmail": "admin@email.com",
+          "password": "Administrator password",
+          "confirmPassword": "Confirm password"
+        },
+        "validations": {
+          "required": "is required",
+          "passwordsMatch": "Passwords do not match",
+          "agencyName": "Agency name is required",
+          "agencyEmail": "Agency email is required",
+          "agencyAddress": "Address is required",
+          "adminName": "Administrator name is required",
+          "adminEmail": "Administrator email is required",
+          "adminPassword": "Password is required",
+          "confirmPassword": "Password confirmation is required"
+        }
+      },
+      "confirmations": {
+        "delete": {
+          "message": "Are you sure you want to delete {{name}}?",
+          "header": "Confirm"
+        }
+      },
+      "messages": {
+        "success": {
+          "agencyDeleted": "Agency Deleted",
+          "agencyUpdated": "Agency updated successfully",
+          "agencyCreated": "Agency created successfully"
+        },
+        "error": {
+          "loadingAgencies": "Error loading agencies",
+          "updatingAgency": "Error updating agency",
+          "creatingAgency": "Error creating agency"
+        }
+      }
+    },
+    "attributes": {
+      "title": "Attribute Management",
+      "buttons": {
+        "newAttribute": "New Attribute",
+        "editAttribute": "Edit Attribute",
+        "manageValues": "Manage Values",
+        "delete": "Delete",
+        "export": "Export",
+        "reload": "Reload",
+        "cancel": "Cancel",
+        "save": "Save",
+        "yes": "Yes",
+        "no": "No"
+      },
+      "tooltips": {
+        "manageValues": "Manage values for selected attribute"
+      },
+      "search": {
+        "placeholder": "Search by name..."
+      },
+      "table": {
+        "columns": {
+          "name": "Name",
+          "inputType": "Field Type",
+          "required": "Required",
+          "reusable": "Reusable",
+          "visibleB2B": "Visible B2B",
+          "visibleB2C": "Visible B2C"
+        },
+        "pagination": {
+          "showingAttributes": "Showing {first} to {last} of {totalRecords} attributes"
+        },
+        "empty": {
+          "title": "No attributes found",
+          "reload": "Reload"
+        }
+      },
+      "inputTypes": {
+        "select": "Single Selector",
+        "multi": "Multiple Selector",
+        "file": "File",
+        "text": "Text",
+        "number": "Number"
+      },
+      "typeDescriptions": {
+        "select": "User selects ONE option from a list",
+        "multi": "User selects MULTIPLE options from a list",
+        "file": "User uploads a file (image, PDF, etc.)",
+        "text": "User enters free text",
+        "number": "User enters a numeric value"
+      },
+      "confirmations": {
+        "delete": {
+          "message": "Are you sure you want to delete \"{name}\"?",
+          "header": "Confirm"
+        }
+      },
+      "messages": {
+        "success": {
+          "attributeDeleted": "Attribute deleted",
+          "attributeUpdated": "Attribute updated successfully",
+          "attributeCreated": "Attribute created successfully",
+          "valuesSaved": "Values saved successfully"
+        },
+        "error": {
+          "loadingAttributes": "Error loading attributes",
+          "deletingAttribute": "Could not delete attribute",
+          "updatingAttribute": "Error updating attribute",
+          "creatingAttribute": "Error creating attribute"
+        },
+        "warning": {
+          "selectionRequired": "Selection required",
+          "selectAttribute": "Please select an attribute to manage its values"
+        }
+      },
+      "form": {
+        "title": {
+          "new": "New Attribute",
+          "edit": "Edit Attribute"
+        },
+        "fields": {
+          "name": "Name",
+          "inputType": "Field Type",
+          "agency": "Agency",
+          "configuration": "Configuration"
+        },
+        "labels": {
+          "required": "Required",
+          "reusable": "Reusable",
+          "visibleB2B": "Visible B2B",
+          "visibleB2C": "Visible B2C"
+        },
+        "placeholders": {
+          "name": "Example: Color, Size, Material",
+          "inputType": "Select a type"
+        },
+        "sections": {
+          "predefinedValues": "Predefined Values",
+          "manageValues": "Manage Values"
+        },
+        "messages": {
+          "requiresValues": "(Requires predefined values)",
+          "valuesInstruction": "This attribute requires predefined values. Click 'Manage Values' to add them.",
+          "valuesWarning": "⚠️ This type requires predefined values. You must add them after saving."
+        },
+        "buttons": {
+          "cancel": "Cancel",
+          "save": "Save",
+          "manageValues": "Manage Values"
+        },
+        "toggle": {
+          "yes": "Yes",
+          "no": "No"
+        }
+      },
+      "values": {
+        "dialog": {
+          "header": "{{name}} Values",
+          "newValue": "New Value",
+          "editValue": "Edit Value"
+        },
+        "form": {
+          "value": "Value",
+          "priceModifier": {
+            "title": "Price Modifier",
+            "type": "Type",
+            "fixed": "Fixed",
+            "percent": "Percentage",
+            "amount": "Amount",
+            "example": "Example: {price} + {modifier} = {result}"
+          },
+          "order": {
+            "label": "Order",
+            "description": "Controls display order"
+          },
+          "status": {
+            "label": "Status",
+            "active": "Active",
+            "inactive": "Inactive"
+          }
+        },
+        "table": {
+          "title": "Configured Values",
+          "columns": {
+            "value": "Value",
+            "modifier": "Modifier",
+            "order": "Order",
+            "status": "Status",
+            "actions": "Actions"
+          },
+          "modifierTypes": {
+            "fixed": "Fixed",
+            "percent": "Percentage",
+            "none": "No modifier"
+          },
+          "empty": {
+            "title": "No values configured",
+            "description": "No values configured for this attribute",
+            "addFirst": "Add First Value"
+          }
+        },
+        "buttons": {
+          "cancel": "Cancel",
+          "saveValue": "Save Value",
+          "newValue": "New Value",
+          "edit": "Edit",
+          "delete": "Delete"
+        },
+        "placeholders": {
+          "value": "Example: Red, XL, Cotton..."
+        },
+        "confirmations": {
+          "delete": {
+            "message": "Are you sure you want to delete value \"{value}\"?",
+            "header": "Confirm"
+          }
+        },
+        "messages": {
+          "success": {
+            "valueCreated": "Value created successfully",
+            "valueUpdated": "Value updated successfully",
+            "valueDeleted": "Value deleted successfully"
+          },
+          "error": {
+            "loading": "Error loading attribute values",
+            "creating": "Error creating value",
+            "updating": "Error updating value",
+            "deleting": "Error deleting value"
+          }
+        }
+      }
+    },
+    "products": {
+      "title": "Manage Products",
+      "buttons": {
+        "new": "New",
+        "edit": "Edit",
+        "manageAttributes": "Manage Attributes",
+        "delete": "Delete",
+        "export": "Export",
+        "refresh": "Refresh",
+        "cancel": "Cancel",
+        "createProduct": "Create Product",
+        "updateProduct": "Update Product",
+        "yes": "Yes",
+        "no": "No"
+      },
+      "search": {
+        "placeholder": "Search by name, SKU or type..."
+      },
+      "table": {
+        "columns": {
+          "sku": "SKU",
+          "name": "Name",
+          "image": "Image",
+          "price": "Price",
+          "type": "Type",
+          "attributes": "Attributes",
+          "status": "Status"
+        },
+        "pagination": {
+          "showingProducts": "Showing {first} to {last} of {totalRecords} products"
+        },
+        "na": "N/A",
+        "noAttributes": "No attributes",
+        "unknown": "Unknown",
+        "empty": {
+          "message": "No products found. Create your first product!"
+        }
+      },
+      "dialog": {
+        "newProduct": "New Product",
+        "upload": {
+          "title": "Click to upload product image",
+          "description": "PNG, JPG, GIF or WebP (max. 10MB)",
+          "button": "Choose Image",
+          "changeButton": "Change Image"
+        },
+        "previewAlt": "Product preview"
+      },
+      "form": {
+        "name": "Product Name",
+        "description": "Description",
+        "basePrice": "Base Price",
+        "productAttributes": "Product Attributes",
+        "manageAttributes": "Manage Attributes",
+        "required": "Required",
+        "order": "Order",
+        "noAttributes": "No attributes assigned yet",
+        "activeStatus": "Active Status",
+        "activeStatusDescription": "Make this product available for purchase",
+        "placeholders": {
+          "name": "Enter product name",
+          "description": "Describe the product features and characteristics"
+        }
+      },
+      "validation": {
+        "imageRequired": "Product image is required",
+        "nameRequired": "Product name is required",
+        "descriptionRequired": "Description is required",
+        "basePriceRequired": "Base price is required"
+      },
+      "types": {
+        "simple": "Simple Product",
+        "variant": "Product with Variants"
+      },
+      "status": {
+        "active": "Active",
+        "inactive": "Inactive"
+      },
+      "confirmations": {
+        "delete": {
+          "header": "Confirm",
+          "message": "Are you sure you want to delete {{name}}?"
+        }
+      },
+      "messages": {
+        "selectionRequired": {
+          "title": "Selection Required",
+          "edit": "Please select a product to edit",
+          "delete": "Please select a product to delete",
+          "manageAttributes": "Please select a product to manage its attributes"
+        },
+        "validation": {
+          "title": "Validation Error",
+          "requiredFields": "Please fill in all required fields",
+          "imageRequired": "Product image is required for new products"
+        },
+        "success": {
+          "title": "Successful",
+          "created": "Product created successfully",
+          "updated": "Product updated successfully",
+          "deleted": "Product Deleted",
+          "attributesSaved": "Product attributes saved successfully"
+        },
+        "error": {
+          "title": "Error",
+          "loading": "Failed to load products",
+          "saving": "Failed to save product",
+          "deletingProduct": "Failed to delete product",
+          "deletingAttributes": "Failed to delete product attributes",
+          "uploadFailed": "Image upload failed",
+          "imageDataMissing": "Image data missing for new product",
+          "invalidFile": "Invalid file",
+          "network": "Network error - please check your connection",
+          "fileTooLarge": "Image file is too large",
+          "unsupportedFile": "Unsupported file type"
+        },
+        "uploading": "Uploading image...",
+        "creating": "Creating product...",
+        "updating": "Updating product..."
+      }
+    },
+ "productAttributes": {
+      "title": "Manage Attributes for {{productName}}",
+      "loading": {
+        "attributes": "Loading available attributes...",
+        "values": "Loading attribute values..."
+      },
+      "sections": {
+        "currentAttributes": {
+          "title": "Currently Assigned Attributes",
+          "count": "{{count}} attribute{{plural}}",
+          "unknownAttribute": "Unknown Attribute",
+          "noValue": "No value",
+          "required": "Required",
+          "order": "Order: {{order}}"
+        },
+        "addNewAttributes": {
+          "title": "Add New Attributes",
+          "hint": "Attributes already assigned are hidden",
+          "placeholder": "Choose attributes to assign",
+          "tooltip": "Attributes marked as reusable can be assigned to multiple products",
+          "noValuesAvailable": "No values available for this attribute"
+        },
+        "configuration": {
+          "selectValue": "Select Value",
+          "chooseValue": "Choose a value",
+          "valueRequired": "This attribute requires a value",
+          "order": "Order",
+          "orderPlaceholder": "Order",
+          "requiredForProduct": "Required for this product",
+          "emptyState": "Select attributes from the dropdown above to configure them for this product"
+        }
+      },
+      "labels": {
+        "assigned": "Assigned: {{count}}",
+        "new": "New: {{count}}"
+      },
+      "buttons": {
+        "remove": "Remove attribute",
+        "removeAttribute": "Remove",
+        "cancel": "Cancel",
+        "saveNewAttributes": "Save New Attributes",
+        "saveTooltip": "Save only new attributes. Use trash icon to remove existing ones."
+      },
+      "messages": {
+        "saving": "Saving attributes...",
+        "noChanges": "No Changes",
+        "noAttributesToAdd": "No new attributes to add",
+        "validation": {
+          "valueRequired": "Value required for attribute: {{attributeName}}"
+        },
+        "success": {
+          "attributesSaved": "Product attributes saved successfully"
+        },
+        "error": {
+          "loadingAttributes": "Failed to load available attributes",
+          "loadingValues": "Failed to load attribute values",
+          "savingAttributes": "Failed to save product attributes",
+          "removingAttribute": "Failed to remove attribute. Please try again."
+        }
+      },
+      "confirmations": {
+        "removeAttribute": {
+          "header": "Confirm Removal",
+          "message": "Are you sure you want to remove attribute \"{{attributeName}}\"?"
+        }
+      },
+      "inputTypes": {
+        "text": "Text",
+        "number": "Number",
+        "select": "Select",
+        "multi": "Multiple Selector",
+        "checkbox": "Checkbox",
+        "radio": "Radio",
+        "textarea": "Textarea",
+        "date": "Date",
+        "file": "File"
+      }
     }
   }
 }

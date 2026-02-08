@@ -20,17 +20,40 @@ import { ProductAttributeValue } from './models/product-atribute-value';
 import { ProductAttributeValueService } from './service/product-atributte-value.service';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { TooltipModule } from 'primeng/tooltip';
+import { TranslocoModule, TranslocoService } from '@ngneat/transloco';
 
 @Component({
     selector: 'app-product-attributes-dialog',
     standalone: true,
-    imports: [CommonModule, FormsModule, ButtonModule, DialogModule, TagModule, MultiSelectModule, SelectModule, InputNumberModule, CheckboxModule, ProgressSpinnerModule, ConfirmDialogModule, TooltipModule],
+    imports: [
+        CommonModule,
+        FormsModule,
+        ButtonModule,
+        DialogModule,
+        TagModule,
+        MultiSelectModule,
+        SelectModule,
+        InputNumberModule,
+        CheckboxModule,
+        ProgressSpinnerModule,
+        ConfirmDialogModule,
+        TooltipModule,
+        TranslocoModule
+    ],
     template: `
-        <p-dialog [(visible)]="visible" [modal]="true" [closable]="!saving && !loadingAttributes && !loadingAttributeValues" [closeOnEscape]="!saving && !loadingAttributes && !loadingAttributeValues" (onHide)="onHide()">
+        <p-dialog
+            [(visible)]="visible"
+            [modal]="true"
+            [closable]="!saving && !loadingAttributes && !loadingAttributeValues"
+            [closeOnEscape]="!saving && !loadingAttributes && !loadingAttributeValues"
+            (onHide)="onHide()"
+        >
             <ng-template #header>
                 <div class="flex items-center gap-3">
                     <i class="pi pi-tags text-2xl"></i>
-                    <span class="font-semibold text-xl">Manage Attributes for {{ product?.name }}</span>
+                    <span class="font-semibold text-xl">
+                        {{ 'admin.productAttributes.title' | transloco: { productName: product?.name || '' } }}
+                    </span>
                 </div>
             </ng-template>
 
@@ -42,7 +65,11 @@ import { TooltipModule } from 'primeng/tooltip';
                             <div class="flex flex-col items-center gap-3">
                                 <p-progressSpinner />
                                 <span class="text-gray-600">
-                                    {{ loadingAttributes ? 'Loading available attributes...' : 'Loading attribute values...' }}
+                                    {{
+                                        loadingAttributes
+                                            ? ('admin.productAttributes.loading.attributes' | transloco)
+                                            : ('admin.productAttributes.loading.values' | transloco)
+                                    }}
                                 </span>
                             </div>
                         </div>
@@ -53,8 +80,13 @@ import { TooltipModule } from 'primeng/tooltip';
                         @if (existingAttributes.length) {
                             <div class="mb-6">
                                 <label class="block font-semibold mb-3 text-gray-700">
-                                    Currently Assigned Attributes
-                                    <span class="ml-2 text-sm font-normal text-gray-500"> ({{ existingAttributes.length }} attribute{{ existingAttributes.length !== 1 ? 's' : '' }}) </span>
+                                    {{ 'admin.productAttributes.sections.currentAttributes.title' | transloco }}
+                                    <span class="ml-2 text-sm font-normal text-gray-500">
+                                        {{ 'admin.productAttributes.sections.currentAttributes.count' | transloco: {
+                                            count: existingAttributes.length,
+                                            plural: existingAttributes.length !== 1 ? 's' : ''
+                                        } }}
+                                    </span>
                                 </label>
                                 <div class="space-y-2 max-h-60 overflow-y-auto pr-2">
                                     @for (attr of existingAttributes; track attr.id) {
@@ -62,21 +94,25 @@ import { TooltipModule } from 'primeng/tooltip';
                                             <div class="flex-1 min-w-0">
                                                 <div class="flex items-center gap-2 mb-1 flex-wrap">
                                                     <span class="font-medium text-gray-800 truncate">
-                                                        {{ attr.attribute.name || 'Unknown Attribute' }}
+                                                        {{ attr.attribute?.name || ('admin.productAttributes.sections.currentAttributes.unknownAttribute' | transloco) }}
                                                     </span>
                                                     <span class="text-gray-400">→</span>
                                                     <span class="text-gray-600 truncate">
-                                                        {{ attr.attributeValue?.value || 'No value' }}
+                                                        {{ attr.attributeValue?.value || ('admin.productAttributes.sections.currentAttributes.noValue' | transloco) }}
                                                     </span>
                                                     @if (attr.required) {
-                                                        <span class="text-xs text-red-600 bg-red-50 px-2 py-0.5 rounded whitespace-nowrap"> Required </span>
+                                                        <span class="text-xs text-red-600 bg-red-50 px-2 py-0.5 rounded whitespace-nowrap">
+                                                            {{ 'admin.productAttributes.sections.currentAttributes.required' | transloco }}
+                                                        </span>
                                                     }
                                                 </div>
                                                 <div class="flex items-center gap-3 text-xs text-gray-500">
-                                                    <span>Order: {{ attr.attributeValue?.order }}</span>
-                                                    @if (attr.attribute.inputType) {
+                                                    <span>
+                                                        {{ 'admin.productAttributes.sections.currentAttributes.order' | transloco: { order: attr.attributeValue?.order || 1 } }}
+                                                    </span>
+                                                    @if (attr.attribute?.inputType) {
                                                         <span class="text-gray-400">•</span>
-                                                        <span>{{ getInputTypeLabel(attr.attribute!.inputType) }}</span>
+                                                        <span>{{ getTranslatedInputType(attr.attribute.inputType) }}</span>
                                                     }
                                                 </div>
                                             </div>
@@ -89,7 +125,7 @@ import { TooltipModule } from 'primeng/tooltip';
                                                 (click)="removeExistingAttribute(attr)"
                                                 [disabled]="saving"
                                                 class="ml-2 shrink-0"
-                                                pTooltip="Remove attribute"
+                                                pTooltip="{{ 'admin.productAttributes.buttons.remove' | transloco }}"
                                                 tooltipPosition="left"
                                             ></button>
                                         </div>
@@ -101,9 +137,11 @@ import { TooltipModule } from 'primeng/tooltip';
                         <!-- Available Attributes Selector -->
                         <div class="mb-6">
                             <label class="block font-semibold mb-3 text-gray-700">
-                                Add New Attributes
+                                {{ 'admin.productAttributes.sections.addNewAttributes.title' | transloco }}
                                 @if (existingAttributes.length) {
-                                    <span class="ml-2 text-sm font-normal text-gray-500"> (Attributes already assigned are hidden) </span>
+                                    <span class="ml-2 text-sm font-normal text-gray-500">
+                                        {{ 'admin.productAttributes.sections.addNewAttributes.hint' | transloco }}
+                                    </span>
                                 }
                             </label>
                             <p-multiSelect
@@ -111,7 +149,7 @@ import { TooltipModule } from 'primeng/tooltip';
                                 [(ngModel)]="selectedAttributes"
                                 (ngModelChange)="onAttributesSelectionChange($event)"
                                 optionLabel="name"
-                                placeholder="Choose attributes to assign"
+                                [placeholder]="'admin.productAttributes.sections.addNewAttributes.placeholder' | transloco"
                                 [showClear]="true"
                                 [filter]="true"
                                 display="chip"
@@ -121,11 +159,15 @@ import { TooltipModule } from 'primeng/tooltip';
                                 <ng-template let-attribute pTemplate="item">
                                     <div class="flex items-center">
                                         <span>{{ attribute.name }}</span>
-                                        <span class="ml-2 text-xs text-gray-500">({{ getInputTypeLabel(attribute.inputType) }})</span>
+                                        <span class="ml-2 text-xs text-gray-500">
+                                            ({{ getTranslatedInputType(attribute.inputType) }})
+                                        </span>
                                     </div>
                                 </ng-template>
                             </p-multiSelect>
-                            <small class="text-gray-500">Attributes marked as reusable can be assigned to multiple products</small>
+                            <small class="text-gray-500">
+                                {{ 'admin.productAttributes.sections.addNewAttributes.tooltip' | transloco }}
+                            </small>
                         </div>
 
                         <!-- Attribute Configuration -->
@@ -137,28 +179,41 @@ import { TooltipModule } from 'primeng/tooltip';
                                             <div>
                                                 <h4 class="font-semibold text-gray-800">{{ attribute.name }}</h4>
                                                 <div class="flex items-center gap-3 mt-1">
-                                                    <p-tag [value]="getInputTypeLabel(attribute.inputType)" severity="info" size="small" />
+                                                    <p-tag [value]="getTranslatedInputType(attribute.inputType)" severity="info" size="small" />
                                                     @if (attribute.reusable) {
-                                                        <span class="text-xs text-green-600 bg-green-50 px-2 py-1 rounded">Reusable</span>
+                                                        <span class="text-xs text-green-600 bg-green-50 px-2 py-1 rounded">
+                                                            {{ 'admin.attributes.table.columns.reusable' | transloco }}
+                                                        </span>
                                                     }
                                                     @if (attribute.required) {
-                                                        <span class="text-xs text-red-600 bg-red-50 px-2 py-1 rounded">Required</span>
+                                                        <span class="text-xs text-red-600 bg-red-50 px-2 py-1 rounded">
+                                                            {{ 'admin.attributes.table.columns.required' | transloco }}
+                                                        </span>
                                                     }
                                                 </div>
                                             </div>
-                                            <p-button icon="pi pi-times" severity="danger" [text]="true" [rounded]="true" (onClick)="removeAttribute(attribute)" />
+                                            <p-button
+                                                icon="pi pi-times"
+                                                severity="danger"
+                                                [text]="true"
+                                                [rounded]="true"
+                                                (onClick)="removeAttribute(attribute)"
+                                                pTooltip="{{ 'admin.productAttributes.buttons.removeAttribute' | transloco }}"
+                                            />
                                         </div>
 
                                         <!-- Value Selection -->
                                         <div class="mb-3">
-                                            <label class="block text-sm font-medium text-gray-700 mb-2">Select Value</label>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                                {{ 'admin.productAttributes.sections.configuration.selectValue' | transloco }}
+                                            </label>
                                             @if ((attributeValuesMap[attribute.id!] || []).length > 0) {
                                                 <div>
                                                     <p-select
                                                         [options]="attributeValuesMap[attribute.id!]"
                                                         [(ngModel)]="selectedAttributeValues[attribute.id!]"
                                                         optionLabel="value"
-                                                        placeholder="Choose a value"
+                                                        [placeholder]="'admin.productAttributes.sections.configuration.chooseValue' | transloco"
                                                         [showClear]="true"
                                                         class="w-full"
                                                         appendTo="body"
@@ -175,14 +230,16 @@ import { TooltipModule } from 'primeng/tooltip';
                                                         </ng-template>
                                                     </p-select>
                                                     @if (!selectedAttributeValues[attribute.id!] && attribute.required) {
-                                                        <small class="text-red-500"> This attribute requires a value </small>
+                                                        <small class="text-red-500">
+                                                            {{ 'admin.productAttributes.sections.configuration.valueRequired' | transloco }}
+                                                        </small>
                                                     }
                                                 </div>
                                             }
                                             @if ((attributeValuesMap[attribute.id!] || []).length === 0) {
                                                 <div class="text-center py-3 text-gray-400">
                                                     <i class="pi pi-exclamation-circle mr-2"></i>
-                                                    No values available for this attribute
+                                                    {{ 'admin.productAttributes.sections.addNewAttributes.noValuesAvailable' | transloco }}
                                                 </div>
                                             }
                                         </div>
@@ -190,12 +247,29 @@ import { TooltipModule } from 'primeng/tooltip';
                                         <!-- Configuration Options -->
                                         <div class="grid grid-cols-2 gap-4">
                                             <div>
-                                                <label class="block text-sm font-medium text-gray-700 mb-2">Order</label>
-                                                <p-inputNumber [(ngModel)]="attributeOrders[attribute.id!]" [min]="1" [max]="100" placeholder="Order" class="w-full" />
+                                                <label class="block text-sm font-medium text-gray-700 mb-2">
+                                                    {{ 'admin.productAttributes.sections.configuration.order' | transloco }}
+                                                </label>
+                                                <p-inputNumber
+                                                    [(ngModel)]="attributeOrders[attribute.id!]"
+                                                    [min]="1"
+                                                    [max]="100"
+                                                    [placeholder]="'admin.productAttributes.sections.configuration.orderPlaceholder' | transloco"
+                                                    class="w-full"
+                                                />
                                             </div>
                                             <div class="flex items-center mt-7.5 ml-24">
-                                                <p-checkbox [(ngModel)]="attributeRequiredFlags[attribute.id!]" [binary]="true" [inputId]="'required-' + attribute.id" />
-                                                <label [for]="'required-' + attribute.id" class="items ml-2 text-sm font-medium text-gray-700"> Required for this product </label>
+                                                <p-checkbox
+                                                    [(ngModel)]="attributeRequiredFlags[attribute.id!]"
+                                                    [binary]="true"
+                                                    [inputId]="'required-' + attribute.id"
+                                                />
+                                                <label
+                                                    [for]="'required-' + attribute.id"
+                                                    class="items ml-2 text-sm font-medium text-gray-700"
+                                                >
+                                                    {{ 'admin.productAttributes.sections.configuration.requiredForProduct' | transloco }}
+                                                </label>
                                             </div>
                                         </div>
                                     </div>
@@ -207,7 +281,9 @@ import { TooltipModule } from 'primeng/tooltip';
                         @if (!selectedAttributes.length && !existingAttributes.length) {
                             <div class="text-center py-8">
                                 <i class="pi pi-tags text-5xl text-gray-300 mb-4"></i>
-                                <p class="text-gray-500">Select attributes from the dropdown above to configure them for this product</p>
+                                <p class="text-gray-500">
+                                    {{ 'admin.productAttributes.sections.configuration.emptyState' | transloco }}
+                                </p>
                             </div>
                         }
                     }
@@ -216,7 +292,9 @@ import { TooltipModule } from 'primeng/tooltip';
                     @if (saving) {
                         <div class="flex items-center gap-3 p-4 bg-blue-50 rounded-lg border border-blue-200">
                             <p-progressSpinner [style]="{ width: '30px', height: '30px' }" strokeWidth="4" />
-                            <span class="text-blue-700 font-medium">Saving attributes...</span>
+                            <span class="text-blue-700 font-medium">
+                                {{ 'admin.productAttributes.messages.saving' | transloco }}
+                            </span>
                         </div>
                     }
                 </div>
@@ -228,23 +306,30 @@ import { TooltipModule } from 'primeng/tooltip';
                         <div class="flex items-center gap-4">
                             <span>
                                 <i class="pi pi-check-circle text-green-500 mr-1"></i>
-                                Assigned: {{ existingAttributes.length }}
+                                {{ 'admin.productAttributes.labels.assigned' | transloco: { count: existingAttributes.length } }}
                             </span>
                             <span class="mr-4">
                                 <i class="pi pi-plus-circle text-blue-500 mr-1"></i>
-                                New: {{ selectedAttributes.length }}
+                                {{ 'admin.productAttributes.labels.new' | transloco: { count: selectedAttributes.length } }}
                             </span>
                         </div>
                     </div>
                     <div class="flex justify-end gap-2">
-                        <p-button label="Cancel" icon="pi pi-times" severity="secondary" [outlined]="true" (onClick)="onCancel()" [disabled]="saving || loadingAttributes || loadingAttributeValues" />
                         <p-button
-                            label="Save New Attributes"
+                            [label]="'admin.productAttributes.buttons.cancel' | transloco"
+                            icon="pi pi-times"
+                            severity="secondary"
+                            [outlined]="true"
+                            (onClick)="onCancel()"
+                            [disabled]="saving || loadingAttributes || loadingAttributeValues"
+                        />
+                        <p-button
+                            [label]="'admin.productAttributes.buttons.saveNewAttributes' | transloco"
                             icon="pi pi-check"
                             (onClick)="saveAttributes()"
                             [loading]="saving"
                             [disabled]="saving || loadingAttributes || loadingAttributeValues"
-                            pTooltip="Save only new attributes. Use trash icon to remove existing ones."
+                            pTooltip="{{ 'admin.productAttributes.buttons.saveTooltip' | transloco }}"
                             tooltipPosition="top"
                         />
                     </div>
@@ -259,6 +344,7 @@ export class ProductAttributesDialog implements OnInit, OnChanges {
     private productAttributeValueService = inject(ProductAttributeValueService);
     private messageService = inject(MessageService);
     private confirmationService = inject(ConfirmationService);
+    private translocoService = inject(TranslocoService);
 
     @Input() visible: boolean = false;
     @Input() product: Product | null = null;
@@ -283,7 +369,6 @@ export class ProductAttributesDialog implements OnInit, OnChanges {
     attributeOrders: { [key: string]: number } = {};
     attributeRequiredFlags: { [key: string]: boolean } = {};
 
-    // Para rastrear qué atributos están cargando sus valores
     loadingAttributeIds = new Set<string>();
 
     ngOnInit() {
@@ -311,12 +396,10 @@ export class ProductAttributesDialog implements OnInit, OnChanges {
 
         this.attributeService.getAttribute({}).subscribe({
             next: (response) => {
-                // ✅ NO excluir atributos completamente
                 this.availableAttributes = response.data || [];
-
                 this.loadingAttributes = false;
 
-                // ✅ Cargar valores para todos los atributos
+                // Cargar valores para todos los atributos
                 const allAttributeIds = this.availableAttributes.map((attr) => attr.id!).filter((id) => id && !this.attributeValuesMap[id]) as string[];
 
                 if (allAttributeIds.length > 0) {
@@ -327,8 +410,8 @@ export class ProductAttributesDialog implements OnInit, OnChanges {
                 console.error('Error loading attributes:', error);
                 this.messageService.add({
                     severity: 'error',
-                    summary: 'Error',
-                    detail: 'Failed to load available attributes',
+                    summary: this.translocoService.translate('admin.products.messages.error.title'),
+                    detail: this.translocoService.translate('admin.productAttributes.messages.error.loadingAttributes'),
                     life: 5000
                 });
                 this.loadingAttributes = false;
@@ -426,6 +509,12 @@ export class ProductAttributesDialog implements OnInit, OnChanges {
                 console.error('Error loading attribute values:', error);
                 attributeIds.forEach((id) => this.loadingAttributeIds.delete(id));
                 this.loadingAttributeValues = false;
+                this.messageService.add({
+                    severity: 'error',
+                    summary: this.translocoService.translate('admin.products.messages.error.title'),
+                    detail: this.translocoService.translate('admin.productAttributes.messages.error.loadingValues'),
+                    life: 5000
+                });
             }
         });
     }
@@ -442,14 +531,17 @@ export class ProductAttributesDialog implements OnInit, OnChanges {
 
         // Validar que nuevos atributos tengan valor si son required
         const hasErrors = this.selectedAttributes.some((attr) => {
-            // Solo validar nuevos atributos (no los existentes)
             const isExisting = this.existingAttributes.find((e) => e.attributeId === attr.id);
 
             if (!isExisting && attr.required && !this.selectedAttributeValues[attr.id!]) {
+                const errorMessage = this.translocoService.translate('admin.productAttributes.messages.validation.valueRequired', {
+                    attributeName: attr.name
+                });
+
                 this.messageService.add({
                     severity: 'error',
-                    summary: 'Validation Error',
-                    detail: `Value required for attribute: ${attr.name}`,
+                    summary: this.translocoService.translate('admin.products.messages.validation.title'),
+                    detail: errorMessage,
                     life: 5000
                 });
                 return true;
@@ -482,8 +574,8 @@ export class ProductAttributesDialog implements OnInit, OnChanges {
         if (attributeDtos.length === 0) {
             this.messageService.add({
                 severity: 'info',
-                summary: 'No Changes',
-                detail: 'No new attributes to add',
+                summary: this.translocoService.translate('admin.productAttributes.messages.noChanges'),
+                detail: this.translocoService.translate('admin.productAttributes.messages.noAttributesToAdd'),
                 life: 3000
             });
             this.saving = false;
@@ -496,13 +588,20 @@ export class ProductAttributesDialog implements OnInit, OnChanges {
                 this.resetForm();
                 this.save.emit();
                 this.saving = false;
+
+                this.messageService.add({
+                    severity: 'success',
+                    summary: this.translocoService.translate('admin.products.messages.success.title'),
+                    detail: this.translocoService.translate('admin.productAttributes.messages.success.attributesSaved'),
+                    life: 3000
+                });
             },
             error: (error) => {
                 console.error('Error saving product attributes:', error);
                 this.messageService.add({
                     severity: 'error',
-                    summary: 'Error',
-                    detail: 'Failed to save product attributes',
+                    summary: this.translocoService.translate('admin.products.messages.error.title'),
+                    detail: this.translocoService.translate('admin.productAttributes.messages.error.savingAttributes'),
                     life: 5000
                 });
                 this.saving = false;
@@ -510,17 +609,18 @@ export class ProductAttributesDialog implements OnInit, OnChanges {
         });
     }
 
-    getInputTypeLabel(inputType: string): string {
-        const labels: { [key: string]: string } = {
-            text: 'Text',
-            number: 'Number',
-            select: 'Select',
-            checkbox: 'Checkbox',
-            radio: 'Radio',
-            textarea: 'Textarea',
-            date: 'Date'
-        };
-        return labels[inputType] || inputType;
+    getTranslatedInputType(inputType: string): string {
+        const translationKey = `admin.productAttributes.inputTypes.${inputType}`;
+        const translated = this.translocoService.translate(translationKey);
+
+        // Si no hay traducción específica, intenta con las de attributes generales
+        if (translated === translationKey) {
+            const fallbackKey = `admin.attributes.inputTypes.${inputType}`;
+            const fallbackTranslation = this.translocoService.translate(fallbackKey);
+            return fallbackTranslation !== fallbackKey ? fallbackTranslation : inputType;
+        }
+
+        return translated;
     }
 
     onCancel() {
@@ -534,9 +634,12 @@ export class ProductAttributesDialog implements OnInit, OnChanges {
     removeExistingAttribute(attr: ProductAttributeValue): void {
         if (!attr.id) return;
 
+        const attributeName = attr.attribute?.name || this.translocoService.translate('admin.productAttributes.sections.currentAttributes.unknownAttribute');
+        const message = this.translocoService.translate('admin.productAttributes.confirmations.removeAttribute.message', { attributeName });
+
         this.confirmationService.confirm({
-            message: `Are you sure you want to remove attribute "${attr.attribute?.name || 'this attribute'}"?`,
-            header: 'Confirm Removal',
+            message: message,
+            header: this.translocoService.translate('admin.productAttributes.confirmations.removeAttribute.header'),
             icon: 'pi pi-exclamation-triangle',
             acceptButtonStyleClass: 'p-button-danger',
             rejectButtonStyleClass: 'p-button-text',
@@ -551,8 +654,8 @@ export class ProductAttributesDialog implements OnInit, OnChanges {
                         console.error('Error removing attribute:', error);
                         this.messageService.add({
                             severity: 'error',
-                            summary: 'Error',
-                            detail: 'Failed to remove attribute. Please try again.',
+                            summary: this.translocoService.translate('admin.products.messages.error.title'),
+                            detail: this.translocoService.translate('admin.productAttributes.messages.error.removingAttribute'),
                             life: 5000
                         });
                     }

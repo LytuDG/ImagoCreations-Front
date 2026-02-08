@@ -13,6 +13,7 @@ import { IconFieldModule } from 'primeng/iconfield';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { DialogModule } from 'primeng/dialog';
 import { MessageService, ConfirmationService } from 'primeng/api';
+import { TranslocoModule, TranslocoService } from '@ngneat/transloco';
 import { UserService } from './services/user.service';
 import { CreateUserDTO, DEFAULT_CREATE_USER, DEFAULT_USER, User } from './models/user';
 import { FilterParams } from '@/core/models/params';
@@ -27,36 +28,60 @@ import { SelectModule } from 'primeng/select';
     selector: 'app-users',
     standalone: true,
     imports: [
-    CommonModule,
-    TableModule,
-    FormsModule,
-    SelectModule,
-    ButtonModule,
-    RippleModule,
-    ToastModule,
-    ToolbarModule,
-    InputTextModule,
-    TagModule,
-    InputIconModule,
-    IconFieldModule,
-    ConfirmDialogModule,
-    DialogModule,
-    Select
-],
+        CommonModule,
+        TableModule,
+        FormsModule,
+        SelectModule,
+        ButtonModule,
+        RippleModule,
+        ToastModule,
+        ToolbarModule,
+        InputTextModule,
+        TagModule,
+        InputIconModule,
+        IconFieldModule,
+        ConfirmDialogModule,
+        DialogModule,
+        Select,
+        TranslocoModule
+    ],
     template: `
         <p-toast />
 
         <p-toolbar class="mb-6">
             <ng-template #start>
-                <p-button label="Nuevo Usuario" icon="pi pi-plus" severity="secondary" class="mr-2" (onClick)="openNew()" />
-                <p-button severity="secondary" label="Eliminar" icon="pi pi-trash" outlined
-                    (onClick)="deleteSelectedUsers()" [disabled]="!selectedUsers || !selectedUsers.length" />
+                <p-button
+                    [label]="'admin.users.buttons.newUser' | transloco"
+                    icon="pi pi-plus"
+                    severity="secondary"
+                    class="mr-2"
+                    (onClick)="openNew()"
+                />
+                <p-button
+                    [label]="'admin.users.buttons.delete' | transloco"
+                    severity="secondary"
+                    icon="pi pi-trash"
+                    outlined
+                    (onClick)="deleteSelectedUsers()"
+                    [disabled]="!selectedUsers || !selectedUsers.length"
+                />
             </ng-template>
 
             <ng-template #end>
-                <p-button label="Exportar" icon="pi pi-upload" severity="secondary" (onClick)="exportCSV()" />
-                <p-button label="Recargar" icon="pi pi-refresh" severity="secondary" class="ml-1"
-                    (onClick)="loadUsers()" [loading]="loading()" />
+                <p-button
+                    [label]="'admin.users.buttons.export' | transloco"
+                    icon="pi pi-upload"
+                    severity="secondary"
+                    (onClick)="exportCSV()"
+                />
+                <p-button
+                    [label]="'admin.users.buttons.reload' | transloco"
+                    icon="pi pi-refresh"
+                    severity="secondary"
+                    class="ml-1"
+                    (onClick)="loadUsers()"
+                    [loading]="loading()"
+                />
             </ng-template>
         </p-toolbar>
 
@@ -70,17 +95,22 @@ import { SelectModule } from 'primeng/select';
             [(selection)]="selectedUsers"
             [rowHover]="true"
             dataKey="id"
-            currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} usuarios"
+            [currentPageReportTemplate]="'admin.users.table.pagination.showingUsers' | transloco"
             [showCurrentPageReport]="true"
             [rowsPerPageOptions]="[10, 20, 30]"
             [loading]="loading()"
         >
             <ng-template #caption>
                 <div class="flex items-center justify-between">
-                    <h5 class="m-0">Gestión de Usuarios</h5>
+                    <h5 class="m-0">{{ 'admin.users.title' | transloco }}</h5>
                     <p-iconfield>
                         <p-inputicon class="pi pi-search" />
-                        <input pInputText type="text" (keyup)="applyFilter($event, 'name')" placeholder="Buscar..." />
+                        <input
+                            pInputText
+                            type="text"
+                            (keyup)="applyFilter($event, 'name')"
+                            [placeholder]="'admin.users.buttons.search' | transloco"
+                        />
                     </p-iconfield>
                 </div>
             </ng-template>
@@ -91,20 +121,20 @@ import { SelectModule } from 'primeng/select';
                         <p-tableHeaderCheckbox />
                     </th>
                     <th pSortableColumn="name" style="min-width:16rem">
-                        Nombre
+                        {{ 'admin.users.table.columns.name' | transloco }}
                         <p-sortIcon field="name" />
                     </th>
                     <th pSortableColumn="email" style="min-width:20rem">
-                        Email
+                        {{ 'admin.users.table.columns.email' | transloco }}
                         <p-sortIcon field="email" />
                     </th>
                     <th pSortableColumn="roleName" style="min-width:12rem">
-                        Rol
+                        {{ 'admin.users.table.columns.role' | transloco }}
                         <p-sortIcon field="roleName" />
                     </th>
-                    <th style="min-width:12rem">Teléfono</th>
+                    <th style="min-width:12rem">{{ 'admin.users.table.columns.phone' | transloco }}</th>
                     <!-- <th pSortableColumn="agencyId" style="min-width:12rem">
-                        Agencia
+                        {{ 'admin.users.table.columns.agency' | transloco }}
                         <p-sortIcon field="agencyId" />
                     </th> -->
                 </tr>
@@ -118,13 +148,18 @@ import { SelectModule } from 'primeng/select';
                     <td style="min-width: 16rem">{{ user.name }} {{ user.lastName }}</td>
                     <td style="min-width: 20rem">{{ user.email }}</td>
                     <td style="min-width: 12rem">
-                        <p-tag [value]="user.role.name" [severity]="getRoleSeverity(user.roleName)" />
+                        <p-tag
+                            [value]="getTranslatedRoleName(user.roleName)"
+                            [severity]="getRoleSeverity(user.roleName)"
+                        />
                     </td>
                     <td style="min-width: 12rem">
                         @if (user.phone) {
                             +{{ user.phoneCountryCode }} {{ user.phone }}
                         } @else {
-                            <span class="text-color-secondary">No especificado</span>
+                            <span class="text-color-secondary">
+                                {{ 'admin.users.table.phone.notSpecified' | transloco }}
+                            </span>
                         }
                     </td>
                     <!-- <td style="min-width: 12rem">{{ user.agencyId || 'N/A' }}</td> -->
@@ -135,50 +170,80 @@ import { SelectModule } from 'primeng/select';
                 <tr>
                     <td colspan="7" class="text-center py-6">
                         <div class="flex flex-column justify-center align-items-center gap-3">
-                            <!-- <i class="pi pi-users text-color-secondary"></i> -->
                             <span class="text-xl my-4 text-color-secondary font-medium">
-                                No se encontraron usuarios
+                                {{ 'admin.users.table.empty.title' | transloco }}
                             </span>
-                            <!-- <p-button label="Recargar" icon="pi pi-refresh" (onClick)="loadUsers()" /> -->
                         </div>
                     </td>
                 </tr>
             </ng-template>
         </p-table>
 
-        <p-dialog [(visible)]="userDialog" [style]="{ width: '450px' }" header="Detalles del Usuario" [modal]="true">
+        <p-dialog
+            [(visible)]="userDialog"
+            [style]="{ width: '450px' }"
+            [header]="'admin.users.dialog.title' | transloco"
+            [modal]="true"
+        >
             <ng-template #content>
                 <div class="flex flex-col gap-6">
                     <div>
-                        <label for="name" class="block font-bold mb-3">Nombre</label>
+                        <label for="name" class="block font-bold mb-3">
+                            {{ 'admin.users.dialog.fields.name' | transloco }}
+                        </label>
                         <input type="text" pInputText id="name" [(ngModel)]="user.name" required autofocus class="w-full" />
                     </div>
                     <div>
-                        <label for="lastName" class="block font-bold mb-3">Apellido</label>
+                        <label for="lastName" class="block font-bold mb-3">
+                            {{ 'admin.users.dialog.fields.lastName' | transloco }}
+                        </label>
                         <input type="text" pInputText id="lastName" [(ngModel)]="user.lastName" required class="w-full" />
                     </div>
                     <div>
-                        <label for="email" class="block font-bold mb-3">Email</label>
+                        <label for="email" class="block font-bold mb-3">
+                            {{ 'admin.users.dialog.fields.email' | transloco }}
+                        </label>
                         <input type="email" pInputText id="email" [(ngModel)]="user.email" required class="w-full" />
                     </div>
                     <div>
-                        <label for="roleName" class="block font-bold mb-3">Rol</label>
-                        <p-select [options]="roles()" optionLabel="name" id="roleName" [(ngModel)]="user.roleName" class="w-full" />
+                        <label for="roleName" class="block font-bold mb-3">
+                            {{ 'admin.users.dialog.fields.role' | transloco }}
+                        </label>
+                        <p-select
+                            [options]="roles()"
+                            optionLabel="name"
+                            id="roleName"
+                            [(ngModel)]="user.roleName"
+                            class="w-full"
+                        />
                     </div>
-                     <div>
-                        <label for="password" class="block font-bold mb-3">Contraseña</label>
+                    <div>
+                        <label for="password" class="block font-bold mb-3">
+                            {{ 'admin.users.dialog.fields.password' | transloco }}
+                        </label>
                         <input type="password" pInputText id="password" [(ngModel)]="user.password" required class="w-full" />
                     </div>
-                     <div>
-                        <label for="passwordConfirmation" class="block font-bold mb-3">Confirmar Contraseña</label>
+                    <div>
+                        <label for="passwordConfirmation" class="block font-bold mb-3">
+                            {{ 'admin.users.dialog.fields.confirmPassword' | transloco }}
+                        </label>
                         <input type="password" pInputText id="passwordConfirm" [(ngModel)]="user.passwordConfirm" required class="w-full" />
                     </div>
                 </div>
             </ng-template>
 
             <ng-template #footer>
-                <p-button label="Cancelar" icon="pi pi-times" text (click)="hideDialog()" />
-                <p-button label="Guardar" icon="pi pi-check" (click)="saveUser()" />
+                <p-button
+                    [label]="'admin.users.buttons.cancel' | transloco"
+                    icon="pi pi-times"
+                    text
+                    (click)="hideDialog()"
+                />
+                <p-button
+                    [label]="'admin.users.buttons.save' | transloco"
+                    icon="pi pi-check"
+                    (click)="saveUser()"
+                />
             </ng-template>
         </p-dialog>
 
@@ -191,6 +256,7 @@ export class Users implements OnInit {
     private userService = inject(UserService);
     private messageService = inject(MessageService);
     private confirmationService = inject(ConfirmationService);
+    private translocoService = inject(TranslocoService);
 
     userDialog: boolean = false;
     users = signal<User[]>([]);
@@ -227,11 +293,15 @@ export class Users implements OnInit {
                 this.roles.set(DEFAULT_ROLES);
                 this.loadRoleState.set(LOAD_STATE.ERROR);
                 console.error('Error loading roles:', error);
+                this.messageService.add({
+                    severity: 'error',
+                    summary: 'Error',
+                    detail: this.translocoService.translate('admin.users.messages.error.loadingRoles'),
+                    life: 5000
+                });
             }
         })
-
     }
-
 
     loadUsers(): void {
         this.loading.set(true);
@@ -246,7 +316,7 @@ export class Users implements OnInit {
                 this.messageService.add({
                     severity: 'error',
                     summary: 'Error',
-                    detail: 'Error loading users',
+                    detail: this.translocoService.translate('admin.users.messages.error.loadingUsers'),
                     life: 5000
                 });
                 this.users.set([]);
@@ -259,12 +329,12 @@ export class Users implements OnInit {
         clearTimeout(this.timeOut);
 
         this.timeOut = setTimeout(() => {
-        if(column == 'name'){
-            const filterValue = (event.target as HTMLInputElement).value.trim();
-            this.requestBody.name = filterValue;
-        }
-        console.log(this.requestBody)
-        this.loadUsers();
+            if(column == 'name'){
+                const filterValue = (event.target as HTMLInputElement).value.trim();
+                this.requestBody.name = filterValue;
+            }
+            console.log(this.requestBody)
+            this.loadUsers();
         }, 500);
     }
 
@@ -281,16 +351,18 @@ export class Users implements OnInit {
 
     deleteSelectedUsers() {
         this.confirmationService.confirm({
-            message: '¿Estás seguro de que quieres eliminar los usuarios seleccionados?',
-            header: 'Confirmar',
+            message: this.translocoService.translate('admin.users.confirmations.deleteSelected.message'),
+            header: this.translocoService.translate('admin.users.confirmations.deleteSelected.header'),
             icon: 'pi pi-exclamation-triangle',
+            acceptLabel: this.translocoService.translate('admin.users.confirmations.deleteSelected.accept'),
+            rejectLabel: this.translocoService.translate('admin.users.confirmations.deleteSelected.reject'),
             accept: () => {
                 this.users.set(this.users().filter((val) => !this.selectedUsers?.includes(val)));
                 this.selectedUsers = null;
                 this.messageService.add({
                     severity: 'success',
-                    summary: 'Éxito',
-                    detail: 'Usuarios Eliminados',
+                    summary: 'Success',
+                    detail: this.translocoService.translate('admin.users.messages.success.usersDeleted'),
                     life: 3000
                 });
             }
@@ -304,16 +376,16 @@ export class Users implements OnInit {
 
     deleteUser(user: User) {
         this.confirmationService.confirm({
-            message: '¿Estás seguro de que quieres eliminar ' + user.name + '?',
-            header: 'Confirmar',
+            message: this.translocoService.translate('admin.users.confirmations.deleteSingle.message', { name: user.name }),
+            header: this.translocoService.translate('admin.users.confirmations.deleteSingle.header'),
             icon: 'pi pi-exclamation-triangle',
             accept: () => {
                 this.users.set(this.users().filter((val) => val.id !== user.id));
                 this.user = DEFAULT_CREATE_USER;
                 this.messageService.add({
                     severity: 'success',
-                    summary: 'Éxito',
-                    detail: 'Usuario Eliminado',
+                    summary: 'Success',
+                    detail: this.translocoService.translate('admin.users.messages.success.userDeleted'),
                     life: 3000
                 });
             }
@@ -329,8 +401,8 @@ export class Users implements OnInit {
             this.user = DEFAULT_CREATE_USER;
             this.messageService.add({
                 severity: 'success',
-                summary: 'Éxito',
-                detail: 'Usuario Guardado',
+                summary: 'Success',
+                detail: this.translocoService.translate('admin.users.messages.success.userSaved'),
                 life: 3000
             });
         }
@@ -355,5 +427,14 @@ export class Users implements OnInit {
             default:
                 return 'secondary';
         }
+    }
+
+    getTranslatedRoleName(roleName: string): string {
+        if (!roleName) return '';
+
+        const roleKey = roleName.toLowerCase();
+        const translationKey = `admin.users.roles.${roleKey}`;
+
+        return this.translocoService.translate(translationKey) || roleName;
     }
 }
