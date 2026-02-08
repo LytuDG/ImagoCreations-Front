@@ -1092,6 +1092,103 @@
         "date": "Fecha",
         "file": "Archivo"
       }
+    },
+    "quotes": {
+      "title": "Gestión de Cotizaciones",
+      "search": {
+        "placeholder": "Buscar cotizaciones..."
+      },
+      "table": {
+        "headers": {
+          "quoteId": "ID de Cotización",
+          "company": "Empresa",
+          "contact": "Contacto",
+          "email": "Correo",
+          "date": "Fecha",
+          "total": "Total",
+          "status": "Estado",
+          "actions": "Acciones"
+        },
+        "emptyMessage": "No se encontraron cotizaciones.",
+        "pagination": {
+          "showingEntries": "Mostrando {first} a {last} de {totalRecords} registros"
+        }
+      },
+      "values": {
+        "na": "N/A"
+      },
+      "tooltips": {
+        "viewDetails": "Ver Detalles"
+      },
+      "status": {
+        "draft": "Borrador",
+        "sent": "Enviado",
+        "approved": "Aprobado",
+        "converted_to_order": "Convertido a Pedido",
+        "changes_requested": "Cambios Solicitados",
+        "rejected": "Rechazado"
+      },
+      "messages": {
+        "error": {
+          "loading": "Error al cargar cotizaciones"
+        }
+      }
+    },
+    "quoteDetail": {
+      "title": "Detalles de Cotización",
+      "buttons": {
+        "back": "Volver a Cotizaciones",
+        "save": "Guardar & Actualizar",
+        "viewPublic": "Ver Seguimiento Público",
+        "download": "Descargar / Ver Completo"
+      },
+      "labels": {
+        "id": "ID",
+        "createdAt": "Creado",
+        "status": "Cambiar Estado",
+        "addNotes": "Agregar notas de actualización (opcional)...",
+        "totalAmount": "Monto Total:",
+        "noOptions": "Sin opciones",
+        "quoteNotes": "Notas de la Cotización",
+        "customerInfo": "Información del Cliente",
+        "company": "Empresa",
+        "contactPerson": "Persona de Contacto",
+        "email": "Correo",
+        "phone": "Teléfono",
+        "address": "Dirección",
+        "personalizationFile": "Archivo de Personalización"
+      },
+      "table": {
+        "headers": {
+          "image": "Imagen",
+          "product": "Producto",
+          "attributes": "Atributos",
+          "unitPrice": "Precio Unitario",
+          "quantity": "Cant",
+          "total": "Total"
+        }
+      },
+      "values": {
+        "na": "N/A"
+      },
+      "messages": {
+        "loading": "Cargando detalles de la cotización...",
+        "success": {
+          "updated": "Cotización actualizada exitosamente"
+        },
+        "error": {
+          "loading": "No se pudo cargar los detalles de la cotización",
+          "updating": "Error al actualizar la cotización"
+        }
+      },
+      "statusOptions": {
+        "draft": "Borrador",
+        "sent": "Enviado",
+        "changes_requested": "Cambios Solicitados",
+        "approved": "Aprobado",
+        "converted_to_order": "Convertido a Pedido",
+        "rejected": "Rechazado"
+      }
     }
   }
 }

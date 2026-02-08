@@ -1019,7 +1019,7 @@
         "updating": "Updating product..."
       }
     },
- "productAttributes": {
+    "productAttributes": {
       "title": "Manage Attributes for {{productName}}",
       "loading": {
         "attributes": "Loading available attributes...",
@@ -1095,6 +1095,103 @@
         "textarea": "Textarea",
         "date": "Date",
         "file": "File"
+      }
+    },
+    "quotes": {
+      "title": "Quotes Management",
+      "search": {
+        "placeholder": "Search quotes..."
+      },
+      "table": {
+        "headers": {
+          "quoteId": "Quote ID",
+          "company": "Company",
+          "contact": "Contact",
+          "email": "Email",
+          "date": "Date",
+          "total": "Total",
+          "status": "Status",
+          "actions": "Actions"
+        },
+        "emptyMessage": "No quotes found.",
+        "pagination": {
+          "showingEntries": "Showing {first} to {last} of {totalRecords} entries"
+        }
+      },
+      "values": {
+        "na": "N/A"
+      },
+      "tooltips": {
+        "viewDetails": "View Details"
+      },
+      "status": {
+        "draft": "Draft",
+        "sent": "Sent",
+        "approved": "Approved",
+        "converted_to_order": "Converted to Order",
+        "changes_requested": "Changes Requested",
+        "rejected": "Rejected"
+      },
+      "messages": {
+        "error": {
+          "loading": "Failed to load quotes"
+        }
+      }
+    },
+    "quoteDetail": {
+      "title": "Quote Details",
+      "buttons": {
+        "back": "Back to Quotes",
+        "save": "Save & Update",
+        "viewPublic": "View Public Tracking",
+        "download": "Download / View Full"
+      },
+      "labels": {
+        "id": "ID",
+        "createdAt": "Created",
+        "status": "Change Status",
+        "addNotes": "Add update notes (optional)...",
+        "totalAmount": "Total Amount:",
+        "noOptions": "No options",
+        "quoteNotes": "Quote Notes",
+        "customerInfo": "Customer Information",
+        "company": "Company",
+        "contactPerson": "Contact Person",
+        "email": "Email",
+        "phone": "Phone",
+        "address": "Address",
+        "personalizationFile": "Personalization File"
+      },
+      "table": {
+        "headers": {
+          "image": "Image",
+          "product": "Product",
+          "attributes": "Attributes",
+          "unitPrice": "Unit Price",
+          "quantity": "Qty",
+          "total": "Total"
+        }
+      },
+      "values": {
+        "na": "N/A"
+      },
+      "messages": {
+        "loading": "Loading quote details...",
+        "success": {
+          "updated": "Quote updated successfully"
+        },
+        "error": {
+          "loading": "Could not load quote details",
+          "updating": "Failed to update quote"
+        }
+      },
+      "statusOptions": {
+        "draft": "Draft",
+        "sent": "Sent",
+        "changes_requested": "Changes Requested",
+        "approved": "Approved",
+        "converted_to_order": "Converted to Order",
+        "rejected": "Rejected"
       }
     }
   }

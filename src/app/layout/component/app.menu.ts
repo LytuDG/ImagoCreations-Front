@@ -1,11 +1,13 @@
-import { Component, inject, OnInit } from '@angular/core';
+// app.menu.component.ts
+import { Component, inject, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { MenuItem } from 'primeng/api';
 import { SkeletonModule } from 'primeng/skeleton';
 import { TranslocoModule, TranslocoService } from '@ngneat/transloco';
+import { Subject, takeUntil } from 'rxjs';
 import { AppMenuitem } from './app.menuitem';
-import { ADMIN_ROUTES, PRIVATE_ROUTES, PUBLIC_BASE_ROUTES } from '@/core/constants/routes/routes';
+import { ADMIN_ROUTES, PUBLIC_BASE_ROUTES } from '@/core/constants/routes/routes';
 import { AuthService } from '@/core/services/auth.service';
 
 @Component({
@@ -95,9 +97,11 @@ import { AuthService } from '@/core/services/auth.service';
         }
     </ul>`
 })
-export class AppMenu implements OnInit {
+export class AppMenu implements OnInit, OnDestroy {
     authService = inject(AuthService);
     translocoService = inject(TranslocoService);
+
+    private destroy$ = new Subject<void>();
 
     isSuperAdmin = false;
     isLoading = true;
@@ -108,85 +112,77 @@ export class AppMenu implements OnInit {
         this.authService.isSuperAdmin().subscribe({
             next: (response) => {
                 this.isSuperAdmin = response;
-                this.buildMenu();
+                this.buildStaticMenu();
                 this.isLoading = false;
             },
             error: (error) => {
                 console.error('Error verificando SUPERADMIN:', error);
                 this.isSuperAdmin = false;
-                this.buildMenu();
+                this.buildStaticMenu();
                 this.isLoading = false;
             }
         });
+    }
+
+    ngOnDestroy() {
+        this.destroy$.next();
+        this.destroy$.complete();
     }
 
     logout() {
         this.authService.logout();
     }
 
-    private buildMenu() {
+    private buildStaticMenu() {
+        console.log('Construyendo menú estático con keys de traducción...');
+
         this.model = [
             {
-                label: this.translocoService.translate('admin.menu.home'),
+                label: 'admin.menu.home', // ← Key de traducción
                 items: [{
-                    label: this.translocoService.translate('admin.menu.dashboard'),
+                    label: 'admin.menu.dashboard', // ← Key de traducción
                     icon: 'pi pi-fw pi-home',
                     routerLink: [ADMIN_ROUTES.ADMIN_DASHBOARD]
                 }]
             },
             {
-                label: this.translocoService.translate('admin.menu.admin'),
+                label: 'admin.menu.admin', // ← Key de traducción
                 icon: 'pi pi-fw pi-briefcase',
                 routerLink: ['/pages'],
                 items: [
                     {
-                        label: this.translocoService.translate('admin.menu.products'),
+                        label: 'admin.menu.products', // ← Key de traducción
                         icon: 'pi pi-fw pi-shopping-cart',
                         routerLink: [ADMIN_ROUTES.ADMIN_PRODUCTS]
                     },
                     {
-                        label: this.translocoService.translate('admin.menu.attributes'),
+                        label: 'admin.menu.attributes', // ← Key de traducción
                         icon: 'pi pi-fw pi-tag',
                         routerLink: [ADMIN_ROUTES.ADMIN_ATTRIBUTES]
                     },
                     {
-                        label: this.translocoService.translate('admin.menu.orders'),
+                        label: 'admin.menu.orders', // ← Key de traducción
                         icon: 'pi pi-fw pi-shop',
                         routerLink: [ADMIN_ROUTES.ADMIN_ORDERS]
                     },
                     {
-                        label: this.translocoService.translate('admin.menu.quotes'),
+                        label: 'admin.menu.quotes', // ← Key de traducción
                         icon: 'pi pi-fw pi-credit-card',
                         routerLink: [ADMIN_ROUTES.ADMIN_QUOTES]
                     },
-                    // {
-                    //     label: this.translocoService.translate('admin.menu.payments'),
-                    //     icon: 'pi pi-fw pi-dollar',
-                    //     routerLink: ['/pages/pay']
-                    // },
-                    // {
-                    //     label: this.translocoService.translate('admin.menu.clients'),
-                    //     icon: 'pi pi-fw pi-building',
-                    //     routerLink: ['/pages/pay']
-                    // },
-                    // {
-                    //     label: this.translocoService.translate('admin.menu.statistics'),
-                    //     icon: 'pi pi-fw pi-chart-bar',
-                    //     routerLink: ['/pages/statistics']
-                    // },
                     {
-                        label: this.translocoService.translate('admin.menu.configuration'),
+                        label: 'admin.menu.configuration', // ← Key de traducción
                         icon: 'pi pi-fw pi-cog',
                         routerLink: [ADMIN_ROUTES.ADMIN_CONFIG]
                     },
                     {
-                        label: this.translocoService.translate('admin.menu.users'),
+                        label: 'admin.menu.users', // ← Key de traducción
                         icon: 'pi pi-fw pi-users',
                         routerLink: [ADMIN_ROUTES.ADMIN_USERS]
                     },
                     ...(this.isSuperAdmin
                         ? [{
-                            label: this.translocoService.translate('admin.menu.agencies'),
+                            label: 'admin.menu.agencies', // ← Key de traducción
                             icon: 'pi pi-fw pi-building',
                             routerLink: [ADMIN_ROUTES.ADMIN_AGENCIES]
                         }]
@@ -194,10 +190,10 @@ export class AppMenu implements OnInit {
                 ]
             },
             {
-                label: this.translocoService.translate('admin.menu.pages'),
+                label: 'admin.menu.pages', // ← Key de traducción
                 icon: 'pi pi-fw pi-briefcase',
                 items: [{
-                    label: this.translocoService.translate('admin.menu.landing'),
+                    label: 'admin.menu.landing', // ← Key de traducción
                     icon: 'pi pi-fw pi-globe',
                     routerLink: [PUBLIC_BASE_ROUTES.HOME]
                 }]
@@ -206,13 +202,15 @@ export class AppMenu implements OnInit {
                 separator: true
             },
             {
-                label: this.translocoService.translate('admin.menu.account'),
+                label: 'admin.menu.account', // ← Key de traducción
                 items: [{
-                    label: this.translocoService.translate('admin.menu.logout'),
+                    label: 'admin.menu.logout', // ← Key de traducción
                     icon: 'pi pi-fw pi-sign-out',
                     command: () => this.logout()
                 }]
             }
         ];
+
+        console.log('Menú construido con keys:', this.model);
     }
 }

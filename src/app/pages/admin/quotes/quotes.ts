@@ -13,11 +13,26 @@ import { IconFieldModule } from 'primeng/iconfield';
 import { InputIconModule } from 'primeng/inputicon';
 import { SkeletonModule } from 'primeng/skeleton';
 import { Router } from '@angular/router';
+import { TranslocoModule, TranslocoService } from '@ngneat/transloco';
+import { TooltipModule } from 'primeng/tooltip';
 
 @Component({
     selector: 'app-admin-quotes',
     standalone: true,
-    imports: [CommonModule, TableModule, ButtonModule, InputTextModule, TagModule, ToastModule, FormsModule, IconFieldModule, InputIconModule, SkeletonModule],
+    imports: [
+        CommonModule,
+        TableModule,
+        ButtonModule,
+        InputTextModule,
+        TagModule,
+        ToastModule,
+        FormsModule,
+        IconFieldModule,
+        InputIconModule,
+        SkeletonModule,
+        TranslocoModule,
+        TooltipModule
+    ],
     providers: [MessageService],
     template: `
         <div class="grid">
@@ -25,11 +40,17 @@ import { Router } from '@angular/router';
                 <div class="card px-6 py-6">
                     <p-toast></p-toast>
                     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
-                        <h5 class="m-0 text-2xl font-bold">Quotes Management</h5>
+                        <h5 class="m-0 text-2xl font-bold">{{ 'admin.quotes.title' | transloco }}</h5>
                         <div class="flex gap-2">
                             <p-iconField iconPosition="left">
                                 <p-inputIcon styleClass="pi pi-search" />
-                                <input pInputText type="text" (input)="onGlobalFilter($event)" placeholder="Search..." class="w-full" />
+                                <input
+                                    pInputText
+                                    type="text"
+                                    (input)="onGlobalFilter($event)"
+                                    [placeholder]="'admin.quotes.search.placeholder' | transloco"
+                                    class="w-full"
+                                />
                             </p-iconField>
                         </div>
                     </div>
@@ -47,56 +68,68 @@ import { Router } from '@angular/router';
                         [loading]="loading"
                         [rowsPerPageOptions]="[10, 25, 50]"
                         [showCurrentPageReport]="true"
-                        currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+                        [currentPageReportTemplate]="'admin.quotes.table.pagination.showingEntries' | transloco"
                         styleClass="p-datatable-striped"
                     >
                         <ng-template pTemplate="header">
                             <tr>
-                                <th style="width: 15%">Quote ID</th>
-                                <th style="width: 20%">Company</th>
-                                <th style="width: 15%">Contact</th>
-                                <th style="width: 15%">Email</th>
-                                <th style="width: 10%">Date</th>
-                                <th style="width: 10%">Total</th>
-                                <th style="width: 10%">Status</th>
-                                <th style="width: 5%">Actions</th>
+                                <th style="width: 15%">{{ 'admin.quotes.table.headers.quoteId' | transloco }}</th>
+                                <th style="width: 20%">{{ 'admin.quotes.table.headers.company' | transloco }}</th>
+                                <th style="width: 15%">{{ 'admin.quotes.table.headers.contact' | transloco }}</th>
+                                <th style="width: 15%">{{ 'admin.quotes.table.headers.email' | transloco }}</th>
+                                <th style="width: 10%">{{ 'admin.quotes.table.headers.date' | transloco }}</th>
+                                <th style="width: 10%">{{ 'admin.quotes.table.headers.total' | transloco }}</th>
+                                <th style="width: 10%">{{ 'admin.quotes.table.headers.status' | transloco }}</th>
+                                <th style="width: 5%">{{ 'admin.quotes.table.headers.actions' | transloco }}</th>
                             </tr>
                         </ng-template>
 
                         <ng-template pTemplate="body" let-quote>
                             <tr>
                                 <td>
-                                    <span class="font-medium text-primary cursor-pointer hover:underline" (click)="viewQuote(quote)">
+                                    <span
+                                        class="font-medium text-primary cursor-pointer hover:underline"
+                                        (click)="viewQuote(quote)"
+                                    >
                                         {{ quote.quoteNumber || quote.id.substring(0, 8) }}
                                     </span>
                                 </td>
                                 <td>
-                                    <span class="p-column-title">Company</span>
-                                    {{ quote.companyName || quote.customerInfo?.companyName || 'N/A' }}
+                                    <span class="p-column-title">{{ 'admin.quotes.table.headers.company' | transloco }}</span>
+                                    {{ quote.companyName || quote.customerInfo?.companyName || ('admin.quotes.values.na' | transloco) }}
                                 </td>
                                 <td>
-                                    <span class="p-column-title">Contact</span>
-                                    {{ quote.contactName || quote.customerInfo?.contactPerson || 'N/A' }}
+                                    <span class="p-column-title">{{ 'admin.quotes.table.headers.contact' | transloco }}</span>
+                                    {{ quote.contactName || quote.customerInfo?.contactPerson || ('admin.quotes.values.na' | transloco) }}
                                 </td>
                                 <td>
-                                    <span class="p-column-title">Email</span>
+                                    <span class="p-column-title">{{ 'admin.quotes.table.headers.email' | transloco }}</span>
                                     {{ quote.email || quote.customerInfo?.email }}
                                 </td>
                                 <td>
-                                    <span class="p-column-title">Date</span>
+                                    <span class="p-column-title">{{ 'admin.quotes.table.headers.date' | transloco }}</span>
                                     {{ quote.createdAt | date: 'mediumDate' }}
                                 </td>
                                 <td>
-                                    <span class="p-column-title">Total</span>
+                                    <span class="p-column-title">{{ 'admin.quotes.table.headers.total' | transloco }}</span>
                                     {{ quote.totalAmount || quote.total | currency: 'USD' }}
                                 </td>
                                 <td>
-                                    <span class="p-column-title">Status</span>
-                                    <p-tag [value]="quote.status" [severity]="getSeverity(quote.status)"> </p-tag>
+                                    <span class="p-column-title">{{ 'admin.quotes.table.headers.status' | transloco }}</span>
+                                    <p-tag
+                                        [value]="getTranslatedStatus(quote.status)"
+                                        [severity]="getSeverity(quote.status)"
+                                    ></p-tag>
                                 </td>
                                 <td>
                                     <div class="flex gap-2">
-                                        <button pButton icon="pi pi-eye" class="p-button-rounded p-button-text p-button-info" (click)="viewQuote(quote)" pTooltip="View Details"></button>
+                                        <button
+                                            pButton
+                                            icon="pi pi-eye"
+                                            class="p-button-rounded p-button-text p-button-info"
+                                            (click)="viewQuote(quote)"
+                                            [pTooltip]="'admin.quotes.tooltips.viewDetails' | transloco"
+                                        ></button>
                                     </div>
                                 </td>
                             </tr>
@@ -104,7 +137,9 @@ import { Router } from '@angular/router';
 
                         <ng-template pTemplate="emptymessage">
                             <tr>
-                                <td colspan="8" class="text-center p-4">No quotes found.</td>
+                                <td colspan="8" class="text-center p-4">
+                                    {{ 'admin.quotes.table.emptyMessage' | transloco }}
+                                </td>
                             </tr>
                         </ng-template>
                     </p-table>
@@ -117,6 +152,7 @@ export class Quotes implements OnInit {
     quoteService = inject(QuoteService);
     messageService = inject(MessageService);
     router = inject(Router);
+    translocoService = inject(TranslocoService);
 
     quotes: QuoteResponse[] = [];
     totalRecords: number = 0;
@@ -154,8 +190,9 @@ export class Quotes implements OnInit {
                 console.error('Error loading quotes:', error);
                 this.messageService.add({
                     severity: 'error',
-                    summary: 'Error',
-                    detail: 'Failed to load quotes'
+                    summary: this.translocoService.translate('admin.messages.error.title'),
+                    detail: this.translocoService.translate('admin.quotes.messages.error.loading'),
+                    life: 3000
                 });
                 this.loading = false;
             }
@@ -190,6 +227,22 @@ export class Quotes implements OnInit {
             default:
                 return 'info';
         }
+    }
+
+    getTranslatedStatus(status: string): string {
+        // Normalizar el estado a minúsculas para la clave de traducción
+        const statusKey = status.toLowerCase();
+
+        // Intentar traducir desde el estado específico de quotes
+        const translationKey = `admin.quotes.status.${statusKey}`;
+        const translated = this.translocoService.translate(translationKey);
+
+        // Si no hay traducción específica, usar el valor original
+        if (translated === translationKey) {
+            return status;
+        }
+
+        return translated;
     }
 
     viewQuote(quote: QuoteResponse) {

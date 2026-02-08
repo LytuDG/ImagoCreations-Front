@@ -14,13 +14,27 @@ import { ToastModule } from 'primeng/toast';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { DialogModule } from 'primeng/dialog';
 import { InputNumberModule } from 'primeng/inputnumber';
-
 import { Textarea } from 'primeng/textarea';
+import { TranslocoModule, TranslocoService } from '@ngneat/transloco';
 
 @Component({
     selector: 'app-quote-detail',
     standalone: true,
-    imports: [CommonModule, ButtonModule, TagModule, CardModule, TableModule, SelectModule, FormsModule, ToastModule, ProgressSpinnerModule, DialogModule, InputNumberModule, Textarea],
+    imports: [
+        CommonModule,
+        ButtonModule,
+        TagModule,
+        CardModule,
+        TableModule,
+        SelectModule,
+        FormsModule,
+        ToastModule,
+        ProgressSpinnerModule,
+        DialogModule,
+        InputNumberModule,
+        Textarea,
+        TranslocoModule
+    ],
     providers: [MessageService],
     template: `
         <div class="card p-6">
@@ -34,30 +48,68 @@ import { Textarea } from 'primeng/textarea';
                 <!-- Header -->
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
                     <div>
-                        <button pButton icon="pi pi-arrow-left" label="Back to Quotes" class="p-button-text p-button-secondary pl-0 mb-2" (click)="goBack()"></button>
-                        <h1 class="text-3xl font-bold m-0 text-surface-900 dark:text-surface-0">Quote Details</h1>
+                        <button
+                            pButton
+                            icon="pi pi-arrow-left"
+                            [label]="'admin.quoteDetail.buttons.back' | transloco"
+                            class="p-button-text p-button-secondary pl-0 mb-2"
+                            (click)="goBack()"
+                        ></button>
+                        <h1 class="text-3xl font-bold m-0 text-surface-900 dark:text-surface-0">
+                            {{ 'admin.quoteDetail.title' | transloco }}
+                        </h1>
                         <div class="text-surface-500 mt-1 flex gap-3 items-center flex-wrap">
-                            <span>ID: {{ quote.id }}</span>
+                            <span>{{ 'admin.quoteDetail.labels.id' | transloco }}: {{ quote.id }}</span>
                             <span>|</span>
-                            <span>{{ quote.createdAt | date: 'medium' }}</span>
+                            <span>{{ 'admin.quoteDetail.labels.createdAt' | transloco }}: {{ quote.createdAt | date: 'medium' }}</span>
                         </div>
                         <div class="mt-2" *ngIf="quote.publicToken">
-                            <button pButton icon="pi pi-external-link" label="View Public Tracking" class="p-button-outlined p-button-sm text-sm py-1" (click)="viewPublicTracking()"></button>
+                            <button
+                                pButton
+                                icon="pi pi-external-link"
+                                [label]="'admin.quoteDetail.buttons.viewPublic' | transloco"
+                                class="p-button-outlined p-button-sm text-sm py-1"
+                                (click)="viewPublicTracking()"
+                            ></button>
                         </div>
                     </div>
 
                     <div class="flex flex-col items-end gap-2">
-                        <p-tag [value]="quote.status" [severity]="getSeverity(quote.status)" class="text-lg px-3 py-1"></p-tag>
+                        <p-tag
+                            [value]="getTranslatedStatus(quote.status)"
+                            [severity]="getSeverity(quote.status)"
+                            class="text-lg px-3 py-1"
+                        ></p-tag>
 
                         <div class="flex flex-col gap-2 mt-2 items-end">
-                            <p-select [options]="statusOptions" [(ngModel)]="selectedStatus" placeholder="Change Status" optionLabel="label" optionValue="value" [style]="{ 'min-width': '200px' }"> </p-select>
+                            <p-select
+                                [options]="getTranslatedStatusOptions()"
+                                [(ngModel)]="selectedStatus"
+                                [placeholder]="'admin.quoteDetail.labels.status' | transloco"
+                                optionLabel="label"
+                                optionValue="value"
+                                [style]="{ 'min-width': '200px' }"
+                            ></p-select>
 
                             <!-- Admin Notes Quick Input -->
                             <div class="w-full max-w-xs">
-                                <textarea pInputTextarea [(ngModel)]="adminNotes" rows="2" class="w-full text-sm" placeholder="Add update notes (optional)..."></textarea>
+                                <textarea
+                                    pInputTextarea
+                                    [(ngModel)]="adminNotes"
+                                    rows="2"
+                                    class="w-full text-sm"
+                                    [placeholder]="'admin.quoteDetail.labels.addNotes' | transloco"
+                                ></textarea>
                             </div>
 
-                            <button pButton icon="pi pi-save" label="Save & Update" (click)="saveQuote()" [loading]="updatingStatus" [disabled]="!selectedStatus"></button>
+                            <button
+                                pButton
+                                icon="pi pi-save"
+                                [label]="'admin.quoteDetail.buttons.save' | transloco"
+                                (click)="saveQuote()"
+                                [loading]="updatingStatus"
+                                [disabled]="!selectedStatus"
+                            ></button>
                         </div>
                     </div>
                 </div>
@@ -70,12 +122,12 @@ import { Textarea } from 'primeng/textarea';
                             <p-table [value]="quote.quoteItems" styleClass="p-datatable-sm" [tableStyle]="{ 'min-width': '40rem' }">
                                 <ng-template pTemplate="header">
                                     <tr>
-                                        <th style="width: 15%">Image</th>
-                                        <th>Product</th>
-                                        <th>Attributes</th>
-                                        <th class="text-right">Unit Price</th>
-                                        <th class="text-center">Qty</th>
-                                        <th class="text-right">Total</th>
+                                        <th style="width: 15%">{{ 'admin.quoteDetail.table.headers.image' | transloco }}</th>
+                                        <th>{{ 'admin.quoteDetail.table.headers.product' | transloco }}</th>
+                                        <th>{{ 'admin.quoteDetail.table.headers.attributes' | transloco }}</th>
+                                        <th class="text-right">{{ 'admin.quoteDetail.table.headers.unitPrice' | transloco }}</th>
+                                        <th class="text-center">{{ 'admin.quoteDetail.table.headers.quantity' | transloco }}</th>
+                                        <th class="text-right">{{ 'admin.quoteDetail.table.headers.total' | transloco }}</th>
                                     </tr>
                                 </ng-template>
                                 <ng-template pTemplate="body" let-item>
@@ -87,22 +139,31 @@ import { Textarea } from 'primeng/textarea';
                                         </td>
                                         <td>
                                             <div class="font-bold">{{ item.product.name }}</div>
-                                            <div class="text-sm text-surface-500">{{ item.product.type }}</div>
+                                            <div class="text-sm text-surface-500">{{ getTranslatedProductType(item.product.type) }}</div>
                                         </td>
                                         <td>
                                             <div *ngIf="item.quoteItemAttributeValue?.length" class="flex flex-wrap gap-1">
                                                 <p-tag
                                                     *ngFor="let attr of item.quoteItemAttributeValue"
-                                                    [value]="attr.productAttributeValue?.attribute?.name + ': ' + attr.productAttributeValue?.attributeValue?.value"
+                                                    [value]="getAttributeDisplay(attr)"
                                                     severity="secondary"
                                                     styleClass="text-xs"
-                                                >
-                                                </p-tag>
+                                                ></p-tag>
                                             </div>
-                                            <span *ngIf="!item.quoteItemAttributeValue?.length" class="text-surface-400 italic text-sm">No options</span>
+                                            <span *ngIf="!item.quoteItemAttributeValue?.length" class="text-surface-400 italic text-sm">
+                                                {{ 'admin.quoteDetail.labels.noOptions' | transloco }}
+                                            </span>
                                         </td>
                                         <td class="text-right font-medium" style="min-width: 150px;">
-                                            <p-inputNumber [(ngModel)]="item.unitPrice" mode="currency" currency="USD" locale="en-US" [minFractionDigits]="2" styleClass="w-full" inputStyleClass="text-right p-inputtext-sm w-full"></p-inputNumber>
+                                            <p-inputNumber
+                                                [(ngModel)]="item.unitPrice"
+                                                mode="currency"
+                                                currency="USD"
+                                                locale="en-US"
+                                                [minFractionDigits]="2"
+                                                styleClass="w-full"
+                                                inputStyleClass="text-right p-inputtext-sm w-full"
+                                            ></p-inputNumber>
                                         </td>
                                         <td class="text-center">{{ item.quantity }}</td>
                                         <td class="text-right font-bold">
@@ -112,15 +173,21 @@ import { Textarea } from 'primeng/textarea';
                                 </ng-template>
                                 <ng-template pTemplate="footer">
                                     <tr>
-                                        <td colspan="5" class="text-right font-bold text-lg">Total Amount:</td>
-                                        <td class="text-right font-bold text-lg text-primary">{{ calculateTotal() | currency: 'USD' }}</td>
+                                        <td colspan="5" class="text-right font-bold text-lg">
+                                            {{ 'admin.quoteDetail.labels.totalAmount' | transloco }}
+                                        </td>
+                                        <td class="text-right font-bold text-lg text-primary">
+                                            {{ calculateTotal() | currency: 'USD' }}
+                                        </td>
                                     </tr>
                                 </ng-template>
                             </p-table>
                         </div>
 
                         <div *ngIf="quote.notes" class="surface-card p-4 rounded-xl shadow-sm border border-surface-200 dark:border-surface-700">
-                            <h3 class="text-lg font-bold mb-2">Quote Notes</h3>
+                            <h3 class="text-lg font-bold mb-2">
+                                {{ 'admin.quoteDetail.labels.quoteNotes' | transloco }}
+                            </h3>
                             <p class="text-surface-600 dark:text-surface-300 bg-surface-50 dark:bg-surface-800 p-3 rounded">{{ quote.notes }}</p>
                         </div>
                     </div>
@@ -128,37 +195,66 @@ import { Textarea } from 'primeng/textarea';
                     <!-- Sidebar (Customer Info) -->
                     <div class="space-y-6">
                         <div class="surface-card p-4 rounded-xl shadow-sm border border-surface-200 dark:border-surface-700">
-                            <h3 class="text-xl font-bold mb-4">Customer Information</h3>
+                            <h3 class="text-xl font-bold mb-4">
+                                {{ 'admin.quoteDetail.labels.customerInfo' | transloco }}
+                            </h3>
                             <div class="space-y-3">
                                 <div>
-                                    <label class="text-sm text-surface-500 block">Company</label>
-                                    <span class="font-medium text-lg">{{ quote.companyName || 'N/A' }}</span>
+                                    <label class="text-sm text-surface-500 block">
+                                        {{ 'admin.quoteDetail.labels.company' | transloco }}
+                                    </label>
+                                    <span class="font-medium text-lg">
+                                        {{ quote.companyName || ('admin.quoteDetail.values.na' | transloco) }}
+                                    </span>
                                 </div>
                                 <div>
-                                    <label class="text-sm text-surface-500 block">Contact Person</label>
+                                    <label class="text-sm text-surface-500 block">
+                                        {{ 'admin.quoteDetail.labels.contactPerson' | transloco }}
+                                    </label>
                                     <span class="font-medium">{{ quote.contactName }}</span>
                                 </div>
                                 <div>
-                                    <label class="text-sm text-surface-500 block">Email</label>
-                                    <a [href]="'mailto:' + quote.email" class="text-primary hover:underline font-medium">{{ quote.email }}</a>
+                                    <label class="text-sm text-surface-500 block">
+                                        {{ 'admin.quoteDetail.labels.email' | transloco }}
+                                    </label>
+                                    <a [href]="'mailto:' + quote.email" class="text-primary hover:underline font-medium">
+                                        {{ quote.email }}
+                                    </a>
                                 </div>
                                 <div>
-                                    <label class="text-sm text-surface-500 block">Phone</label>
-                                    <span class="font-medium">{{ quote.phone || 'N/A' }}</span>
+                                    <label class="text-sm text-surface-500 block">
+                                        {{ 'admin.quoteDetail.labels.phone' | transloco }}
+                                    </label>
+                                    <span class="font-medium">
+                                        {{ quote.phone || ('admin.quoteDetail.values.na' | transloco) }}
+                                    </span>
                                 </div>
                                 <div>
-                                    <label class="text-sm text-surface-500 block">Address</label>
-                                    <span class="font-medium block">{{ quote.address || 'N/A' }}</span>
+                                    <label class="text-sm text-surface-500 block">
+                                        {{ 'admin.quoteDetail.labels.address' | transloco }}
+                                    </label>
+                                    <span class="font-medium block">
+                                        {{ quote.address || ('admin.quoteDetail.values.na' | transloco) }}
+                                    </span>
                                 </div>
                             </div>
                         </div>
 
                         <div *ngIf="quote.personalizationFileUrl" class="surface-card p-4 rounded-xl shadow-sm border border-surface-200 dark:border-surface-700">
-                            <h3 class="text-lg font-bold mb-3">Personalization File</h3>
+                            <h3 class="text-lg font-bold mb-3">
+                                {{ 'admin.quoteDetail.labels.personalizationFile' | transloco }}
+                            </h3>
                             <div class="w-full aspect-video bg-surface-50 dark:bg-surface-800 rounded-lg flex items-center justify-center overflow-hidden mb-3 border border-surface-200 dark:border-surface-700">
                                 <img [src]="quote.personalizationFileUrl" alt="Personalization" class="max-w-full max-h-full object-contain" />
                             </div>
-                            <a [href]="quote.personalizationFileUrl" target="_blank" pButton label="Download / View Full" icon="pi pi-download" class="w-full p-button-outlined"></a>
+                            <a
+                                [href]="quote.personalizationFileUrl"
+                                target="_blank"
+                                pButton
+                                [label]="'admin.quoteDetail.buttons.download' | transloco"
+                                icon="pi pi-download"
+                                class="w-full p-button-outlined"
+                            ></a>
                         </div>
                     </div>
                 </div>
@@ -171,6 +267,7 @@ export class QuoteDetail implements OnInit {
     route = inject(ActivatedRoute);
     router = inject(Router);
     messageService = inject(MessageService);
+    translocoService = inject(TranslocoService);
 
     quote: QuoteResponse | null = null;
     loading = true;
@@ -179,17 +276,15 @@ export class QuoteDetail implements OnInit {
     selectedStatus: string | null = null;
     adminNotes: string = '';
 
+    // Status options will be translated dynamically
     statusOptions = [
-        { label: 'Draft', value: QuoteStatusEnum.DRAFT },
-        { label: 'Sent', value: QuoteStatusEnum.SENT },
-        { label: 'Changes Requested', value: QuoteStatusEnum.CHANGES_REQUESTED },
-        { label: 'Approved', value: QuoteStatusEnum.APPROVED },
-        { label: 'Converted to Order', value: QuoteStatusEnum.CONVERTED_TO_ORDER },
-        { label: 'Rejected', value: QuoteStatusEnum.REJECTED }
+        { label: QuoteStatusEnum.DRAFT, value: QuoteStatusEnum.DRAFT },
+        { label: QuoteStatusEnum.SENT, value: QuoteStatusEnum.SENT },
+        { label: QuoteStatusEnum.CHANGES_REQUESTED, value: QuoteStatusEnum.CHANGES_REQUESTED },
+        { label: QuoteStatusEnum.APPROVED, value: QuoteStatusEnum.APPROVED },
+        { label: QuoteStatusEnum.CONVERTED_TO_ORDER, value: QuoteStatusEnum.CONVERTED_TO_ORDER },
+        { label: QuoteStatusEnum.REJECTED, value: QuoteStatusEnum.REJECTED }
     ];
-
-    // Expose Enum to template
-    QuoteStatusEnum = QuoteStatusEnum;
 
     ngOnInit() {
         this.route.params.subscribe((params) => {
@@ -204,14 +299,17 @@ export class QuoteDetail implements OnInit {
         this.loading = true;
         this.quoteService.getQuoteById(id).subscribe({
             next: (data: any) => {
-                // Adjust if response is wrapped
-                this.quote = data; // Assuming getQuoteById returns QuoteResponse directly or compatible structure
+                this.quote = data;
                 this.selectedStatus = this.quote!.status;
                 this.loading = false;
             },
             error: (err) => {
                 console.error('Error loading quote details', err);
-                this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Could not load quote details' });
+                this.messageService.add({
+                    severity: 'error',
+                    summary: this.translocoService.translate('admin.messages.error.title'),
+                    detail: this.translocoService.translate('admin.quoteDetail.messages.error.loading')
+                });
                 this.loading = false;
             }
         });
@@ -235,16 +333,23 @@ export class QuoteDetail implements OnInit {
 
         this.quoteService.updateQuote(this.quote.id, itemsPayload, this.selectedStatus, this.adminNotes).subscribe({
             next: (updatedQuote: any) => {
-                // Type assertion or proper type
-                this.quote = updatedQuote; // Backend returns full updated quote
+                this.quote = updatedQuote;
                 this.selectedStatus = this.quote!.status;
-                this.adminNotes = ''; // Clear notes after successful update? Or keep? Usually clear if it's "send message" style.
-                this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Quote updated successfully' });
+                this.adminNotes = '';
+                this.messageService.add({
+                    severity: 'success',
+                    summary: this.translocoService.translate('admin.messages.success.title'),
+                    detail: this.translocoService.translate('admin.quoteDetail.messages.success.updated')
+                });
                 this.updatingStatus = false;
             },
             error: (err) => {
                 console.error('Error updating quote', err);
-                this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to update quote' });
+                this.messageService.add({
+                    severity: 'error',
+                    summary: this.translocoService.translate('admin.messages.error.title'),
+                    detail: this.translocoService.translate('admin.quoteDetail.messages.error.updating')
+                });
                 this.updatingStatus = false;
             }
         });
@@ -276,5 +381,41 @@ export class QuoteDetail implements OnInit {
             default:
                 return 'info';
         }
+    }
+
+    getTranslatedStatus(status: string): string {
+        const statusKey = status.toLowerCase();
+        const translationKey = `admin.quoteDetail.statusOptions.${statusKey}`;
+        const translated = this.translocoService.translate(translationKey);
+
+        // Fallback to general quotes status if not found in quoteDetail
+        if (translated === translationKey) {
+            const fallbackKey = `admin.quotes.status.${statusKey}`;
+            const fallbackTranslation = this.translocoService.translate(fallbackKey);
+            return fallbackTranslation !== fallbackKey ? fallbackTranslation : status;
+        }
+
+        return translated;
+    }
+
+    getTranslatedStatusOptions() {
+        return this.statusOptions.map(option => ({
+            value: option.value,
+            label: this.getTranslatedStatus(option.value)
+        }));
+    }
+
+    getTranslatedProductType(type: string): string {
+        const translationKey = `admin.products.types.${type.toLowerCase()}`;
+        const translated = this.translocoService.translate(translationKey);
+        return translated !== translationKey ? translated : type;
+    }
+
+    getAttributeDisplay(attr: any): string {
+        const attributeName = attr.productAttributeValue?.attribute?.name ||
+                             this.translocoService.translate('admin.products.table.unknown');
+        const attributeValue = attr.productAttributeValue?.attributeValue?.value ||
+                              this.translocoService.translate('admin.products.table.unknown');
+        return `${attributeName}: ${attributeValue}`;
     }
 }
