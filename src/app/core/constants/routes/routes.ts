@@ -24,7 +24,8 @@ export enum PUBLIC_ROUTES {
     QUOTE_INFO = 'quote-info',
     SERVICES = 'services',
     TRACKING = 'track/:token',
-    TRACKING_SEARCH = 'track'
+    TRACKING_SEARCH = 'track',
+    TSHIRT_EDITOR = 'tshirt-editor'
 }
 
 export enum PUBLIC_BASE_ROUTES {

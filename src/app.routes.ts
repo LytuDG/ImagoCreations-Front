@@ -6,6 +6,7 @@ import { Landing } from './app/pages/landing/landing';
 import { Notfound } from './app/pages/notfound/notfound';
 import { PRIVATE_ROUTES, PUBLIC_ROUTES } from '@/core/constants/routes/routes';
 import { authGuard } from '@/core/guards/auth-guard';
+import { TshirtEditor } from '@/pages/tshirt-editor/tshirt-editor.component';
 
 export const appRoutes: Routes = [
     {
@@ -41,6 +42,10 @@ export const appRoutes: Routes = [
     {
         path: PUBLIC_ROUTES.TRACKING_SEARCH,
         loadComponent: () => import('./app/pages/tracking/tracker-search').then((m) => m.TrackerSearch)
+    },
+    {
+        path: PUBLIC_ROUTES.TSHIRT_EDITOR,
+        loadComponent: () => import('./app/pages/tshirt-editor/tshirt-editor.component').then((m) => m.TshirtEditor)
     },
     { path: PUBLIC_ROUTES.NOTFOUND, component: Notfound },
     { path: '**', redirectTo: PUBLIC_ROUTES.NOTFOUND }
